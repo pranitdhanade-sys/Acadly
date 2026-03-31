@@ -1,848 +1,917 @@
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AcadLy — Illuminate Your Learning</title>
-    <meta
-      name="description"
-      content="AcadLy is a modern educational platform with interactive modules and an AI learning assistant."
-    />
 
-    <script>
-      // Prevent theme flash (set asap, before Tailwind paints)
-      (function () {
-        try {
-          const saved = localStorage.getItem("acadly-theme");
-          const prefersDark =
-            window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-          const useDark = saved ? saved === "dark" : prefersDark;
-          if (useDark) document.documentElement.classList.add("dark");
-        } catch {}
-      })();
-    </script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy — Illuminate Your Learning</title>
+  <meta name="description"
+    content="AcadLy is a modern educational platform with interactive modules and an AI learning assistant." />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ["ui-sans-serif", "system-ui", "Segoe UI", "Inter", "Arial"],
-            },
-            boxShadow: {
-              neon: "0 0 0 1px rgba(34,211,238,.55), 0 0 18px rgba(34,211,238,.28)",
-            },
+  <script>
+    // Prevent theme flash (set asap, before Tailwind paints)
+    (function () {
+      try {
+        const saved = localStorage.getItem("acadly-theme");
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const useDark = saved ? saved === "dark" : prefersDark;
+        if (useDark) document.documentElement.classList.add("dark");
+      } catch { }
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["ui-sans-serif", "system-ui", "Segoe UI", "Inter", "Arial"],
+          },
+          boxShadow: {
+            neon: "0 0 0 1px rgba(34,211,238,.55), 0 0 18px rgba(34,211,238,.28)",
           },
         },
-      };
-    </script>
+      },
+    };
+  </script>
 
-    <style>
-      :root {
-        --bg: 248 250 252; /* slate-50 */
-        --panel: 255 255 255;
-        --text: 15 23 42; /* slate-900 */
-        --muted: 71 85 105; /* slate-600 */
-        --ring: 34 211 238; /* cyan-400 */
-        --ring2: 168 85 247; /* violet-500 */
-        --border: 226 232 240; /* slate-200 */
-      }
-      html.dark {
-        --bg: 2 6 23; /* slate-950 */
-        --panel: 7 16 35; /* slate-900-ish */
-        --text: 226 232 240; /* slate-200 */
-        --muted: 148 163 184; /* slate-400 */
-        --border: 30 41 59; /* slate-800 */
+  <style>
+    :root {
+      --bg: 248 250 252;
+      /* slate-50 */
+      --panel: 255 255 255;
+      --text: 15 23 42;
+      /* slate-900 */
+      --muted: 71 85 105;
+      /* slate-600 */
+      --ring: 34 211 238;
+      /* cyan-400 */
+      --ring2: 168 85 247;
+      /* violet-500 */
+      --border: 226 232 240;
+      /* slate-200 */
+    }
+
+    html.dark {
+      --bg: 2 6 23;
+      /* slate-950 */
+      --panel: 7 16 35;
+      /* slate-900-ish */
+      --text: 226 232 240;
+      /* slate-200 */
+      --muted: 148 163 184;
+      /* slate-400 */
+      --border: 30 41 59;
+      /* slate-800 */
+    }
+
+    body {
+      background: rgb(var(--bg));
+      color: rgb(var(--text));
+    }
+
+    /* Neon accents (sparingly) */
+    .neon-glow {
+      text-shadow:
+        0 0 12px rgba(var(--ring), 0.28),
+        0 0 26px rgba(var(--ring), 0.16);
+    }
+
+    /* Animated gradient text (used sparingly on accents) */
+    .animated-gradient {
+      background-size: 200% 200%;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
       }
 
-      body {
-        background: rgb(var(--bg));
-        color: rgb(var(--text));
+      50% {
+        background-position: 100% 50%;
       }
 
-      /* Neon accents (sparingly) */
-      .neon-glow {
-        text-shadow:
-          0 0 12px rgba(var(--ring), 0.28),
-          0 0 26px rgba(var(--ring), 0.16);
+      100% {
+        background-position: 0% 50%;
       }
+    }
 
-      /* Animated gradient text (used sparingly on accents) */
-      .animated-gradient {
-        background-size: 200% 200%;
-        animation: gradientShift 6s ease-in-out infinite;
-      }
-      @keyframes gradientShift {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-      .neon-border {
-        position: relative;
-      }
-      .neon-border::before {
-        content: "";
-        position: absolute;
-        inset: -1px;
-        border-radius: 16px;
-        padding: 1px;
-        background: linear-gradient(
-          90deg,
+    .neon-border {
+      position: relative;
+    }
+
+    .neon-border::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(90deg,
           rgba(var(--ring), 0.85),
           rgba(var(--ring2), 0.85),
-          rgba(var(--ring), 0.85)
-        );
-        -webkit-mask: linear-gradient(#000 0 0) content-box,
-          linear-gradient(#000 0 0);
-        mask: linear-gradient(#000 0 0) content-box,
-          linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        opacity: 0;
-        transition: opacity 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
-        pointer-events: none;
-      }
-      .neon-border:hover::before {
-        opacity: 1;
-      }
+          rgba(var(--ring), 0.85));
+      -webkit-mask: linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+    }
 
-      /* Animated underline for nav links */
-      .nav-underline {
-        position: relative;
-      }
-      .nav-underline::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -6px;
-        height: 2px;
-        width: 100%;
-        transform: scaleX(0);
-        transform-origin: left;
-        background: linear-gradient(
-          90deg,
+    .neon-border:hover::before {
+      opacity: 1;
+    }
+
+    /* Animated underline for nav links */
+    .nav-underline {
+      position: relative;
+    }
+
+    .nav-underline::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      height: 2px;
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: linear-gradient(90deg,
           rgba(var(--ring), 0.95),
-          rgba(var(--ring2), 0.95)
-        );
-        border-radius: 999px;
-        transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-      }
-      .nav-underline:hover::after,
-      .nav-underline[aria-current="page"]::after {
-        transform: scaleX(1);
+          rgba(var(--ring2), 0.95));
+      border-radius: 999px;
+      transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .nav-underline:hover::after,
+    .nav-underline[aria-current="page"]::after {
+      transform: scaleX(1);
+    }
+
+    /* Scroll reveal */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(14px);
+      transition:
+        opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Floating decorative shapes */
+    .floaty {
+      animation: floaty 7s ease-in-out infinite;
+    }
+
+    .floaty2 {
+      animation: floaty 9s ease-in-out infinite;
+      animation-delay: -2.5s;
+    }
+
+    .floaty3 {
+      animation: floaty 11s ease-in-out infinite;
+      animation-delay: -5s;
+    }
+
+    @keyframes floaty {
+
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0);
       }
 
-      /* Scroll reveal */
-      [data-reveal] {
-        opacity: 0;
-        transform: translateY(14px);
-        transition:
-          opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
-          transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      50% {
+        transform: translate3d(0, -18px, 0);
       }
-      [data-reveal].is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    }
 
-      /* Floating decorative shapes */
-      .floaty {
-        animation: floaty 7s ease-in-out infinite;
-      }
-      .floaty2 {
-        animation: floaty 9s ease-in-out infinite;
-        animation-delay: -2.5s;
-      }
-      .floaty3 {
-        animation: floaty 11s ease-in-out infinite;
-        animation-delay: -5s;
-      }
-      @keyframes floaty {
-        0%,
-        100% {
-          transform: translate3d(0, 0, 0);
-        }
-        50% {
-          transform: translate3d(0, -18px, 0);
-        }
-      }
+    /* CTA pulse */
+    .cta-pulse {
+      box-shadow:
+        0 0 0 0 rgba(var(--ring), 0.35),
+        0 0 22px rgba(var(--ring), 0.18);
+      animation: pulseGlow 2.6s ease-in-out infinite;
+    }
 
-      /* CTA pulse */
-      .cta-pulse {
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
         box-shadow:
           0 0 0 0 rgba(var(--ring), 0.35),
           0 0 22px rgba(var(--ring), 0.18);
-        animation: pulseGlow 2.6s ease-in-out infinite;
-      }
-      @keyframes pulseGlow {
-        0%,
-        100% {
-          box-shadow:
-            0 0 0 0 rgba(var(--ring), 0.35),
-            0 0 22px rgba(var(--ring), 0.18);
-        }
-        50% {
-          box-shadow:
-            0 0 0 10px rgba(var(--ring), 0.08),
-            0 0 34px rgba(var(--ring), 0.26);
-        }
       }
 
-      /* Mobile menu slide */
-      .mobile-panel {
-        overflow: hidden;
-        max-height: 0;
-        opacity: 0;
-        transform: translateY(-8px);
-        transition:
-          max-height 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
-          opacity 240ms ease,
-          transform 240ms ease;
-      }
-      .mobile-panel.open {
-        max-height: 520px;
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      /* Typing dots */
-      .typing-dots span {
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 999px;
-        background: rgba(var(--ring), 0.9);
-        opacity: 0.9;
-        animation: dotBounce 900ms ease-in-out infinite;
-      }
-      .typing-dots span:nth-child(2) {
-        animation-delay: 150ms;
-        background: rgba(var(--ring2), 0.85);
-      }
-      .typing-dots span:nth-child(3) {
-        animation-delay: 300ms;
-      }
-      @keyframes dotBounce {
-        0%,
-        100% {
-          transform: translateY(0);
-          opacity: 0.65;
-        }
-        50% {
-          transform: translateY(-5px);
-          opacity: 1;
-        }
-      }
-
-      /* Nice focus ring */
-      .focus-neon:focus-visible {
-        outline: none;
+      50% {
         box-shadow:
-          0 0 0 2px rgba(var(--panel), 0.9),
-          0 0 0 5px rgba(var(--ring), 0.45);
+          0 0 0 10px rgba(var(--ring), 0.08),
+          0 0 34px rgba(var(--ring), 0.26);
       }
-    </style>
-  </head>
+    }
 
-  <body class="antialiased selection:bg-cyan-300/30 selection:text-slate-950 dark:selection:text-white">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-[rgb(var(--bg))]/70 backdrop-blur dark:border-slate-800/70">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <!-- Left: Logo -->
-        <a
-          href="#home"
-          class="group inline-flex items-center gap-2 rounded-xl px-2 py-1 font-semibold tracking-tight text-slate-900 transition duration-300 ease-out hover:text-slate-900 dark:text-slate-100 dark:hover:text-white focus-neon"
-        >
-          <span
-            class="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white/70 text-slate-900 shadow-sm transition duration-300 ease-out group-hover:shadow-[0_0_22px_rgba(34,211,238,.18)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-100"
-            aria-hidden="true"
-          >
-            A
+    /* Mobile menu slide */
+    .mobile-panel {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        max-height 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 240ms ease,
+        transform 240ms ease;
+    }
+
+    .mobile-panel.open {
+      max-height: 520px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Typing dots */
+    .typing-dots span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(var(--ring), 0.9);
+      opacity: 0.9;
+      animation: dotBounce 900ms ease-in-out infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: 150ms;
+      background: rgba(var(--ring2), 0.85);
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: 300ms;
+    }
+
+    @keyframes dotBounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.65;
+      }
+
+      50% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+
+    /* Nice focus ring */
+    .focus-neon:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 2px rgba(var(--panel), 0.9),
+        0 0 0 5px rgba(var(--ring), 0.45);
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-cyan-300/30 selection:text-slate-950 dark:selection:text-white">
+  <!-- Header -->
+  <header
+    class="sticky top-0 z-50 border-b border-slate-200/70 bg-[rgb(var(--bg))]/70 backdrop-blur dark:border-slate-800/70">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <!-- Left: Logo -->
+      <a href="#home"
+        class="group inline-flex items-center gap-2 rounded-xl px-2 py-1 font-semibold tracking-tight text-slate-900 transition duration-300 ease-out hover:text-slate-900 dark:text-slate-100 dark:hover:text-white focus-neon">
+        <span
+          class="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white/70 text-slate-900 shadow-sm transition duration-300 ease-out group-hover:shadow-[0_0_22px_rgba(34,211,238,.18)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-100"
+          aria-hidden="true">
+          A
+        </span>
+        <span
+          class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow text-lg">
+          AcadLy
+        </span>
+      </a>
+
+      <!-- Center: Nav -->
+      <nav class="hidden items-center gap-7 text-sm md:flex" aria-label="Primary">
+        <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          href="#home" aria-current="page">Home</a>
+        <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          href="#modules">Modules</a>
+        <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          href="#ai">AI Chat</a>
+        <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          href="#features">Future</a>
+        <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          href="#footer">Contact</a>
+      </nav>
+
+      <!-- Right: Actions -->
+      <div class="hidden items-center gap-3 md:flex">
+        <!-- Theme toggle -->
+        <button id="themeToggle" type="button"
+          class="focus-neon group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(34,211,238,.14)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
+          aria-label="Toggle dark mode">
+          <span class="relative h-5 w-5">
+            <!-- Sun -->
+            <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" class="absolute inset-0 h-5 w-5 transition-all duration-300 ease-out">
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+            <!-- Moon -->
+            <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" class="absolute inset-0 h-5 w-5 scale-75 opacity-0 transition-all duration-300 ease-out">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+            </svg>
           </span>
-          <span
-            class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow text-lg"
-          >
-            AcadLy
-          </span>
+          <span class="hidden lg:inline">Theme</span>
+        </button>
+
+        <a href="signin.html"
+          class="focus-neon inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_22px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200">
+          Sign In
         </a>
+        <a href="Login.html"
+          class="focus-neon inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_26px_rgba(34,211,238,.18)] dark:bg-white dark:text-slate-900">
+          Log In
+        </a>
+      </div>
 
-        <!-- Center: Nav -->
-        <nav class="hidden items-center gap-7 text-sm md:flex" aria-label="Primary">
-          <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#home" aria-current="page">Home</a>
-          <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#modules">Modules</a>
-          <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#ai">AI Chat</a>
-          <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#features">Future</a>
-          <a class="nav-underline focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#footer">Contact</a>
+      <!-- Mobile: hamburger -->
+      <div class="flex items-center gap-2 md:hidden">
+        <button id="themeToggleMobile" type="button"
+          class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
+          aria-label="Toggle dark mode">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            class="h-5 w-5">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+          </svg>
+        </button>
+        <button id="menuBtn" type="button"
+          class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
+          aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+          <svg id="iconHamburger" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" class="h-6 w-6">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="iconClose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" class="hidden h-6 w-6">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobile-panel border-t border-slate-200/70 dark:border-slate-800/70 md:hidden">
+      <div class="mx-auto max-w-6xl px-4 py-4">
+        <nav class="flex flex-col gap-3 text-sm" aria-label="Mobile">
+          <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            href="#home">Home</a>
+          <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            href="#modules">Modules</a>
+          <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            href="#ai">AI Chat</a>
+          <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            href="#features">Future</a>
+          <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            href="#footer">Contact</a>
         </nav>
 
-        <!-- Right: Actions -->
-        <div class="hidden items-center gap-3 md:flex">
-          <!-- Theme toggle -->
-          <button
-            id="themeToggle"
-            type="button"
-            class="focus-neon group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(34,211,238,.14)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
-            aria-label="Toggle dark mode"
-          >
-            <span class="relative h-5 w-5">
-              <!-- Sun -->
-              <svg
-                id="iconSun"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="absolute inset-0 h-5 w-5 transition-all duration-300 ease-out"
-              >
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-              </svg>
-              <!-- Moon -->
-              <svg
-                id="iconMoon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="absolute inset-0 h-5 w-5 scale-75 opacity-0 transition-all duration-300 ease-out"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
-              </svg>
-            </span>
-            <span class="hidden lg:inline">Theme</span>
-          </button>
-
-          <a
-            href="signin.html"
-            class="focus-neon inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_22px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
-          >
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <a href="signin.html"
+            class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200">
             Sign In
           </a>
-          <a
-            href="Login.html"
-            class="focus-neon inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_26px_rgba(34,211,238,.18)] dark:bg-white dark:text-slate-900"
-          >
+          <a href="Login.html"
+            class="focus-neon inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 dark:bg-white dark:text-slate-900">
             Log In
           </a>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <!-- Mobile: hamburger -->
-        <div class="flex items-center gap-2 md:hidden">
-          <button
-            id="themeToggleMobile"
-            type="button"
-            class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
-            aria-label="Toggle dark mode"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
-            </svg>
-          </button>
-          <button
-            id="menuBtn"
-            type="button"
-            class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
-            aria-label="Open menu"
-            aria-expanded="false"
-            aria-controls="mobileMenu"
-          >
-            <svg id="iconHamburger" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <svg id="iconClose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden h-6 w-6">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
+  <!-- Hero -->
+  <main id="home">
+    <section class="relative overflow-hidden">
+      <div class="pointer-events-none absolute inset-0">
+        <div class="absolute -left-24 top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl dark:bg-cyan-400/15 floaty">
+        </div>
+        <div
+          class="absolute right-[-90px] top-10 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl dark:bg-violet-500/15 floaty2">
+        </div>
+        <div
+          class="absolute left-1/2 top-64 h-96 w-96 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/10 floaty3">
+        </div>
+        <div
+          class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,211,238,.10),transparent_45%),radial-gradient(ellipse_at_bottom,rgba(168,85,247,.09),transparent_50%)]">
         </div>
       </div>
 
-      <!-- Mobile menu -->
-      <div id="mobileMenu" class="mobile-panel border-t border-slate-200/70 dark:border-slate-800/70 md:hidden">
-        <div class="mx-auto max-w-6xl px-4 py-4">
-          <nav class="flex flex-col gap-3 text-sm" aria-label="Mobile">
-            <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white" href="#home">Home</a>
-            <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white" href="#modules">Modules</a>
-            <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white" href="#ai">AI Chat</a>
-            <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white" href="#features">Future</a>
-            <a class="focus-neon rounded-xl px-3 py-2 text-slate-700 transition hover:bg-slate-900/[0.04] hover:text-slate-900 dark:text-slate-200 dark:hover:bg-white/[0.06] dark:hover:text-white" href="#footer">Contact</a>
-          </nav>
-
-          <div class="mt-4 grid grid-cols-2 gap-3">
-            <a
-              href="signin.html"
-              class="focus-neon inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200"
-            >
-              Sign In
-            </a>
-            <a
-              href="Login.html"
-              class="focus-neon inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 dark:bg-white dark:text-slate-900"
-            >
-              Log In
-            </a>
+      <div class="mx-auto max-w-6xl px-4 py-20 sm:py-24">
+        <div class="relative mx-auto max-w-3xl text-center" data-reveal>
+          <div
+            class="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-xs font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200">
+            <span class="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
+            Minimal. Interactive. Neon.
           </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Hero -->
-    <main id="home">
-      <section class="relative overflow-hidden">
-        <div class="pointer-events-none absolute inset-0">
-          <div class="absolute -left-24 top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl dark:bg-cyan-400/15 floaty"></div>
-          <div class="absolute right-[-90px] top-10 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl dark:bg-violet-500/15 floaty2"></div>
-          <div class="absolute left-1/2 top-64 h-96 w-96 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/10 floaty3"></div>
-          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,211,238,.10),transparent_45%),radial-gradient(ellipse_at_bottom,rgba(168,85,247,.09),transparent_50%)]"></div>
-        </div>
-
-        <div class="mx-auto max-w-6xl px-4 py-20 sm:py-24">
-          <div class="relative mx-auto max-w-3xl text-center" data-reveal>
-            <div class="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-xs font-medium text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200">
-              <span class="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
-              Minimal. Interactive. Neon.
-            </div>
-            <h1 class="text-balance text-4xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-              Illuminate Your Learning with
-              <span
-                class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow"
-              >
-                AcadLy
-              </span>
-            </h1>
-            <p class="mt-5 text-pretty text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
-              A modern platform for focused study, interactive modules, and an AI assistant that keeps you moving forward — without the noise.
-            </p>
-
-            <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href="#modules"
-                class="focus-neon cta-pulse inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition duration-300 ease-out hover:scale-[1.03] hover:shadow-[0_0_34px_rgba(34,211,238,.22)] dark:bg-white dark:text-slate-900"
-              >
-                Get Started
-              </a>
-              <a
-                href="#ai"
-                class="focus-neon inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_22px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200"
-              >
-                See AI Chat
-              </a>
-            </div>
-          </div>
-
-          <div class="relative mt-14 grid gap-4 sm:grid-cols-3" data-reveal>
-            <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(34,211,238,.10)] dark:border-slate-800 dark:bg-slate-900/45">
-              <div class="text-sm font-semibold text-slate-900 dark:text-white">Focused Modules</div>
-              <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Learn in crisp, bite-sized paths.</div>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(168,85,247,.10)] dark:border-slate-800 dark:bg-slate-900/45">
-              <div class="text-sm font-semibold text-slate-900 dark:text-white">Progress Clarity</div>
-              <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">See what’s next at a glance.</div>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45">
-              <div class="text-sm font-semibold text-slate-900 dark:text-white">AI Assist</div>
-              <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Ask, refine, and keep momentum.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Study Modules -->
-      <section id="modules" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
-        <div class="flex items-end justify-between gap-6" data-reveal>
-          <div>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Study modules</h2>
-            <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Clean, interactive cards that keep things minimal — with neon only where it matters.
-            </p>
-          </div>
-          <div class="hidden sm:block text-xs text-slate-500 dark:text-slate-400">
-            Hover a card for glow
-          </div>
-        </div>
-
-        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Card -->
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
-                Neon UI
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">01</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Neon UI Fundamentals</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Build clean interfaces with just enough glow — micro-interactions included.
-            </p>
-          </article>
-
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300">
-                Motion
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">02</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-cyan-50 to-violet-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Motion & Scroll Reveals</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Soft fade + slide-up reveals that feel premium and never distracting.
-            </p>
-          </article>
-
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                Systems
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">03</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-slate-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Study Systems</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Turn topics into repeatable routines with minimal friction.
-            </p>
-          </article>
-
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
-                Patterns
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">04</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-cyan-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Frontend Patterns</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Components, layout systems, and the details that make UIs feel “done.”
-            </p>
-          </article>
-
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300">
-                Exam Mode
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">05</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-violet-50 to-slate-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Exam Mode</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Timed practice, spaced review, and calm, high-signal feedback.
-            </p>
-          </article>
-
-          <article class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-                AI Companion
-              </span>
-              <span class="text-xs text-slate-500 dark:text-slate-400">06</span>
-            </div>
-            <div class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-violet-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
-              <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-                Placeholder image
-              </div>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">AI Study Companion</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Explain concepts, generate practice, and fix misunderstandings instantly.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <!-- AI Chat Mockup -->
-      <section id="ai" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
-        <div class="grid items-center gap-10 lg:grid-cols-2">
-          <div data-reveal>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">AI chat, made calm</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              A lightweight assistant for explaining topics, generating examples, and guiding next steps — with a UI that feels like it’s floating.
-            </p>
-            <ul class="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-              <li class="flex gap-3">
-                <span class="mt-1 inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
-                Ask follow-ups without losing context.
-              </li>
-              <li class="flex gap-3">
-                <span class="mt-1 inline-block h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_18px_rgba(168,85,247,.35)]"></span>
-                Get step-by-step guidance and practice.
-              </li>
-              <li class="flex gap-3">
-                <span class="mt-1 inline-block h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,.25)]"></span>
-                Keep everything minimal and readable.
-              </li>
-            </ul>
-          </div>
-
-          <div data-reveal>
-            <a
-              href="../ai-assistant.html"
-              class="group block rounded-3xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,211,238,.14)] dark:border-slate-800 dark:bg-slate-900/45"
-              aria-label="Open AI chat (mock link)"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-white">
-                    <span class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow font-semibold">
-                      AI
-                    </span>
-                  </div>
-                  <div>
-                    <div class="text-sm font-semibold text-slate-900 dark:text-white">AcadLy Assistant</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">Click to open (new tab)</div>
-                  </div>
-                </div>
-                <div class="rounded-full border border-slate-200 bg-white/60 px-3 py-1 text-xs text-slate-600 transition group-hover:shadow-[0_0_18px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
-                  Live
-                </div>
-              </div>
-
-              <div class="mt-5 space-y-3">
-                <div class="flex items-start gap-3">
-                  <div class="mt-1 h-8 w-8 shrink-0 rounded-2xl bg-slate-900 text-white grid place-items-center text-xs font-semibold dark:bg-white dark:text-slate-900">
-                    You
-                  </div>
-                  <div class="max-w-[80%] rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-slate-200">
-                    Explain the difference between <span class="font-semibold">flex</span> and <span class="font-semibold">grid</span> quickly.
-                  </div>
-                </div>
-
-                <div class="flex items-start gap-3">
-                  <div class="mt-1 h-8 w-8 shrink-0 rounded-2xl border border-slate-200 bg-white/70 text-slate-900 grid place-items-center text-xs font-semibold shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:text-white">
-                    AI
-                  </div>
-                  <div class="max-w-[80%] rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-slate-200">
-                    Flex is best for 1D layouts (row or column). Grid is best for 2D layouts (rows and columns). Want examples?
-                    <div class="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span class="typing-dots" aria-label="Typing">
-                        <span></span><span></span><span></span>
-                      </span>
-                      <span>typing…</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-5 flex items-center justify-between">
-                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <span class="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
-                  Context-aware
-                </div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Press Enter</div>
-              </div>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- Future Features -->
-      <section id="features" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
-        <div class="flex items-end justify-between gap-6" data-reveal>
-          <div>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Future features</h2>
-            <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Minimal tools, maximum impact — arriving soon.
-            </p>
-          </div>
-        </div>
-
-        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45" data-reveal data-reveal-delay="0">
-            <div class="flex items-center gap-3">
-              <div class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-cyan-500/15 via-violet-500/10 to-emerald-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
-                📚
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-900 dark:text-white">Smart Library</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Auto-organized notes</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45" data-reveal data-reveal-delay="120">
-            <div class="flex items-center gap-3">
-              <div class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-violet-500/15 via-cyan-500/10 to-emerald-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
-                🧪
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-900 dark:text-white">Practice Lab</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Instant quizzes</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45" data-reveal data-reveal-delay="240">
-            <div class="flex items-center gap-3">
-              <div class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-violet-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
-                ⏱️
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-900 dark:text-white">Focus Timer</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Flow-state mode</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45" data-reveal data-reveal-delay="360">
-            <div class="flex items-center gap-3">
-              <div class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-cyan-500/15 via-emerald-500/10 to-violet-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
-                🗺️
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-slate-900 dark:text-white">Roadmaps</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Guided tracks</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer id="footer" class="border-t border-slate-200/70 dark:border-slate-800/70">
-      <div class="mx-auto max-w-6xl px-4 py-10">
-        <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div class="text-sm text-slate-600 dark:text-slate-300">
+          <h1 class="text-balance text-4xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+            Illuminate Your Learning with
             <span
-              class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow font-semibold"
-            >
+              class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow">
               AcadLy
             </span>
-            <span class="mx-2 text-slate-400">•</span>
-            <span>© <span id="year"></span> All rights reserved.</span>
-          </div>
-          <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-            <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#">Privacy</a>
-            <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#">Terms</a>
-            <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" href="#">Support</a>
+          </h1>
+          <p class="mt-5 text-pretty text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
+            A modern platform for focused study, interactive modules, and an AI assistant that keeps you moving forward
+            — without the noise.
+          </p>
+
+          <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a href="Login.html?next=../acadly_learning_path.html"
+              class="focus-neon cta-pulse inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition duration-300 ease-out hover:scale-[1.03] hover:shadow-[0_0_34px_rgba(34,211,238,.22)] dark:bg-white dark:text-slate-900">
+              Get Started
+            </a>
+            <a href="#ai"
+              class="focus-neon inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_22px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-900/55 dark:text-slate-200">
+              See AI Chat
+            </a>
           </div>
         </div>
 
-        <div class="mt-8 flex items-center justify-between">
-          <div class="text-xs text-slate-500 dark:text-slate-400">
-            Built with Tailwind (CDN) + custom neon motion.
+        <div class="relative mt-14 grid gap-4 sm:grid-cols-3" data-reveal>
+          <div
+            class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(34,211,238,.10)] dark:border-slate-800 dark:bg-slate-900/45">
+            <div class="text-sm font-semibold text-slate-900 dark:text-white">Focused Modules</div>
+            <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Learn in crisp, bite-sized paths.</div>
           </div>
-          <div class="flex items-center gap-3">
-            <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200" href="#" aria-label="Social 1">◎</a>
-            <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200" href="#" aria-label="Social 2">◈</a>
-            <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200" href="#" aria-label="Social 3">◇</a>
+          <div
+            class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(168,85,247,.10)] dark:border-slate-800 dark:bg-slate-900/45">
+            <div class="text-sm font-semibold text-slate-900 dark:text-white">Progress Clarity</div>
+            <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">See what’s next at a glance.</div>
+          </div>
+          <div
+            class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:shadow-[0_0_22px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45">
+            <div class="text-sm font-semibold text-slate-900 dark:text-white">AI Assist</div>
+            <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Ask, refine, and keep momentum.</div>
           </div>
         </div>
       </div>
-    </footer>
+    </section>
 
-    <script>
-      const $ = (sel, root = document) => root.querySelector(sel);
-      const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    <!-- Study Modules -->
+    <section id="modules" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+      <div class="flex items-end justify-between gap-6" data-reveal>
+        <div>
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Study modules</h2>
+          <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Clean, interactive cards that keep things minimal — with neon only where it matters.
+          </p>
+        </div>
+        <div class="hidden sm:block text-xs text-slate-500 dark:text-slate-400">
+          Hover a card for glow
+        </div>
+      </div>
 
-      // Footer year
-      $("#year").textContent = new Date().getFullYear();
+      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Card -->
+        <article onclick="window.location.href='../acadly_learning_path.html'"
+          class="cursor-pointer neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+              Neon UI
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">01</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Neon UI Fundamentals</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Build clean interfaces with just enough glow — micro-interactions included.
+          </p>
+        </article>
 
-      // Theme toggle (persist)
-      function syncThemeIcons() {
-        const isDark = document.documentElement.classList.contains("dark");
-        const sun = $("#iconSun");
-        const moon = $("#iconMoon");
-        if (!sun || !moon) return;
-        if (isDark) {
-          sun.classList.add("scale-75", "opacity-0");
-          moon.classList.remove("scale-75", "opacity-0");
-          moon.classList.add("scale-100", "opacity-100");
-        } else {
-          moon.classList.add("scale-75", "opacity-0");
-          sun.classList.remove("scale-75", "opacity-0");
-          sun.classList.add("scale-100", "opacity-100");
-        }
+        <article
+          class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300">
+              Motion
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">02</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-cyan-50 to-violet-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Motion & Scroll Reveals</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Soft fade + slide-up reveals that feel premium and never distracting.
+          </p>
+        </article>
+
+        <article
+          class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+              Systems
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">03</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-slate-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Study Systems</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Turn topics into repeatable routines with minimal friction.
+          </p>
+        </article>
+
+        <article
+          class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+              Patterns
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">04</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-cyan-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Frontend Patterns</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Components, layout systems, and the details that make UIs feel “done.”
+          </p>
+        </article>
+
+        <article
+          class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300">
+              Exam Mode
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">05</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-violet-50 to-slate-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">Exam Mode</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Timed practice, spaced review, and calm, high-signal feedback.
+          </p>
+        </article>
+
+        <article
+          class="neon-border group rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_26px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal>
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+              AI Companion
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">06</span>
+          </div>
+          <div
+            class="aspect-[16/10] overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-violet-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+            <div class="flex h-full items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Placeholder image
+            </div>
+          </div>
+          <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-white">AI Study Companion</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Explain concepts, generate practice, and fix misunderstandings instantly.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- AI Chat Mockup -->
+    <section id="ai" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+      <div class="grid items-center gap-10 lg:grid-cols-2">
+        <div data-reveal>
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">AI chat, made calm</h2>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            A lightweight assistant for explaining topics, generating examples, and guiding next steps — with a UI that
+            feels like it’s floating.
+          </p>
+          <ul class="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+            <li class="flex gap-3">
+              <span
+                class="mt-1 inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
+              Ask follow-ups without losing context.
+            </li>
+            <li class="flex gap-3">
+              <span
+                class="mt-1 inline-block h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_18px_rgba(168,85,247,.35)]"></span>
+              Get step-by-step guidance and practice.
+            </li>
+            <li class="flex gap-3">
+              <span
+                class="mt-1 inline-block h-2 w-2 rounded-full bg-emerald-400/90 shadow-[0_0_18px_rgba(16,185,129,.25)]"></span>
+              Keep everything minimal and readable.
+            </li>
+          </ul>
+        </div>
+
+        <div data-reveal>
+          <a href="Login.html?next=public/ai-assistant.html"
+            class="group block rounded-3xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur transition duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,211,238,.14)] dark:border-slate-800 dark:bg-slate-900/45"
+            aria-label="Open AI chat (mock link)">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-white">
+                  <span
+                    class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow font-semibold">
+                    AI
+                  </span>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-slate-900 dark:text-white">AcadLy Assistant</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Click to open (new tab)</div>
+                </div>
+              </div>
+              <div
+                class="rounded-full border border-slate-200 bg-white/60 px-3 py-1 text-xs text-slate-600 transition group-hover:shadow-[0_0_18px_rgba(168,85,247,.14)] dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
+                Live
+              </div>
+            </div>
+
+            <div class="mt-5 space-y-3">
+              <div class="flex items-start gap-3">
+                <div
+                  class="mt-1 h-8 w-8 shrink-0 rounded-2xl bg-slate-900 text-white grid place-items-center text-xs font-semibold dark:bg-white dark:text-slate-900">
+                  You
+                </div>
+                <div
+                  class="max-w-[80%] rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-slate-200">
+                  Explain the difference between <span class="font-semibold">flex</span> and <span
+                    class="font-semibold">grid</span> quickly.
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div
+                  class="mt-1 h-8 w-8 shrink-0 rounded-2xl border border-slate-200 bg-white/70 text-slate-900 grid place-items-center text-xs font-semibold shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:text-white">
+                  AI
+                </div>
+                <div
+                  class="max-w-[80%] rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-slate-200">
+                  Flex is best for 1D layouts (row or column). Grid is best for 2D layouts (rows and columns). Want
+                  examples?
+                  <div class="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="typing-dots" aria-label="Typing">
+                      <span></span><span></span><span></span>
+                    </span>
+                    <span>typing…</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between">
+              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <span
+                  class="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,.45)]"></span>
+                Context-aware
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Press Enter</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future Features -->
+    <section id="features" class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+      <div class="flex items-end justify-between gap-6" data-reveal>
+        <div>
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Future features</h2>
+          <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Minimal tools, maximum impact — arriving soon.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal data-reveal-delay="0">
+          <div class="flex items-center gap-3">
+            <div
+              class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-cyan-500/15 via-violet-500/10 to-emerald-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
+              📚
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-slate-900 dark:text-white">Smart Library</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Auto-organized notes</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal data-reveal-delay="120">
+          <div class="flex items-center gap-3">
+            <div
+              class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-violet-500/15 via-cyan-500/10 to-emerald-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
+              🧪
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-slate-900 dark:text-white">Practice Lab</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Instant quizzes</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal data-reveal-delay="240">
+          <div class="flex items-center gap-3">
+            <div
+              class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-500/15 via-cyan-500/10 to-violet-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
+              ⏱️
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-slate-900 dark:text-white">Focus Timer</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Flow-state mode</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/45"
+          data-reveal data-reveal-delay="360">
+          <div class="flex items-center gap-3">
+            <div
+              class="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-cyan-500/15 via-emerald-500/10 to-violet-500/10 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950/35 dark:text-white">
+              🗺️
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-slate-900 dark:text-white">Roadmaps</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Guided tracks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer" class="border-t border-slate-200/70 dark:border-slate-800/70">
+    <div class="mx-auto max-w-6xl px-4 py-10">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="text-sm text-slate-600 dark:text-slate-300">
+          <span
+            class="animated-gradient text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 neon-glow font-semibold">
+            AcadLy
+          </span>
+          <span class="mx-2 text-slate-400">•</span>
+          <span>© <span id="year"></span> All rights reserved.</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+            href="#">Privacy</a>
+          <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+            href="#">Terms</a>
+          <a class="focus-neon text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+            href="#">Support</a>
+        </div>
+      </div>
+
+      <div class="mt-8 flex items-center justify-between">
+        <div class="text-xs text-slate-500 dark:text-slate-400">
+          Built with Tailwind (CDN) + custom neon motion.
+        </div>
+        <div class="flex items-center gap-3">
+          <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(34,211,238,.12)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200"
+            href="#" aria-label="Social 1">◎</a>
+          <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(168,85,247,.12)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200"
+            href="#" aria-label="Social 2">◈</a>
+          <a class="focus-neon grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white/60 text-slate-700 shadow-sm transition hover:shadow-[0_0_20px_rgba(16,185,129,.10)] dark:border-slate-800 dark:bg-slate-900/45 dark:text-slate-200"
+            href="#" aria-label="Social 3">◇</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    // Footer year
+    $("#year").textContent = new Date().getFullYear();
+
+    // Theme toggle (persist)
+    function syncThemeIcons() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const sun = $("#iconSun");
+      const moon = $("#iconMoon");
+      if (!sun || !moon) return;
+      if (isDark) {
+        sun.classList.add("scale-75", "opacity-0");
+        moon.classList.remove("scale-75", "opacity-0");
+        moon.classList.add("scale-100", "opacity-100");
+      } else {
+        moon.classList.add("scale-75", "opacity-0");
+        sun.classList.remove("scale-75", "opacity-0");
+        sun.classList.add("scale-100", "opacity-100");
       }
+    }
 
-      function toggleTheme() {
-        const root = document.documentElement;
-        const nextIsDark = !root.classList.contains("dark");
-        root.classList.toggle("dark", nextIsDark);
-        try {
-          localStorage.setItem("acadly-theme", nextIsDark ? "dark" : "light");
-        } catch {}
-        syncThemeIcons();
-      }
-
-      $("#themeToggle")?.addEventListener("click", toggleTheme);
-      $("#themeToggleMobile")?.addEventListener("click", toggleTheme);
+    function toggleTheme() {
+      const root = document.documentElement;
+      const nextIsDark = !root.classList.contains("dark");
+      root.classList.toggle("dark", nextIsDark);
+      try {
+        localStorage.setItem("acadly-theme", nextIsDark ? "dark" : "light");
+      } catch { }
       syncThemeIcons();
+    }
 
-      // Mobile menu toggle
-      const menuBtn = $("#menuBtn");
-      const mobileMenu = $("#mobileMenu");
-      const iconHamburger = $("#iconHamburger");
-      const iconClose = $("#iconClose");
+    $("#themeToggle")?.addEventListener("click", toggleTheme);
+    $("#themeToggleMobile")?.addEventListener("click", toggleTheme);
+    syncThemeIcons();
 
-      function setMenuOpen(open) {
-        if (!mobileMenu || !menuBtn) return;
-        mobileMenu.classList.toggle("open", open);
-        menuBtn.setAttribute("aria-expanded", String(open));
-        menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-        iconHamburger?.classList.toggle("hidden", open);
-        iconClose?.classList.toggle("hidden", !open);
-      }
+    // Mobile menu toggle
+    const menuBtn = $("#menuBtn");
+    const mobileMenu = $("#mobileMenu");
+    const iconHamburger = $("#iconHamburger");
+    const iconClose = $("#iconClose");
 
-      menuBtn?.addEventListener("click", () => {
-        const open = !mobileMenu?.classList.contains("open");
-        setMenuOpen(open);
-      });
+    function setMenuOpen(open) {
+      if (!mobileMenu || !menuBtn) return;
+      mobileMenu.classList.toggle("open", open);
+      menuBtn.setAttribute("aria-expanded", String(open));
+      menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      iconHamburger?.classList.toggle("hidden", open);
+      iconClose?.classList.toggle("hidden", !open);
+    }
 
-      // Close mobile menu on nav click
-      $$("#mobileMenu a").forEach((a) => {
-        a.addEventListener("click", () => setMenuOpen(false));
-      });
+    menuBtn?.addEventListener("click", () => {
+      const open = !mobileMenu?.classList.contains("open");
+      setMenuOpen(open);
+    });
 
-      // Scroll reveals (soft fade + slide up)
-      const revealEls = $$("[data-reveal]");
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            const el = e.target;
-            const delay = Number(el.getAttribute("data-reveal-delay") || "0");
-            if (delay) el.style.transitionDelay = `${delay}ms`;
-            el.classList.add("is-visible");
-            io.unobserve(el);
-          }
-        },
-        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-      );
-      revealEls.forEach((el) => io.observe(el));
-    </script>
-  </body>
+    // Close mobile menu on nav click
+    $$("#mobileMenu a").forEach((a) => {
+      a.addEventListener("click", () => setMenuOpen(false));
+    });
+
+    // Scroll reveals (soft fade + slide up)
+    const revealEls = $$("[data-reveal]");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const el = e.target;
+          const delay = Number(el.getAttribute("data-reveal-delay") || "0");
+          if (delay) el.style.transitionDelay = `${delay}ms`;
+          el.classList.add("is-visible");
+          io.unobserve(el);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    revealEls.forEach((el) => io.observe(el));
+  </script>
+</body>
+
 </html>
