@@ -79,10 +79,11 @@
             </p>
           </header>
 
-          <form class="mt-6 space-y-4" onsubmit="event.preventDefault();">
+          <form class="mt-6 space-y-4" id="loginForm">
             <label class="block">
               <span class="text-sm text-slate-700 dark:text-slate-200">Email</span>
               <input
+                id="emailInput"
                 class="mt-2 w-full rounded-md bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-1 ring-slate-200 transition focus:ring-2 focus:ring-brand-500/80 dark:bg-slate-800 dark:text-white dark:ring-transparent"
                 type="email"
                 placeholder="you@acadly.com"
@@ -209,6 +210,50 @@
       });
 
       syncThemeToggle();
+
+      // Login form handling
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('loginPassword').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+        
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Login successful
+            alert('Login successful! Welcome ' + data.user.name);
+            // Store user data in localStorage
+            localStorage.setItem('acadly-user', JSON.stringify(data.user));
+            // Redirect to dashboard or home
+            window.location.href = '/dashboard.html';
+          } else {
+            // Login failed
+            alert(data.message || 'Login failed');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('Network error. Please try again.');
+        } finally {
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Log in';
+        }
+      });
     </script>
   </body>
 </html>
