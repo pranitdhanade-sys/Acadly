@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="en" data-accent-theme="purple">
+  <script>
+    (function () {
+      try {
+        const key = "acadly-ai-theme";
+        const saved = localStorage.getItem(key);
+        const prefersDark =
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const useDark =
+          saved === "light" ? false : saved === "dark" ? true : prefersDark;
+        document.documentElement.classList.toggle("dark", useDark);
+      } catch {}
+    })();
+  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcadLy AI Assistant</title>
+    <meta name="description" content="AcadLy AI Assistant - Educational neon glass chat UI" />
+
+    <!-- Tailwind (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome (CDN) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            boxShadow: {
+              glowAccent: "0 0 34px rgba(124, 58, 237, .25)",
+            },
+            fontFamily: {
+              sans: ["ui-sans-serif", "system-ui", "Inter"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --ai-hl: #22d3ee; /* cyan-400 */
+      }
+
+      html[data-accent-theme="purple"] {
+        --accent: #7c3aed; /* purple-600 */
+        --accent-rgb: 124, 58, 237;
+      }
+
+      html[data-accent-theme="amber"] {
+        --accent: #fb923c; /* neon amber/orange */
+        --accent-rgb: 251, 146, 60;
+      }
+
+      /* Accent helpers (used to keep theme switching consistent) */
+      .accent-bg {
+        background: rgba(var(--accent-rgb), 0.2);
+      }
+      .accent-border {
+        border-color: rgba(var(--accent-rgb), 0.45);
+      }
+      .accent-solid {
+        background: rgb(var(--accent-rgb));
+      }
+      .accent-solid:hover {
+        box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.35);
+      }
+      .accent-glow {
+        box-shadow: 0 0 34px rgba(var(--accent-rgb), 0.26);
+      }
+
+      .gradient-accent {
+        background: linear-gradient(90deg, rgb(var(--accent-rgb)), var(--ai-hl));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* Typing dots */
+      @keyframes dot-bounce {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.6;
+        }
+        40% {
+          transform: translateY(-6px);
+          opacity: 1;
+        }
+      }
+      .typing-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(var(--accent-rgb), 0.9);
+        display: inline-block;
+        animation: dot-bounce 1s infinite;
+      }
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.12s;
+      }
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.24s;
+      }
+
+      /* Code block token coloring */
+      .code-block {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .code-pre {
+        padding: 14px 14px 16px;
+        margin: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+      }
+      .code-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(2, 6, 23, 0.35);
+      }
+      .tok-keyword {
+        color: rgba(var(--accent-rgb), 0.95);
+        font-weight: 600;
+      }
+      .tok-fn {
+        color: rgba(34, 211, 238, 0.95);
+        font-weight: 600;
+      }
+      .tok-string {
+        color: rgba(74, 222, 128, 0.95);
+      }
+      .tok-number {
+        color: rgba(96, 165, 250, 0.95);
+      }
+      .tok-comment {
+        color: rgba(148, 163, 184, 0.7);
+        font-style: italic;
+      }
+
+      /* Hide textarea scrollbars unless really needed */
+      textarea.no-scrollbar {
+        scrollbar-width: none; /* Firefox */
+      }
+      textarea.no-scrollbar::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      /* Action icon glow on hover */
+      .action-icon-btn {
+        color: rgba(148, 163, 184, 0.85);
+        transition: transform 120ms ease, color 120ms ease, box-shadow 120ms ease;
+      }
+      .action-icon-btn:hover {
+        color: rgba(226, 232, 240, 0.95);
+        box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.22);
+        transform: translateY(-1px);
+      }
+
+      /* Scrollbar polish */
+      #chatFeed::-webkit-scrollbar {
+        width: 10px;
+      }
+      #chatFeed::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.2);
+        border-radius: 999px;
+        border: 2px solid rgba(2, 6, 23, 0.7);
+      }
+      html:not(.dark) #chatFeed::-webkit-scrollbar-thumb {
+        border: 2px solid rgba(241, 245, 249, 0.95);
+      }
+
+      html:not(.dark) .action-icon-btn {
+        color: rgba(71, 85, 105, 0.9);
+      }
+      html:not(.dark) .action-icon-btn:hover {
+        color: rgba(15, 23, 42, 0.95);
+      }
+
+      /* Smooth sidebar transition */
+      .sidebar-panel {
+        transition: transform 220ms ease;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200">
+    <div id="mobileOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 md:hidden dark:bg-black/50"></div>
+
+    <div class="flex h-screen overflow-hidden">
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="sidebar-panel z-50 hidden w-72 flex-col border-r border-slate-200/80 bg-white/60 backdrop-blur-md dark:border-white/5 dark:bg-slate-900/40 md:flex"
+      >
+        <div class="p-4">
+          <div class="flex items-center gap-3">
+            <button
+              id="btnNewChat"
+              type="button"
+              class="group relative w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 hover:shadow-[0_0_40px_rgba(var(--accent-rgb),.25)] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:shadow-[0_0_40px_rgba(var(--accent-rgb),.35)]"
+              aria-label="New Chat"
+            >
+              <span class="inline-flex items-center gap-2">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                New Chat
+              </span>
+              <span class="sr-only">Start a new chat</span>
+            </button>
+          </div>
+
+          <div class="mt-3 flex gap-3">
+            <button
+              id="btnTempChat"
+              type="button"
+              class="group flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-white/15 dark:hover:bg-white/10"
+              aria-label="Temporary Chat"
+              title="Temporary Chat"
+            >
+              <i class="fa-solid fa-ghost text-slate-600 group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white" aria-hidden="true"></i>
+            </button>
+            <div class="flex-1">
+              <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="text-xs text-slate-500 dark:text-slate-400">
+                    Temporary
+                  </div>
+                  <div id="tempLabelBadge" class="hidden text-xs font-semibold text-amber-600 dark:text-amber-300">
+                    History Paused
+                  </div>
+                </div>
+                <button
+                  id="tempChatInlineToggle"
+                  type="button"
+                  class="mt-1 w-full text-left text-xs text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                  aria-label="Toggle Temporary Chat"
+                >
+                  Toggle Incognito Mode
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-3 pb-4">
+          <div class="px-2">
+            <div class="mt-2 text-xs font-semibold text-slate-500 uppercase tracking-wide dark:text-slate-400">Recent Chats</div>
+
+            <div class="mt-3">
+              <div class="text-xs font-medium text-slate-500 dark:text-slate-500">Today</div>
+              <div class="mt-2 space-y-2">
+                <button class="chat-item w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                  Module 3 Doubts: Variables & Scopes
+                </button>
+                <button class="chat-item w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                  Quick Quiz: Biology (Genetics)
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-5">
+              <div class="text-xs font-medium text-slate-500">Previous 7 Days</div>
+              <div class="mt-2 space-y-2">
+                <button class="chat-item w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                  Explain Big O Notation (with examples)
+                </button>
+                <button class="chat-item w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                  Code Review: Async/Await Patterns
+                </button>
+                <button class="chat-item w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                  Summarizer: Chapter 4 Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200/80 p-4 dark:border-white/5">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="grid h-9 w-9 place-items-center rounded-full bg-slate-200 ring-1 ring-slate-300 dark:bg-white/10 dark:ring-white/10">
+                <span class="text-sm font-semibold text-slate-800 dark:text-white">F</span>
+              </div>
+              <div class="leading-tight">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Fletcher</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Student</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button
+                id="themeToggleSidebar"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                aria-label="Toggle light or dark mode"
+              >
+                <i id="themeIconSunSidebar" class="fa-solid fa-sun hidden text-amber-500" aria-hidden="true"></i>
+                <i id="themeIconMoonSidebar" class="fa-solid fa-moon hidden text-slate-600 dark:text-slate-200" aria-hidden="true"></i>
+                <span id="themeLabelSidebar" class="hidden min-w-[2.5rem] text-left sm:inline">Dark</span>
+              </button>
+              <button type="button" class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white" aria-label="Settings">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Mobile Sidebar Panel (hidden on desktop) -->
+      <aside
+        id="sidebarMobile"
+        class="sidebar-panel fixed inset-y-0 left-0 z-50 w-72 translate-x-[-110%] border-r border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-white/5 dark:bg-slate-900/60 md:hidden"
+        aria-label="Sidebar"
+      >
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">AcadLy</div>
+            <button
+              id="btnCloseSidebarMobile"
+              type="button"
+              class="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+              aria-label="Close sidebar"
+            >
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="px-4 pb-4">
+          <button
+            id="btnNewChatMobile"
+            type="button"
+            class="group w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 hover:shadow-[0_0_40px_rgba(var(--accent-rgb),.25)] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:shadow-[0_0_40px_rgba(var(--accent-rgb),.35)]"
+          >
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              New Chat
+            </span>
+          </button>
+          <button
+            id="btnTempChatMobile"
+            type="button"
+            class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-white/15 dark:hover:bg-white/10"
+          >
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-ghost" aria-hidden="true"></i>
+              Temporary Chat
+            </span>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto px-3 pb-4">
+          <div class="px-2 pt-3">
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide dark:text-slate-400">Recent Chats</div>
+            <div class="mt-3 space-y-2">
+              <button class="w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                Module 3 Doubts: Variables & Scopes
+              </button>
+              <button class="w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                Quick Quiz: Biology (Genetics)
+              </button>
+              <button class="w-full truncate rounded-xl border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">
+                Explain Big O Notation (with examples)
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-slate-200/80 p-4 dark:border-white/5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div class="grid h-9 w-9 place-items-center rounded-full bg-slate-200 ring-1 ring-slate-300 dark:bg-white/10 dark:ring-white/10">
+                <span class="text-sm font-semibold text-slate-800 dark:text-white">F</span>
+              </div>
+              <div class="leading-tight">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Fletcher</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">Student</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                id="themeToggleSidebarMobile"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                aria-label="Toggle light or dark mode"
+              >
+                <i id="themeIconSunSidebarMobile" class="fa-solid fa-sun hidden text-amber-500" aria-hidden="true"></i>
+                <i id="themeIconMoonSidebarMobile" class="fa-solid fa-moon hidden text-slate-600 dark:text-slate-200" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white" aria-label="Settings">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Chat -->
+      <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header class="flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/70 px-6 py-4 backdrop-blur-md dark:border-white/5 dark:bg-slate-950/40">
+          <div class="flex items-center gap-3">
+            <!-- Mobile hamburger (in header) -->
+            <button
+              id="btnOpenSidebarMobile"
+              type="button"
+              class="hidden rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white md:hidden"
+              aria-label="Open sidebar"
+            >
+              <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-slate-900 dark:text-white/95">AcadLy Assistant</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Learning mode, powered by AI</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:block">
+              <div id="tempHeaderPill" class="hidden flex items-center rounded-full border border-amber-400/40 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-800 dark:border-amber-400/25 dark:bg-amber-500/10 dark:text-amber-200">
+                Temporary Chat - History Paused
+              </div>
+            </div>
+
+            <div class="relative">
+              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Persona</div>
+              <select
+                id="personaSelect"
+                class="w-56 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+                aria-label="AI Persona"
+              >
+                <option value="socratic">🧠 Socratic Tutor</option>
+                <option value="code">💻 Code Reviewer</option>
+                <option value="summary">📝 Summarizer</option>
+              </select>
+            </div>
+
+            <button
+              id="themeToggle"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+              aria-label="Toggle light or dark mode"
+            >
+              <i id="themeIconSun" class="fa-solid fa-sun hidden text-amber-500" aria-hidden="true"></i>
+              <i id="themeIconMoon" class="fa-solid fa-moon hidden text-slate-600 dark:text-slate-200" aria-hidden="true"></i>
+              <span id="themeLabel" class="hidden sm:inline">Dark</span>
+            </button>
+
+            <button
+              id="btnClearContext"
+              type="button"
+              class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+            >
+              Clear Context
+            </button>
+          </div>
+        </header>
+
+        <main class="relative flex min-h-0 flex-1 overflow-hidden">
+          <div id="chatFeed" class="w-full overflow-y-auto px-6 py-8">
+            <!-- Empty State -->
+            <div id="emptyState" class="mx-auto hidden max-w-2xl text-center">
+              <div class="text-4xl font-extrabold tracking-tight">
+                <span class="gradient-accent">Hello, Fletcher</span>
+              </div>
+              <div class="mt-2 text-sm text-slate-600 dark:text-slate-400">Pick a suggestion or ask a question to begin.</div>
+
+              <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2">
+                <button
+                  type="button"
+                  class="suggest-card group rounded-2xl border border-slate-200/90 bg-white/80 p-4 text-left shadow-sm backdrop-blur-md hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10"
+                  data-suggest="Explain Big O Notation with examples"
+                >
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-cyan-400" aria-hidden="true"></i>
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Explain Big O</div>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-600 group-hover:text-slate-800 dark:text-slate-400 dark:group-hover:text-slate-200">Learn complexity in minutes</div>
+                </button>
+
+                <button
+                  type="button"
+                  class="suggest-card group rounded-2xl border border-slate-200/90 bg-white/80 p-4 text-left shadow-sm backdrop-blur-md hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10"
+                  data-suggest="Quiz me on Biology (Genetics) with 5 questions"
+                >
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-dna text-cyan-400" aria-hidden="true"></i>
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Biology Quiz</div>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-600 group-hover:text-slate-800 dark:text-slate-400 dark:group-hover:text-slate-200">5 questions, instant feedback</div>
+                </button>
+
+                <button
+                  type="button"
+                  class="suggest-card group rounded-2xl border border-slate-200/90 bg-white/80 p-4 text-left shadow-sm backdrop-blur-md hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10"
+                  data-suggest="Summarize Module 3: Advanced JavaScript for me"
+                >
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-cyan-400" aria-hidden="true"></i>
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Summarize Module 3</div>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-600 group-hover:text-slate-800 dark:text-slate-400 dark:group-hover:text-slate-200">Key ideas + takeaways</div>
+                </button>
+
+                <button
+                  type="button"
+                  class="suggest-card group rounded-2xl border border-slate-200/90 bg-white/80 p-4 text-left shadow-sm backdrop-blur-md hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/10"
+                  data-suggest="Review this code: improve readability and fix any issues"
+                >
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-code text-cyan-400" aria-hidden="true"></i>
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Code Review</div>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-600 group-hover:text-slate-800 dark:text-slate-400 dark:group-hover:text-slate-200">Actionable improvements</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages" class="space-y-5"></div>
+          </div>
+
+          <!-- Input Area -->
+          <div class="absolute inset-x-0 bottom-0 px-4 pb-5 md:px-6">
+            <div class="mx-auto w-full max-w-4xl">
+              <div class="relative">
+                <div id="contextBadge" class="absolute -left-1 -top-4 z-10 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-[0_0_40px_rgba(var(--accent-rgb),.18)] backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:shadow-[0_0_40px_rgba(var(--accent-rgb),.22)]">
+                  <span class="mr-2">📍</span>
+                  <span id="badgeText">Current Context: Advanced JavaScript (Module 3)</span>
+                </div>
+
+                <div class="rounded-3xl border border-slate-200/90 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-slate-800/80">
+                  <div class="flex items-end gap-3">
+                    <!-- Left Action Buttons -->
+                    <div class="flex items-center gap-2 pb-1">
+                      <button
+                        id="btnAttach"
+                        type="button"
+                        class="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+                        aria-label="Attach"
+                      >
+                        <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+                      </button>
+                      <button
+                        id="btnImage"
+                        type="button"
+                        class="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+                        aria-label="Image"
+                      >
+                        <i class="fa-regular fa-image" aria-hidden="true"></i>
+                      </button>
+                    </div>
+
+                    <!-- Textarea -->
+                    <div class="flex-1 min-w-0">
+                      <textarea
+                        id="chatInput"
+                        class="no-scrollbar w-full resize-none bg-transparent px-2 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                        rows="1"
+                        placeholder="Ask AcadLy anything..."
+                      ></textarea>
+                    </div>
+
+                    <!-- Right Action Buttons -->
+                    <div class="flex items-center gap-2 pb-1">
+                      <button
+                        id="btnMic"
+                        type="button"
+                        class="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+                        aria-label="Microphone"
+                      >
+                        <i class="fa-solid fa-microphone" aria-hidden="true"></i>
+                      </button>
+
+                      <button
+                        id="btnSend"
+                        type="button"
+                        class="accent-solid rounded-2xl px-4 py-2 text-sm font-semibold text-white transition focus:outline-none hover:shadow-[0_0_40px_rgba(var(--accent-rgb),.45)]"
+                        aria-label="Send"
+                      >
+                        <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
+                        Send
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                    Press <span class="font-medium text-slate-800 dark:text-slate-200">Enter</span> to send, <span class="font-medium text-slate-800 dark:text-slate-200">Shift+Enter</span> for a new line.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+      const sidebar = $("#sidebar");
+      const sidebarMobile = $("#sidebarMobile");
+      const mobileOverlay = $("#mobileOverlay");
+
+      const btnOpenSidebarMobile = $("#btnOpenSidebarMobile");
+      const btnCloseSidebarMobile = $("#btnCloseSidebarMobile");
+
+      const btnNewChat = $("#btnNewChat");
+      const btnNewChatMobile = $("#btnNewChatMobile");
+      const btnTempChat = $("#btnTempChat");
+      const btnTempChatMobile = $("#btnTempChatMobile");
+      const tempChatInlineToggle = $("#tempChatInlineToggle");
+
+      const tempHeaderPill = $("#tempHeaderPill");
+      const tempLabelBadge = $("#tempLabelBadge");
+
+      const btnClearContext = $("#btnClearContext");
+      const personaSelect = $("#personaSelect");
+
+      const emptyState = $("#emptyState");
+      const messagesEl = $("#messages");
+      const chatFeed = $("#chatFeed");
+
+      const textarea = $("#chatInput");
+      const btnSend = $("#btnSend");
+
+      const contextBadge = $("#contextBadge");
+      const badgeText = $("#badgeText");
+
+      const THEME_KEY = "acadly-ai-theme";
+      const themeToggle = $("#themeToggle");
+      const themeToggleSidebar = $("#themeToggleSidebar");
+      const themeToggleSidebarMobile = $("#themeToggleSidebarMobile");
+
+      function syncThemeToggleUI() {
+        const isDark = document.documentElement.classList.contains("dark");
+        const groups = [
+          { sun: "themeIconSun", moon: "themeIconMoon", label: "themeLabel" },
+          { sun: "themeIconSunSidebar", moon: "themeIconMoonSidebar", label: "themeLabelSidebar" },
+          { sun: "themeIconSunSidebarMobile", moon: "themeIconMoonSidebarMobile", label: null },
+        ];
+        for (const g of groups) {
+          const sun = document.getElementById(g.sun);
+          const moon = document.getElementById(g.moon);
+          const label = g.label ? document.getElementById(g.label) : null;
+          if (sun) sun.classList.toggle("hidden", isDark);
+          if (moon) moon.classList.toggle("hidden", !isDark);
+          if (label) label.textContent = isDark ? "Dark" : "Light";
+        }
+      }
+
+      function toggleColorTheme() {
+        const next = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", next);
+        try {
+          localStorage.setItem(THEME_KEY, next ? "dark" : "light");
+        } catch {}
+        syncThemeToggleUI();
+      }
+
+      themeToggle?.addEventListener("click", toggleColorTheme);
+      themeToggleSidebar?.addEventListener("click", toggleColorTheme);
+      themeToggleSidebarMobile?.addEventListener("click", toggleColorTheme);
+
+      const state = {
+        temporaryChat: false,
+        persona: "socratic",
+        messages: [],
+      };
+
+      const genId = () => Math.random().toString(16).slice(2) + Date.now().toString(16);
+
+      function setThemeTemporary(next) {
+        state.temporaryChat = next;
+        document.documentElement.dataset.accentTheme = next ? "amber" : "purple";
+
+        // Visual warning
+        if (tempHeaderPill) tempHeaderPill.classList.toggle("hidden", !next);
+        if (tempLabelBadge) tempLabelBadge.classList.toggle("hidden", !next);
+
+        // Badge + input placeholder changes requested by the prompt
+        if (next) {
+          badgeText.textContent = "Temporary Chat - History Paused";
+          textarea.placeholder = "Temporary Chat - History Paused";
+        } else {
+          badgeText.textContent = "Current Context: Advanced JavaScript (Module 3)";
+          textarea.placeholder = "Ask AcadLy anything...";
+        }
+      }
+
+      function openMobileSidebar() {
+        sidebarMobile.style.transform = "translateX(0)";
+        mobileOverlay.classList.remove("hidden");
+        mobileOverlay.classList.add("block");
+      }
+
+      function closeMobileSidebar() {
+        sidebarMobile.style.transform = "translateX(-110%)";
+        mobileOverlay.classList.add("hidden");
+        mobileOverlay.classList.remove("block");
+      }
+
+      function scrollToBottom() {
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+      }
+
+      function autoResizeTextarea() {
+        textarea.style.height = "auto";
+        const maxPx = 240;
+        const next = Math.min(textarea.scrollHeight, maxPx);
+        textarea.style.height = next + "px";
+        if (textarea.scrollHeight > maxPx) {
+          textarea.style.overflowY = "auto";
+        } else {
+          textarea.style.overflowY = "hidden";
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function buildMockAiResponse(persona, userText) {
+        const safeUser = userText ? escapeHtml(userText) : "";
+
+        if (persona === "code") {
+          return {
+            heading: "Code review highlights",
+            paragraph:
+              "Nice start. Let’s make the logic clearer, reduce repetition, and handle edge cases more explicitly. " +
+              (safeUser ? `You asked: "${safeUser}".` : ""),
+            codeTitle: "module3.js",
+            codeRaw: `export function module3Validate(input) {
+  const trimmed = input.trim();
+  if (!trimmed) throw new Error("Empty input");
+  return trimmed.match(/[A-Za-z0-9_]+/g);
+}
+`,
+          };
+        }
+
+        if (persona === "summary") {
+          return {
+            heading: "Module 3 summary (quick + practical)",
+            paragraph:
+              "Here are the key takeaways you can apply right away. Focus on patterns, not memorization: write small helpers, validate inputs early, and keep data transformations predictable.",
+            codeTitle: "learning-notes.md",
+            codeRaw: `# Module 3 Notes
+
+- Prefer small pure functions.
+- Validate at boundaries (inputs/outputs).
+- Keep state transitions explicit.
+`,
+          };
+        }
+
+        // Socratic Tutor (default)
+        return {
+          heading: "A Socratic walkthrough",
+          paragraph:
+            "Let’s reason it out step-by-step. If you had to explain this concept in one sentence, what would you say? " +
+            "After that, try mapping it to a small example and compare outcomes.",
+          codeTitle: "example.js",
+          codeRaw: `const idea = "Make your transformations explicit";
+
+function nextStep(value) {
+  if (!value) return "start";
+  return "continue";
+}
+`,
+        };
+      }
+
+      function highlightCode(codeRaw) {
+        // Lightweight, deterministic highlighting for the provided mock snippets.
+        // (For production: use a real highlighter like Prism.)
+        const esc = escapeHtml(codeRaw);
+        let html = esc;
+
+        // Comments (very simple)
+        html = html.replace(/(&#039;\/\*.*?\*\/&#039;)/g, "$1");
+
+        // Keywords
+        const keywords = [
+          "export",
+          "function",
+          "return",
+          "const",
+          "if",
+          "throw",
+          "class",
+        ];
+        for (const kw of keywords) {
+          const re = new RegExp("\\b" + kw + "\\b", "g");
+          html = html.replace(re, `<span class="tok-keyword">${kw}</span>`);
+        }
+
+        // Common built-ins
+        html = html.replace(/\\b(Error|trim|match)\\b/g, (m) => `<span class="tok-fn">${m}</span>`);
+
+        // Strings
+        html = html.replace(/(&quot;.*?&quot;)/g, `<span class="tok-string">$1</span>`);
+        html = html.replace(/(&#039;.*?&#039;)/g, `<span class="tok-string">$1</span>`);
+
+        // Numbers
+        html = html.replace(/\\b(\\d+)\\b/g, `<span class="tok-number">$1</span>`);
+
+        return html;
+      }
+
+      function renderAiMessageWithActions(messageId, aiPayload) {
+        const codeHighlighted = highlightCode(aiPayload.codeRaw);
+        const codeRawEsc = aiPayload.codeRaw;
+
+        // Code block with Copy Code button inside the message bubble
+        const codeBlockHtml = `
+          <div class="code-block mt-4">
+            <div class="code-header">
+              <div class="text-xs font-semibold text-slate-700 dark:text-slate-200/90">${escapeHtml(aiPayload.codeTitle)}</div>
+              <button
+                type="button"
+                class="copy-code-btn rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10"
+                data-copy-code="${escapeHtml(codeRawEsc)}"
+                aria-label="Copy Code"
+              >
+                <i class="fa-solid fa-copy mr-2" aria-hidden="true"></i>
+                Copy Code
+              </button>
+            </div>
+            <pre class="code-pre text-[12px] text-slate-100"><code>${codeHighlighted}</code></pre>
+          </div>
+        `;
+
+        const aiHtml = document.createElement("div");
+        aiHtml.className = "flex justify-start";
+        aiHtml.dataset.messageId = messageId;
+
+        aiHtml.innerHTML = `
+          <div class="max-w-[86%] rounded-2xl border border-slate-200/80 bg-transparent pl-4 dark:border-white/5">
+            <div class="border-l-2 border-cyan-500/80 px-3 py-3 dark:border-cyan-400/70">
+              <div class="text-sm font-extrabold text-slate-900 dark:text-white">${escapeHtml(aiPayload.heading)}</div>
+              <div class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200/90">${escapeHtml(aiPayload.paragraph)}</div>
+              ${codeBlockHtml}
+            </div>
+            <div class="px-3 pb-3 pt-2">
+              <div class="flex items-center gap-4 text-[12px] text-slate-500 dark:text-slate-400">
+                <button type="button" class="action-icon-btn like-btn" data-action="like" aria-label="Thumbs Up">
+                  <i class="fa-regular fa-thumbs-up" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="action-icon-btn dislike-btn" data-action="dislike" aria-label="Thumbs Down">
+                  <i class="fa-regular fa-thumbs-down" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="action-icon-btn copy-msg-btn"
+                  data-action="copy"
+                  data-copy-text="${encodeURIComponent(aiPayload.heading + "\n\n" + aiPayload.paragraph)}"
+                  aria-label="Copy"
+                >
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="action-icon-btn save-btn"
+                  data-action="save"
+                  data-saved="false"
+                  aria-label="Save to Notes"
+                >
+                  <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Wire Copy Code button
+        const copyCodeBtn = aiHtml.querySelector(".copy-code-btn");
+        copyCodeBtn?.addEventListener("click", async () => {
+          try {
+            const raw = copyCodeBtn.getAttribute("data-copy-code") || "";
+            await navigator.clipboard.writeText(raw);
+            copyCodeBtn.innerHTML = '<i class="fa-solid fa-check mr-2" aria-hidden="true"></i>Copied';
+            setTimeout(() => {
+              copyCodeBtn.innerHTML = '<i class="fa-solid fa-copy mr-2" aria-hidden="true"></i>Copy Code';
+            }, 1100);
+          } catch {
+            // Silent fallback
+          }
+        });
+
+        // Wire action row buttons (thumbs, copy, save)
+        aiHtml.querySelectorAll(".action-icon-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const action = btn.getAttribute("data-action");
+            if (action === "copy") {
+              try {
+                const raw = btn.getAttribute("data-copy-text") || "";
+                await navigator.clipboard.writeText(decodeURIComponent(raw));
+              } catch {}
+            }
+
+            if (action === "save") {
+              const savedNow = btn.getAttribute("data-saved") === "true";
+              const next = !savedNow;
+              btn.setAttribute("data-saved", String(next));
+              const icon = btn.querySelector("i");
+              if (icon) {
+                icon.classList.toggle("fa-regular", !next);
+                icon.classList.toggle("fa-solid", next);
+              }
+              // Tiny visual hint: pulse glow briefly
+              btn.classList.add("accent-glow");
+              setTimeout(() => btn.classList.remove("accent-glow"), 350);
+            }
+
+            if (action === "like") {
+              btn.querySelector("i")?.classList.toggle("fa-solid");
+              btn.querySelector("i")?.classList.toggle("fa-regular");
+            }
+            if (action === "dislike") {
+              btn.querySelector("i")?.classList.toggle("fa-solid");
+              btn.querySelector("i")?.classList.toggle("fa-regular");
+            }
+          });
+        });
+
+        return aiHtml;
+      }
+
+      function renderUserMessage(messageId, text) {
+        const wrap = document.createElement("div");
+        wrap.className = "flex justify-end";
+        wrap.dataset.messageId = messageId;
+        wrap.innerHTML = `
+          <div class="max-w-[86%] rounded-2xl accent-bg border border-slate-200/60 px-4 py-3 dark:border-white/5">
+            <div class="text-sm leading-relaxed text-slate-900 dark:text-slate-100">${escapeHtml(text)}</div>
+          </div>
+        `;
+        return wrap;
+      }
+
+      function renderTypingIndicator(messageId) {
+        const wrap = document.createElement("div");
+        wrap.className = "flex justify-start";
+        wrap.dataset.messageId = messageId;
+
+        wrap.innerHTML = `
+          <div class="max-w-[70%] rounded-2xl border border-slate-200/80 bg-transparent pl-4 dark:border-white/5">
+            <div class="border-l-2 border-cyan-500/80 px-3 py-3 dark:border-cyan-400/70">
+              <div class="flex items-center gap-2">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+              <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">AcadLy is typing…</div>
+            </div>
+          </div>
+        `;
+        return wrap;
+      }
+
+      function setEmptyStateVisible(isVisible) {
+        emptyState.classList.toggle("hidden", !isVisible);
+        // The messages container stays mounted for smoother scroll behavior.
+        messagesEl.classList.toggle("hidden", isVisible);
+      }
+
+      function clearChat() {
+        state.messages = [];
+        messagesEl.innerHTML = "";
+        setEmptyStateVisible(true);
+      }
+
+      function replaceTypingWithAi(typingEl, aiPayload) {
+        const messageId = typingEl.dataset.messageId;
+        typingEl.replaceWith(renderAiMessageWithActions(messageId, aiPayload));
+      }
+
+      function addUserAndAi(text) {
+        const userId = genId();
+        const userMsgEl = renderUserMessage(userId, text);
+        messagesEl.appendChild(userMsgEl);
+        state.messages.push({ id: userId, role: "user", text });
+        setEmptyStateVisible(false);
+        scrollToBottom();
+
+        const typingId = genId();
+        const typingEl = renderTypingIndicator(typingId);
+        messagesEl.appendChild(typingEl);
+        state.messages.push({ id: typingId, role: "ai", typing: true });
+        scrollToBottom();
+
+        setTimeout(() => {
+          // Remove the typing message object and show the final mock response
+          const aiPayload = buildMockAiResponse(state.persona, text);
+          replaceTypingWithAi(typingEl, aiPayload);
+          // Ensure the internal state tracks a finalized message
+          state.messages = state.messages.map((m) => (m.id === typingId ? { id: typingId, role: "ai", payload: aiPayload } : m));
+          scrollToBottom();
+        }, 1500);
+      }
+
+      function sendMessageFromInput() {
+        const raw = textarea.value.trim();
+        if (!raw) return;
+        textarea.value = "";
+        textarea.style.height = "auto";
+        autoResizeTextarea();
+        addUserAndAi(raw);
+      }
+
+      // Persona selection
+      personaSelect.addEventListener("change", () => {
+        state.persona = personaSelect.value;
+      });
+
+      // Clear context
+      btnClearContext.addEventListener("click", () => {
+        clearChat();
+      });
+
+      // Temporary chat toggle (theme shift)
+      function toggleTempChat() {
+        const next = !state.temporaryChat;
+        setThemeTemporary(next);
+
+        // For better UX, clear existing chat when turning on temporary mode.
+        // (History is "paused" anyway.)
+        if (next) {
+          clearChat();
+        }
+      }
+
+      btnTempChat.addEventListener("click", toggleTempChat);
+      btnTempChatMobile.addEventListener("click", toggleTempChat);
+      tempChatInlineToggle.addEventListener("click", toggleTempChat);
+
+      // New chat
+      btnNewChat.addEventListener("click", () => {
+        clearChat();
+      });
+      btnNewChatMobile.addEventListener("click", () => {
+        clearChat();
+        closeMobileSidebar();
+      });
+
+      // Mobile sidebar
+      btnOpenSidebarMobile?.addEventListener("click", openMobileSidebar);
+      btnCloseSidebarMobile?.addEventListener("click", closeMobileSidebar);
+      mobileOverlay?.addEventListener("click", closeMobileSidebar);
+
+      // Suggestion cards
+      $$(".suggest-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          const suggest = card.getAttribute("data-suggest") || "";
+          if (state.temporaryChat) {
+            // Temporary mode: still allow sending, but don't preserve to "recent chats".
+          }
+          addUserAndAi(suggest);
+        });
+      });
+
+      // Send events
+      btnSend.addEventListener("click", sendMessageFromInput);
+      textarea.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessageFromInput();
+        }
+      });
+
+      // Auto resize
+      textarea.addEventListener("input", autoResizeTextarea);
+      // Initial sizing
+      autoResizeTextarea();
+
+      // Attach / Image / Mic stubs (for UI only)
+      $("#btnAttach")?.addEventListener("click", () => {
+        // UI-only stub
+      });
+      $("#btnImage")?.addEventListener("click", () => {
+        // UI-only stub
+      });
+      $("#btnMic")?.addEventListener("click", () => {
+        // UI-only stub
+      });
+
+      // Mock up initial conversation (Active Chat State)
+      function seedMockConversation() {
+        setEmptyStateVisible(false);
+        const user1 = genId();
+        const userMsg1 = renderUserMessage(user1, "Can you explain how Module 3 advanced JavaScript works?");
+        messagesEl.appendChild(userMsg1);
+        state.messages.push({ id: user1, role: "user", text: "Can you explain how Module 3 advanced JavaScript works?" });
+
+        const aiId = genId();
+        const aiPayload = buildMockAiResponse("socratic", "Can you explain how Module 3 advanced JavaScript works?");
+        const aiMsg = renderAiMessageWithActions(aiId, aiPayload);
+        messagesEl.appendChild(aiMsg);
+        state.messages.push({ id: aiId, role: "ai", payload: aiPayload });
+        scrollToBottom();
+      }
+
+      // Initial state
+      setThemeTemporary(false);
+      syncThemeToggleUI();
+      setEmptyStateVisible(false);
+      seedMockConversation();
+    </script>
+  </body>
+</html>
+
