@@ -75,7 +75,7 @@
             <h1 class="text-3xl font-bold tracking-tight">Create an account</h1>
             <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
               Already have an account?
-              <a href="login.html" class="font-semibold text-brand-500 transition hover:text-brand-400">Log in</a>
+              <a href="Login.html" class="font-semibold text-brand-500 transition hover:text-brand-400">Log in</a>
             </p>
           </header>
 
@@ -86,7 +86,7 @@
                 <input
                   class="mt-2 w-full rounded-md bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-1 ring-slate-200 transition focus:ring-2 focus:ring-brand-500/80 dark:bg-slate-800 dark:text-white dark:ring-transparent"
                   type="text"
-                  placeholder="Keshava"
+                  placeholder="Firstname"
                   autocomplete="given-name"
                   required
                 />
@@ -96,7 +96,7 @@
                 <input
                   class="mt-2 w-full rounded-md bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-1 ring-slate-200 transition focus:ring-2 focus:ring-brand-500/80 dark:bg-slate-800 dark:text-white dark:ring-transparent"
                   type="text"
-                  placeholder="K."
+                  placeholder="Lastname"
                   autocomplete="family-name"
                   required
                 />
@@ -231,6 +231,33 @@
         inputId: "signupPassword",
         buttonId: "signupToggleBtn",
         iconId: "signupEyeIcon",
+      });
+
+      // Sign up form handling (UI gate)
+      document.querySelector("form")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const params = new URLSearchParams(window.location.search);
+        const nextUrl = params.get("next") || "../index.html";
+
+        const form = e.target;
+        const emailInput = form.querySelector('input[type="email"]');
+        const email = (emailInput?.value || "").trim();
+
+        const firstNameInput = form.querySelector('input[autocomplete="given-name"]');
+        const lastNameInput = form.querySelector('input[autocomplete="family-name"]');
+        const first = (firstNameInput?.value || "").trim();
+        const last = (lastNameInput?.value || "").trim();
+
+        const name = [first, last].filter(Boolean).join(" ") || (email ? email.split("@")[0] : "Student");
+
+        localStorage.setItem(
+          "acadly-user",
+          JSON.stringify({ name, email })
+        );
+        localStorage.setItem("acadly-authenticated", "true");
+
+        window.location.href = nextUrl;
       });
 
       syncThemeToggle();

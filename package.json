@@ -1,0 +1,21 @@
+{
+  "name": "homepage",
+  "version": "1.0.0",
+  "description": "**Acadly** is a high-performance, full-stack academic management solution designed to streamline institutional workflows, enhance collaboration between educators and students, and centralize all academic operations into a unified digital platform. It minimizes administrative overhead while maximizing productivity, transparency, and accessibility across the entire education lifecycle.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranitdhanade-sys/Acadly.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pranitdhanade-sys/Acadly/issues"
+  },
+  "homepage": "https://github.com/pranitdhanade-sys/Acadly#readme"
+}

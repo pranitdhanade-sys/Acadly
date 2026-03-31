@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcadLy - Learning Path</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            950: '#020617',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(147, 51, 234, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(147, 51, 234, 0.8); }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-hover { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px -5px rgba(147, 51, 234, 0.4);
+            border-color: rgba(147, 51, 234, 0.5);
+        }
+
+        /* View Transitions */
+        .view-window {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease-in-out;
+        }
+        .view-a-active { transform: translateX(0); opacity: 1; }
+        .view-a-hidden { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+        .view-b-active { transform: translateX(0); opacity: 1; }
+        .view-b-hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+
+        /* Path Nodes */
+        .path-line {
+            position: absolute;
+            top: 50%;
+            left: 4rem;
+            width: 212rem; /* Enough length to connect all items */
+            height: 4px;
+            background: linear-gradient(90deg, #22d3ee 35%, #334155 35%);
+            transform: translateY(-5px);
+            z-index: 0;
+            transition: background 1s ease;
+        }
+
+        .node-btn {
+            position: relative;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+        
+        /* Node states */
+        .node-completed {
+            background: #0f172a;
+            border-color: #22d3ee;
+            color: #22d3ee;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6);
+        }
+        .node-active {
+            background: #0f172a;
+            border-color: #9333ea;
+            color: #9333ea;
+            animation: pulse-purple 2s infinite;
+        }
+        .node-locked {
+            background: #1e293b;
+            border-color: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        .node-ai {
+            background: #0f172a;
+            border-color: #f59e0b;
+            color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+            animation: float 3s ease-in-out infinite;
+        }
+        .node-boss {
+            background: #0f172a;
+            border-color: #22d3ee;
+            color: #22d3ee;
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), inset 0 0 15px rgba(34, 211, 238, 0.4);
+            transform: scale(1.2);
+        }
+
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(147, 51, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Modal / Side Panel */
+        .content-panel {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+        }
+        .panel-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
+        .panel-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        
+        /* Quiz option hover */
+        .quiz-opt { transition: all 0.2s; }
+        .quiz-opt:hover:not(.selected) { background: rgba(147, 51, 234, 0.1); border-color: rgba(147, 51, 234, 0.5); }
+        .quiz-opt.selected { background: #9333ea; border-color: #9333ea; color: white; }
+
+        /* Stagger Nodes */
+        .node-btn:nth-of-type(odd) { margin-top: -6rem; }
+        .node-btn:nth-of-type(even) { margin-top: 6rem; }
+        #node-10 { margin-top: 0 !important; }
+
+        /* Light Theme Overrides */
+        body.light-theme { background-color: #f8fafc; color: #0f172a; }
+        body.light-theme .glass { background: rgba(255, 255, 255, 0.7); border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        body.light-theme .text-slate-200, body.light-theme .text-slate-300, body.light-theme .text-slate-400, body.light-theme p.text-slate-400 { color: #475569 !important; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme .text-white { color: #0f172a !important; }
+        body.light-theme .node-locked { background: #e2e8f0; border-color: #cbd5e1; color: #64748b; }
+        body.light-theme .node-completed, body.light-theme .node-active, body.light-theme .node-ai, body.light-theme .node-boss { background: #ffffff; }
+        body.light-theme #contentPanelOverlay { background: rgba(255,255,255,0.7); }
+        body.light-theme #contentPanel { box-shadow: 0 -10px 40px rgba(0,0,0,0.1); background: rgba(255,255,255,0.95); }
+        body.light-theme .bg-slate-900\/60, body.light-theme .bg-slate-900\/50, body.light-theme .bg-slate-900\/40, body.light-theme .bg-slate-800\/50 { background: #f1f5f9; border-color: #cbd5e1 !important; }
+        body.light-theme .bg-slate-900, body.light-theme .bg-slate-800\/80, body.light-theme .bg-slate-800\/40, body.light-theme .bg-slate-800 { background: #ffffff; border-color: #e2e8f0 !important; }
+        body.light-theme .border-white\/10, body.light-theme .border-white\/5 { border-color: rgba(0,0,0,0.1) !important; }
+        
+        body.light-theme #gradStop2 { stop-color: #cbd5e1; }
+        body.light-theme .bg-black\/60 { background: #e2e8f0; }
+        body.light-theme .prose-invert { color: #334155; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 overflow-hidden h-screen w-screen relative">
+
+
+    <!-- Background Accents -->
+    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[40%] h-[50%] rounded-full bg-cyan-900/20 blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- VIEW A: THE MODULE GRID -->
+    <main id="viewA" class="view-window view-a-active flex flex-col pt-16 px-8 md:px-20 z-10 overflow-auto">
+        <header class="mb-12 max-w-6xl mx-auto w-full flex justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 inline-block mb-4">
+                    Explore Modules
+                </h1>
+                <p class="text-slate-400 text-lg">Select a discipline to begin your journey.</p>
+            </div>
+            <!-- Theme Toggle for View A -->
+            <button onclick="toggleTheme()" class="theme-btn w-12 h-12 shrink-0 rounded-full glass flex items-center justify-center text-xl text-yellow-400 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,204,21,0.2)]">
+                <i class="fa-solid fa-sun theme-icon"></i>
+            </button>
+        </header>
+
+        <section class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+            <!-- Module Card 1 -->
+            <button onclick="navigateToViewB('Advanced Algorithms')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 text-2xl group-hover:bg-purple-500/40 transition-colors">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Advanced Algorithms</h3>
+                    <p class="text-sm text-slate-400">Master dynamic programming and graph structures.</p>
+                </div>
+            </button>
+            
+            <!-- Module Card 2 -->
+            <button onclick="navigateToViewB('UI/UX Fundamentals')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-2xl group-hover:bg-cyan-500/40 transition-colors">
+                    <i class="fa-solid fa-pen-nib"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">UI/UX Fundamentals</h3>
+                    <p class="text-sm text-slate-400">Design systems, psychological principles, and modern tools.</p>
+                </div>
+            </button>
+            
+            <!-- Module Card 3 -->
+            <button onclick="navigateToViewB('Machine Learning')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-2xl group-hover:bg-amber-500/40 transition-colors">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Machine Learning</h3>
+                    <p class="text-sm text-slate-400">Neural networks, deep learning logic, and AI models.</p>
+                </div>
+            </button>
+            
+            <!-- Module Card 4 -->
+            <button onclick="navigateToViewB('System Design')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl group-hover:bg-emerald-500/40 transition-colors">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">System Design</h3>
+                    <p class="text-sm text-slate-400">Scalable architectures and microservice patterns.</p>
+                </div>
+            </button>
+        </section>
+    </main>
+
+    <!-- VIEW B: THE LEARNING PATH -->
+    <main id="viewB" class="view-window view-b-hidden flex flex-col z-10 h-full">
+        <!-- Top Nav -->
+        <nav class="glass px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+            <div class="flex items-center gap-6">
+                <button onclick="navigateToViewA()" class="text-slate-400 hover:text-white flex items-center gap-2 transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Back to Modules</span>
+                </button>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <h2 id="courseHeaderTitle" class="text-xl font-semibold text-purple-400">Course Title</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Theme Toggle for View B -->
+                <button onclick="toggleTheme()" class="theme-btn w-10 h-10 shrink-0 rounded-full glass flex items-center justify-center text-lg text-yellow-400 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,204,21,0.2)]">
+                    <i class="fa-solid fa-sun theme-icon"></i>
+                </button>
+                <div class="text-sm text-slate-400 bg-slate-800/50 px-4 py-1.5 rounded-full border border-slate-700">
+                    <i class="fa-solid fa-bolt text-amber-400 mr-2"></i> 400 XP
+                </div>
+            </div>
+        </nav>
+
+        <!-- Horizontal Map -->
+        <div class="flex-1 w-full overflow-x-auto overflow-y-hidden relative flex items-center hide-scroll">
+            <div class="min-w-max px-20 flex items-center gap-24 relative h-full">
+                <!-- Curve connecting nodes -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" id="pathSvg">
+                    <defs>
+                        <linearGradient id="pathGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="35%" stop-color="#22d3ee" id="gradStop1"></stop>
+                            <stop offset="35%" stop-color="#334155" id="gradStop2"></stop>
+                        </linearGradient>
+                    </defs>
+                    <path id="curvePath" fill="none" stroke="url(#pathGradient)" stroke-width="4"></path>
+                </svg>
+
+                <!-- Node 1 (Completed) -->
+                <button onclick="openPanel('standard', 1, 'Introduction & Concepts')" class="node-btn node-completed w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group">
+                    <i class="fa-solid fa-check"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-300 group-hover:text-white">1. Intro</span>
+                </button>
+                
+                <!-- Node 2 (Completed) -->
+                <button onclick="openPanel('standard', 2, 'Core Methodologies')" class="node-btn node-completed w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group">
+                    <i class="fa-solid fa-check"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-300 group-hover:text-white">2. Methods</span>
+                </button>
+
+                <!-- Node 3 (Completed) -->
+                <button onclick="openPanel('standard', 3, 'Practical Application I')" class="node-btn node-completed w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group">
+                    <i class="fa-solid fa-check"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-300 group-hover:text-white">3. Practice I</span>
+                </button>
+
+                <!-- Node 4 (Active Pulsing) -->
+                <button onclick="openPanel('standard', 4, 'Advanced Theories')" class="node-btn node-active w-20 h-20 rounded-full border-2 flex items-center justify-center text-2xl outline-none shrink-0 group">
+                    <i class="fa-solid fa-play ml-1"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-200">4. Theories</span>
+                </button>
+
+                <!-- Node 5 (AI Checkpoint) -->
+                <button onclick="openPanel('ai', 5, 'AI Checkpoint')" class="node-btn node-ai w-16 h-16 rounded-xl border-2 flex items-center justify-center text-2xl outline-none shrink-0 group rotate-45 hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-robot -rotate-45"></i>
+                    <span class="absolute -bottom-10 -left-6 whitespace-nowrap text-sm font-bold text-amber-400 tracking-wider -rotate-45">CHECKPOINT</span>
+                </button>
+
+                <!-- Node 6 (Locked initially) -->
+                <button id="node-6" onclick="openPanel('standard', 6, 'Practical Application II')" class="node-btn node-locked w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group" disabled>
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-500">6. Practice II</span>
+                </button>
+
+                <!-- Node 7 (Locked) -->
+                <button id="node-7" class="node-btn node-locked w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group" disabled>
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-500">7. Case Study</span>
+                </button>
+
+                <!-- Node 8 (Locked) -->
+                <button id="node-8" class="node-btn node-locked w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group" disabled>
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-500">8. Deep Dive</span>
+                </button>
+
+                <!-- Node 9 (Locked) -->
+                <button id="node-9" class="node-btn node-locked w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group" disabled>
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-500">9. Synthesis</span>
+                </button>
+
+                <!-- Node 10 (Boss Fight) -->
+                <button id="node-10" onclick="openPanel('boss', 10, 'Final Mock Test')" class="node-btn node-locked w-24 h-24 rounded-full border-4 flex items-center justify-center text-4xl outline-none shrink-0 group mx-8" disabled>
+                    <i class="fa-solid fa-crown text-slate-600" id="boss-icon"></i>
+                    <span class="absolute -bottom-10 whitespace-nowrap text-lg font-bold text-slate-600 uppercase tracking-widest" id="boss-text">Final Test</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- CONTENT PANEL (Modal/Sliding Drawer) -->
+    <div id="contentPanelOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 panel-hidden" onclick="closePanel(event)">
+        <div id="contentPanel" class="absolute bottom-0 left-0 w-full h-[85vh] md:h-[90vh] glass rounded-t-3xl border-b-0 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col pt-2" onclick="event.stopPropagation()">
+            
+            <!-- Drag Handle / Header -->
+            <div class="w-full flex justify-between items-center px-8 py-4 border-b border-white/10 shrink-0">
+                <div class="flex items-center gap-4">
+                    <div id="panelNodeBadge" class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-bold">4</div>
+                    <h3 id="panelTitle" class="text-2xl font-semibold text-white">Advanced Theories</h3>
+                </div>
+                <button onclick="closePanel()" class="text-slate-400 hover:text-white p-2 text-2xl outline-none transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="panelBody" class="flex-1 overflow-y-auto w-full p-6 md:p-12 relative">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------
+        // View Transitions & Navigation
+        // ----------------------------------------
+        const viewA = document.getElementById('viewA');
+        const viewB = document.getElementById('viewB');
+        const courseHeaderTitle = document.getElementById('courseHeaderTitle');
+
+        function navigateToViewB(courseName) {
+            courseHeaderTitle.textContent = courseName;
+            
+            // Slide A out, B in
+            viewA.classList.remove('view-a-active');
+            viewA.classList.add('view-a-hidden');
+            
+            viewB.classList.remove('view-b-hidden');
+            viewB.classList.add('view-b-active');
+
+            setTimeout(drawCurvyLine, 100);
+            setTimeout(drawCurvyLine, 300); // multiple checks for transition flow
+        }
+
+        function navigateToViewA() {
+            // Slide B out, A in
+            viewB.classList.remove('view-b-active');
+            viewB.classList.add('view-b-hidden');
+            
+            viewA.classList.remove('view-a-hidden');
+            viewA.classList.add('view-a-active');
+        }
+
+        // ----------------------------------------
+        // Content Panel Logic
+        // ----------------------------------------
+        const panelOverlay = document.getElementById('contentPanelOverlay');
+        const panelTitle = document.getElementById('panelTitle');
+        const panelNodeBadge = document.getElementById('panelNodeBadge');
+        const panelBody = document.getElementById('panelBody');
+        
+        // Track Node 6 lock state natively
+        let isNode6Unlocked = false;
+
+        function openPanel(type, nodeNumber, title) {
+            // Setup header
+            panelNodeBadge.textContent = nodeNumber;
+            panelTitle.textContent = title;
+            
+            // Set badge styling based on type
+            panelNodeBadge.className = 'w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 ' + 
+                (type === 'standard' ? 'bg-slate-800 border-purple-500 text-purple-400' :
+                 type === 'ai' ? 'bg-slate-800 border-amber-500 text-amber-400 rounded-xl rotate-45 [&>span]:-rotate-45' : 
+                 'bg-slate-800 border-cyan-400 text-cyan-400');
+            
+            if (type === 'ai') {
+                panelNodeBadge.innerHTML = '<span>' + nodeNumber + '</span>';
+            }
+
+            // Clear previous body
+            panelBody.innerHTML = '';
+            
+            // Render specific content
+            if (type === 'standard') {
+                renderStandardContent();
+            } else if (type === 'ai') {
+                renderAIContent();
+            } else if (type === 'boss') {
+                renderBossContent();
+            }
+
+            // Show Panel
+            panelOverlay.classList.remove('panel-hidden');
+            panelOverlay.classList.add('panel-visible');
+        }
+
+        function closePanel(e) {
+            // If e is passed, ensure clicking overlay background closes it (onClick on overlay div handles this)
+            panelOverlay.classList.remove('panel-visible');
+            panelOverlay.classList.add('panel-hidden');
+        }
+
+        // ----------------------------------------
+        // Render Functions for Panel Content
+        // ----------------------------------------
+
+        function renderStandardContent() {
+            panelBody.innerHTML = `
+                <div class="max-w-4xl mx-auto flex flex-col gap-8">
+                    <!-- Video Player Placeholder -->
+                    <div class="w-full aspect-video bg-black/60 rounded-2xl border border-white/10 flex flex-col items-center justify-center group relative overflow-hidden cursor-pointer">
+                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1600" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity blur-[2px]" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="w-20 h-20 rounded-full bg-purple-600/80 backdrop-blur border border-white/20 flex items-center justify-center text-3xl text-white group-hover:scale-110 group-hover:bg-purple-500 transition-all z-10 shadow-[0_0_30px_rgba(147,51,234,0.5)]">
+                            <i class="fa-solid fa-play ml-2"></i>
+                        </div>
+                        <div class="absolute bottom-6 left-8 z-10">
+                            <h4 class="text-xl font-semibold mb-1">Module Overview</h4>
+                            <p class="text-slate-300 text-sm">12:45 • High Quality</p>
+                        </div>
+                    </div>
+
+                    <!-- Reading Material -->
+                    <article class="prose prose-invert max-w-none text-slate-300">
+                        <h2 class="text-2xl font-semibold text-white mb-4 border-b border-white/10 pb-2">Understanding the Core Concepts</h2>
+                        <p class="mb-4 text-lg leading-relaxed">
+                            In this module, we dive deep into the fundamental building blocks of the subject. 
+                            Understanding these principles is crucial for mastering upcoming advanced patterns.
+                        </p>
+                        <h3 class="text-xl font-medium text-white mt-8 mb-3">Key Takeaways:</h3>
+                        <ul class="space-y-3 mb-8 bg-slate-900/50 p-6 rounded-xl border border-white/5">
+                            <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i> <span>Identifying architectural bottlenecks early.</span></li>
+                            <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i> <span>Leveraging asynchronous paradigms for performance.</span></li>
+                            <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i> <span>Implementing robust error handling logic.</span></li>
+                        </ul>
+                        <p class="leading-relaxed">
+                            Ensure you practice these methodologies in a safe sandbox environment before deploying them to production. 
+                            The next section will test your understanding of these principles.
+                        </p>
+                        
+                        <div class="mt-12 flex justify-end">
+                            <button onclick="closePanel()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-8 rounded-full shadow-[0_0_15px_rgba(147,51,234,0.4)] transition-all hover:scale-105">
+                                Mark as Complete <i class="fa-solid fa-check ml-2"></i>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+            `;
+        }
+
+        function renderAIContent() {
+            panelBody.innerHTML = `
+                <div class="max-w-3xl mx-auto h-full flex flex-col">
+                    <div class="flex-1 bg-slate-900/40 rounded-2xl border border-white/5 p-6 mb-6 overflow-y-auto" id="chatWindow">
+                        <!-- Bot Message -->
+                        <div class="flex gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 mt-1 border border-amber-500/30">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-slate-200 border border-white/5 shadow-sm">
+                                <p class="mb-2">Hello! Artificial Intelligence Assistant here.</p>
+                                <p>Let's review the first 4 modules. <strong class="text-amber-400">What is the primary function of a reverse proxy in modern architecture?</strong></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Success Message Container (Hidden initially) -->
+                        <div id="aiSuccess" class="hidden flex gap-4 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0 mt-1 border border-cyan-500/30">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <div class="bg-slate-800/80 rounded-2xl rounded-tl-sm p-4 text-slate-200 border border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+                                <p class="text-cyan-400 font-semibold mb-1">Correct! Brilliant answer.</p>
+                                <p>You have unlocked Node 6. You can now proceed to Practical Application II.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="relative shrink-0">
+                        <textarea id="aiInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 pl-4 pr-32 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 resize-none" rows="2" placeholder="Type your answer here..."></textarea>
+                        <button onclick="submitAIAnswer()" class="absolute right-3 bottom-3 bg-amber-600 hover:bg-amber-500 text-black font-semibold py-2 px-6 rounded-lg transition-colors">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function submitAIAnswer() {
+            const input = document.getElementById('aiInput');
+            if (input.value.trim().length === 0) return;
+            
+            // Append User Message visually
+            const chatWindow = document.getElementById('chatWindow');
+            const userHtml = `
+                <div class="flex gap-4 mb-6 flex-row-reverse">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 mt-1 border border-purple-500/30">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="bg-purple-900/40 rounded-2xl rounded-tr-sm p-4 text-slate-200 border border-purple-500/20">
+                        <p>${input.value.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                    </div>
+                </div>
+            `;
+            
+            const aiSuccessId = document.getElementById('aiSuccess'); // find it to insert before it
+            aiSuccessId.insertAdjacentHTML('beforebegin', userHtml);
+            
+            input.value = '';
+            input.disabled = true;
+
+            // Simulate slight delay then unlock
+            setTimeout(() => {
+                const aiSuccess = document.getElementById('aiSuccess');
+                aiSuccess.classList.remove('hidden');
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                
+                unlockNode6();
+            }, 800);
+        }
+
+        function unlockNode6() {
+            if (isNode6Unlocked) return;
+            isNode6Unlocked = true;
+            
+            // Update UI for Path
+            const node6 = document.getElementById('node-6');
+            node6.disabled = false;
+            node6.className = "node-btn node-active w-20 h-20 rounded-full border-2 flex items-center justify-center text-2xl outline-none shrink-0 group";
+            node6.innerHTML = `
+                <i class="fa-solid fa-play ml-1"></i>
+                <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-200">6. Practice II</span>
+            `;
+            
+            // Revert Node 4 to completed
+            const node4 = document.querySelector('.node-active.node-btn:not(#node-6)');
+            if(node4) {
+                node4.className = "node-btn node-completed w-16 h-16 rounded-full border-2 flex items-center justify-center text-xl outline-none shrink-0 group";
+                node4.innerHTML = `
+                    <i class="fa-solid fa-check"></i>
+                    <span class="absolute -bottom-8 whitespace-nowrap text-sm font-medium text-slate-300 group-hover:text-white">4. Theories</span>
+                `;
+            }
+
+            // Expand gradient line to connect Node 6
+            document.getElementById('gradStop1').setAttribute('offset', '55%');
+            document.getElementById('gradStop2').setAttribute('offset', '55%');
+            
+            // For demo purposes, automatically unlock Boss Mock Test as well to show its UI
+            const node10 = document.getElementById('node-10');
+            node10.disabled = false;
+            node10.className = "node-btn node-boss w-24 h-24 rounded-full border-4 flex items-center justify-center text-4xl outline-none shrink-0 group mx-8";
+            document.getElementById('boss-icon').className = "fa-solid fa-crown text-cyan-400";
+            document.getElementById('boss-text').className = "absolute -bottom-10 whitespace-nowrap text-lg font-bold text-cyan-400 uppercase tracking-widest";
+            document.getElementById('boss-text').style.textShadow = "0 0 10px rgba(34,211,238,0.8)";
+        }
+
+        // ----------------------------------------
+        // Quiz (Node 10) Logic
+        // ----------------------------------------
+        let selectedQuizOption = null;
+
+        function renderBossContent() {
+            selectedQuizOption = null; // reset
+            panelBody.innerHTML = `
+                <div class="max-w-2xl mx-auto flex flex-col items-center pt-8">
+                    <div class="w-20 h-20 bg-cyan-900/50 border border-cyan-400 rounded-2xl flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(34,211,238,0.4)]">
+                        <i class="fa-solid fa-crown text-4xl text-cyan-400"></i>
+                    </div>
+                    
+                    <h2 class="text-3xl font-bold text-center text-white mb-2">Final Evaluation</h2>
+                    <p class="text-slate-400 mb-10 text-center">Question 1 of 1</p>
+
+                    <div class="w-full bg-slate-900/60 p-8 rounded-2xl border border-white/10 mb-8 rounded-tl-sm relative">
+                        <div class="absolute -top-3 -left-3 w-8 h-8 bg-purple-600 rounded flex items-center justify-center text-white font-bold shadow-lg">Q</div>
+                        <p class="text-xl leading-relaxed text-slate-200">
+                            In a highly distributed, real-time application experiencing rapid traffic spikes, which specific architectural pattern ensures sustained reliability without data loss, assuming eventual consistency is acceptable?
+                        </p>
+                    </div>
+                    
+                    <div class="w-full flex justify-end mb-4">
+                        <button class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"><i class="fa-solid fa-lightbulb mr-1"></i> Hint</button>
+                    </div>
+
+                    <!-- Quiz Options -->
+                    <div class="w-full space-y-4" id="quizOptionsContainer">
+                        <button onclick="selectQuizOption('A')" id="optA" class="quiz-opt w-full text-left p-6 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-4 group">
+                            <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 opt-badge transition-colors">A</span>
+                            <span class="text-lg">Synchronous Microservices with Two-Phase Commit</span>
+                        </button>
+                        
+                        <button onclick="selectQuizOption('B')" id="optB" class="quiz-opt w-full text-left p-6 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-4 group">
+                            <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 opt-badge transition-colors">B</span>
+                            <span class="text-lg">Event-Driven Architecture with Message Queues (Kafka/RabbitMQ)</span>
+                        </button>
+                        
+                        <button onclick="selectQuizOption('C')" id="optC" class="quiz-opt w-full text-left p-6 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-4 group">
+                            <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 opt-badge transition-colors">C</span>
+                            <span class="text-lg">Monolithic Architecture with vertically scaled hardware</span>
+                        </button>
+
+                        <button onclick="selectQuizOption('D')" id="optD" class="quiz-opt w-full text-left p-6 rounded-xl border border-slate-700 bg-slate-800/40 flex items-center gap-4 group">
+                            <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 opt-badge transition-colors">D</span>
+                            <span class="text-lg">Direct Database connections built into the client app</span>
+                        </button>
+                    </div>
+
+                    <button id="submitTestBtn" disabled class="mt-12 w-full py-5 rounded-xl font-bold text-lg transition-all duration-300 bg-slate-800 text-slate-500 cursor-not-allowed">
+                        SUBMIT TEST
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectQuizOption(choice) {
+            selectedQuizOption = choice;
+            const options = ['A', 'B', 'C', 'D'];
+            
+            options.forEach(opt => {
+                const el = document.getElementById('opt' + opt);
+                const badge = el.querySelector('.opt-badge');
+                if (opt === choice) {
+                    el.classList.add('selected');
+                    badge.classList.replace('bg-slate-700', 'bg-white');
+                    badge.classList.replace('text-slate-300', 'text-purple-600');
+                } else {
+                    el.classList.remove('selected');
+                    if (badge.classList.contains('bg-white')) {
+                        badge.classList.replace('bg-white', 'bg-slate-700');
+                        badge.classList.replace('text-purple-600', 'text-slate-300');
+                    }
+                }
+            });
+
+            // Enable submit button
+            const submitBtn = document.getElementById('submitTestBtn');
+            submitBtn.disabled = false;
+            submitBtn.className = "mt-12 w-full py-5 rounded-xl font-bold text-lg transition-all duration-300 bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_20px_rgba(34,211,238,0.5)] transform hover:-translate-y-1";
+            submitBtn.onclick = finishTest;
+        }
+        
+        function finishTest() {
+            panelBody.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center pb-20 fade-in">
+                    <div class="w-32 h-32 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-6xl mb-8 border-4 border-cyan-400 shadow-[0_0_50px_rgba(34,211,238,0.6)] animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold text-white mb-4">Course Completed!</h2>
+                    <p class="text-xl text-slate-400 mb-8">You've successfully mastered the curriculum.</p>
+                    <button onclick="closePanel(); navigateToViewA()" class="bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-slate-200 transition-colors">
+                        Return to Modules
+                    </button>
+                </div>
+            `;
+        }
+
+        // ----------------------------------------
+        // Theme & Wavy SVG Logic
+        // ----------------------------------------
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-theme');
+            const isLight = body.classList.contains('light-theme');
+            
+            const icons = document.querySelectorAll('.theme-icon');
+            const btns = document.querySelectorAll('.theme-btn');
+            
+            if (isLight) {
+                icons.forEach(icon => icon.className = 'fa-solid fa-moon text-indigo-600 theme-icon');
+                btns.forEach(btn => {
+                    btn.classList.add('shadow-[0_0_15px_rgba(79,70,229,0.2)]');
+                    btn.classList.remove('shadow-[0_0_15px_rgba(250,204,21,0.2)]', 'text-yellow-400');
+                });
+            } else {
+                icons.forEach(icon => icon.className = 'fa-solid fa-sun text-yellow-400 theme-icon');
+                btns.forEach(btn => {
+                    btn.classList.add('shadow-[0_0_15px_rgba(250,204,21,0.2)]');
+                    btn.classList.remove('shadow-[0_0_15px_rgba(79,70,229,0.2)]');
+                });
+            }
+        }
+
+        function drawCurvyLine() {
+            const nodes = document.querySelectorAll('.node-btn');
+            const path = document.getElementById('curvePath');
+            if (nodes.length === 0 || !path) return;
+            
+            // Re-calc curve logic
+            let d = "";
+            nodes.forEach((node, i) => {
+                // Determine exact pixel coords of node center
+                // Notice: offsetTop and offsetLeft are fully relative to .min-w-max which is the identical parent for the SVG
+                const x = node.offsetLeft + node.offsetWidth / 2;
+                const y = node.offsetTop + node.offsetHeight / 2;
+                
+                if (i === 0) {
+                    d += `M ${x} ${y} `;
+                } else {
+                    const prev = nodes[i-1];
+                    const prevX = prev.offsetLeft + prev.offsetWidth / 2;
+                    const prevY = prev.offsetTop + prev.offsetHeight / 2;
+                    
+                    // Smooth curve using cubic bezier control points via midpoints
+                    const midX = (prevX + x) / 2;
+                    d += `C ${midX} ${prevY}, ${midX} ${y}, ${x} ${y} `;
+                }
+            });
+            path.setAttribute('d', d);
+        }
+
+        // Initialize SVG curves
+        window.addEventListener('load', () => { setTimeout(drawCurvyLine, 100); });
+        window.addEventListener('resize', drawCurvyLine);
+        
+        // Redraw on transition end to ensure proper calculations during animation
+        document.getElementById('viewB').addEventListener('transitionend', drawCurvyLine);
+    </script>
+</body>
+</html>
