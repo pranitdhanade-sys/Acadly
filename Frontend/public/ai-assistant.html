@@ -791,17 +791,15 @@
 
         // Socratic Tutor (default)
         return {
-          heading: "A Socratic walkthrough",
+          heading: "System Design Overview",
           paragraph:
-            "Let’s reason it out step-by-step. If you had to explain this concept in one sentence, what would you say? " +
-            "After that, try mapping it to a small example and compare outcomes.",
-          codeTitle: "example.js",
-          codeRaw: `const idea = "Make your transformations explicit";
+            "System design is the process of defining the architecture, components, modules, interfaces, and data for a system to satisfy specified requirements. It involves abstracting complexities, choosing the right technologies, and ensuring scalability and reliability.",
+          codeTitle: "system-design-basics.md",
+          codeRaw: `# Core Principles
 
-function nextStep(value) {
-  if (!value) return "start";
-  return "continue";
-}
+- Scalability: Handling growth
+- Reliability: Resisting failure
+- Maintainability: Easy to update
 `,
         };
       }
