@@ -1,20 +1,26 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Acadly Backend Server - Academic Management Platform",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["acadly", "education", "academic-management"],
+  "author": "Acadly Team",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.1.2",
     "mysql2": "^3.20.0",
     "nodemon": "^3.1.14",
     "path": "^0.12.7"

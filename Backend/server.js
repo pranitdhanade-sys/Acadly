@@ -21,21 +21,37 @@ app.use(express.static(FRONTEND_PATH));
 
 // -------------------- ROUTES -------------------- //
 
-// Auth routes (may not exist yet in this hackathon fork)
+// Auth routes (registration, login, token management)
 try {
   const authRoutes = require("./routes/auth");
   app.use("/api/auth", authRoutes);
+  console.log("✅ Auth routes mounted at /api/auth");
 } catch (err) {
-  console.warn("Auth routes not found yet, skipping /api/auth wiring");
+  console.warn("⚠️  Auth routes not found:", err.message);
 }
 
-// Video playlist routes for the AI video player
+// User management routes (dashboard, attendance, progress)
+try {
+  const userManagementRoutes = require("./routes/user-management");
+  app.use("/api/users", userManagementRoutes);
+  console.log("✅ User management routes mounted at /api/users");
+} catch (err) {
+  console.warn("⚠️  User management routes not found:", err.message);
+}
+
+// Video playlist routes (with hierarchical categories and upload)
 const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
+console.log("✅ Video routes mounted at /api/videos");
 
-// Basic progress routes (XP / video completion demo)
-const progressRoutes = require("./routes/progress");
-app.use("/api/progress", progressRoutes);
+// Basic progress routes (XP / video completion)
+try {
+  const progressRoutes = require("./routes/progress");
+  app.use("/api/progress", progressRoutes);
+  console.log("✅ Progress routes mounted at /api/progress");
+} catch (err) {
+  console.warn("⚠️  Progress routes not found:", err.message);
+}
 
 // Home route
 app.get("/", (req, res) => {
