@@ -5,7 +5,32 @@
 const express = require("express");
 const path = require("path");
 const multer = require("multer");
+const mongoose = require("mongoose");
 const db = require("../db_config");
+const { getGridFSBucket } = require("../../DataBase/db_config_mongo");
+
+// Import VideoMetadata schema
+const VideoMetadataSchema = new mongoose.Schema({
+  file_id: mongoose.Schema.Types.ObjectId,
+  title: String,
+  description: String,
+  category: String,
+  subcategory: String,
+  duration: Number,
+  format: String,
+  mimeType: String,
+  fileSize: Number,
+  uploadedBy: mongoose.Schema.Types.ObjectId,
+  isPublished: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
+  xpReward: { type: Number, default: 25 },
+  tags: [String],
+  views: { type: Number, default: 0 },
+  rating: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const VideoMetadata = mongoose.model("VideoMetadata", VideoMetadataSchema);
 
 const router = express.Router();
 
