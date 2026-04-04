@@ -2,7 +2,7 @@
 // Video management with hierarchical categories, upload, and deletion
 
 const express = require('express');
-const db = require('../DataBase/db_config');
+const db = require('../db_config');
 
 const router = express.Router();
 

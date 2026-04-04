@@ -2,7 +2,7 @@
 // User dashboard, attendance, and progress tracking
 
 const express = require('express');
-const db = require('../DataBase/db_config');
+const db = require('../db_config');
 
 const router = express.Router();
 
