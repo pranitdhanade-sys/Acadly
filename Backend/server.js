@@ -86,6 +86,15 @@ try {
   console.warn("⚠️  Dashboard routes not found:", err.message);
 }
 
+// Practice lab routes (quiz configuration + test generation)
+try {
+  const practiceLabRoutes = require("./routes/practicelab");
+  app.use("/", practiceLabRoutes);
+  console.log("✅ Practice lab routes mounted");
+} catch (err) {
+  console.warn("⚠️  Practice lab routes not found:", err.message);
+}
+
 // Home route
 app.get("/", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "Homepage.html"));

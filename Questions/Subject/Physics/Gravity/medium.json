@@ -1,0 +1,19 @@
+{
+  "questions": [
+    {
+      "question": "What is the speed of light in vacuum?",
+      "options": ["3 x 10^8 m/s", "1.5 x 10^8 m/s", "2.5 x 10^8 m/s", "3.5 x 10^8 m/s"],
+      "answer": "3 x 10^8 m/s"
+    },
+    {
+      "question": "What is the formula for kinetic energy?",
+      "options": ["KE = 1/2 mv^2", "KE = mv", "KE = mgh", "KE = Fd"],
+      "answer": "KE = 1/2 mv^2"
+    },
+    {
+      "question": "What is the formula for work done?",
+      "options": ["W = Fd", "W = 1/2 mv^2", "W = mgh", "W = E = mc^2"],
+      "answer": "W = Fd"
+    }
+  ]
+}

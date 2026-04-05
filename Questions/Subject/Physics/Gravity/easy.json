@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "question": "What is the unit of force?",
+      "options": ["Newton", "Joule", "Watt", "Pascal"],
+      "answer": "Newton"
+    },
+    {
+      "question": "What is the acceleration due to gravity on Earth?",
+      "options": ["9.8 m/s^2", "9.6 m/s^2", "10.0 m/s^2", "8.9 m/s^2"],
+      "answer": "9.8 m/s^2"
+    }
+  ]
+}

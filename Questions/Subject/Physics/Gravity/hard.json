@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "question": "If a body is projected with velocity u at angle θ, what is its time of flight?",
+      "options": ["2u sinθ / g", "u cosθ / g", "u sinθ / 2g", "u² sinθ / g"],
+      "answer": "2u sinθ / g"
+    },
+    {
+      "question": "What is the escape velocity from Earth (approx.)?",
+      "options": ["11.2 km/s", "7.9 km/s", "3.0 km/s", "15.0 km/s"],
+      "answer": "11.2 km/s"
+    }
+  ]
+}
