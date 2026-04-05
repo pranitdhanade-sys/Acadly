@@ -173,54 +173,81 @@
                 </h1>
                 <p class="text-slate-400 text-lg">Select a discipline to begin your journey.</p>
             </div>
-            <!-- Theme Toggle for View A -->
-            <button onclick="toggleTheme()" class="theme-btn w-12 h-12 shrink-0 rounded-full glass flex items-center justify-center text-xl text-yellow-400 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,204,21,0.2)]">
-                <i class="fa-solid fa-sun theme-icon"></i>
-            </button>
+            <div class="flex items-center gap-4">
+                <a href="dashboard_v2.html" class="flex items-center gap-2 px-4 py-2 rounded-full glass text-slate-300 hover:text-white hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all font-medium text-sm">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                <!-- Theme Toggle for View A -->
+                <button onclick="toggleTheme()" class="theme-btn w-12 h-12 shrink-0 rounded-full glass flex items-center justify-center text-xl text-yellow-400 hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,204,21,0.2)]">
+                    <i class="fa-solid fa-sun theme-icon"></i>
+                </button>
+            </div>
         </header>
 
         <section class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
             <!-- Module Card 1 -->
-            <button onclick="navigateToViewB('Advanced Algorithms')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-purple-500">
-                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 text-2xl group-hover:bg-purple-500/40 transition-colors">
-                    <i class="fa-solid fa-code"></i>
+            <button onclick="navigateToViewB('System Design')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-emerald-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/SysyemD.png" alt="System Design" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-white mb-2">Advanced Algorithms</h3>
-                    <p class="text-sm text-slate-400">Master dynamic programming and graph structures.</p>
+                    <h3 class="text-xl font-semibold text-white mb-2">System Design</h3>
+                    <p class="text-sm text-slate-400">Scalable architectures, distributed systems, and microservices patterns.</p>
                 </div>
             </button>
             
             <!-- Module Card 2 -->
-            <button onclick="navigateToViewB('UI/UX Fundamentals')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
-                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-2xl group-hover:bg-cyan-500/40 transition-colors">
-                    <i class="fa-solid fa-pen-nib"></i>
+            <button onclick="navigateToViewB('Data Structures & Algorithms')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/DSA.png" alt="DSA" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-white mb-2">UI/UX Fundamentals</h3>
-                    <p class="text-sm text-slate-400">Design systems, psychological principles, and modern tools.</p>
+                    <h3 class="text-xl font-semibold text-white mb-2">DSA</h3>
+                    <p class="text-sm text-slate-400">Master data structures, algorithms, graph theory, and dynamic programming.</p>
                 </div>
             </button>
             
             <!-- Module Card 3 -->
-            <button onclick="navigateToViewB('Machine Learning')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-2xl group-hover:bg-amber-500/40 transition-colors">
-                    <i class="fa-solid fa-brain"></i>
+            <button onclick="navigateToViewB('Python Programming')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-amber-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/python.png" alt="Python Programming" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-white mb-2">Machine Learning</h3>
-                    <p class="text-sm text-slate-400">Neural networks, deep learning logic, and AI models.</p>
+                    <h3 class="text-xl font-semibold text-white mb-2">Python Programming</h3>
+                    <p class="text-sm text-slate-400">From basic syntax to advanced decorators and standard libraries.</p>
                 </div>
             </button>
             
             <!-- Module Card 4 -->
-            <button onclick="navigateToViewB('System Design')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl group-hover:bg-emerald-500/40 transition-colors">
-                    <i class="fa-solid fa-network-wired"></i>
+            <button onclick="navigateToViewB('University Physics')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-cyan-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/physics.png" alt="University Physics" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h3 class="text-xl font-semibold text-white mb-2">System Design</h3>
-                    <p class="text-sm text-slate-400">Scalable architectures and microservice patterns.</p>
+                    <h3 class="text-xl font-semibold text-white mb-2">University Physics</h3>
+                    <p class="text-sm text-slate-400">Classical mechanics, electromagnetism, and modern physics principles.</p>
+                </div>
+            </button>
+
+            <!-- Module Card 5 -->
+            <button onclick="navigateToViewB('Maths 1 (Calculus)')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-rose-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/maths1.png" alt="Maths 1" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Maths 1 (Calculus)</h3>
+                    <p class="text-sm text-slate-400">Limits, derivatives, integrals, and their applications in engineering.</p>
+                </div>
+            </button>
+
+            <!-- Module Card 6 -->
+            <button onclick="navigateToViewB('Maths 2 (Linear Algebra)')" class="text-left w-full h-48 glass rounded-2xl p-6 card-hover flex flex-col justify-between group outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                    <img src="modules images/maths2.png" alt="Maths 2" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Maths 2 (Linear Algebra)</h3>
+                    <p class="text-sm text-slate-400">Matrices, vector spaces, eigenvalues, and multi-variable calculus.</p>
                 </div>
             </button>
         </section>

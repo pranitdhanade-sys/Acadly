@@ -22,9 +22,9 @@
           !!localStorage.getItem("acadly-user");
 
         if (!authed) {
-          const next = "ai-assistant.html"; // Correct path
+          const next = "ai-assistant.html"; // resolved from Login.html
           window.location.replace(
-            "Frontend/Login.html?next=" + encodeURIComponent(next)
+            "Login.html?next=" + encodeURIComponent(next)
           );
         }
       } catch {}

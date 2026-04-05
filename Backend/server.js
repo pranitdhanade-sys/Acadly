@@ -13,8 +13,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Absolute path to new Frontend 2.0 folder
-const FRONTEND_PATH = path.join(__dirname, "../../Frontend 2.0");
+// Absolute path to Frontend folder (moved from Frontend 2.0)
+const FRONTEND_PATH = path.join(__dirname, "../Frontend");
 
 // Serve static files
 app.use(express.static(FRONTEND_PATH));
