@@ -77,6 +77,15 @@ try {
   console.warn("⚠️  Progress routes not found:", err.message);
 }
 
+// Dashboard v2 (MySQL-backed UI data)
+try {
+  const dashboardRoutes = require("./routes/dashboard");
+  app.use("/api/dashboard", dashboardRoutes);
+  console.log("✅ Dashboard routes mounted at /api/dashboard");
+} catch (err) {
+  console.warn("⚠️  Dashboard routes not found:", err.message);
+}
+
 // Home route
 app.get("/", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "Homepage.html"));

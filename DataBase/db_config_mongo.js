@@ -19,13 +19,12 @@ async function connectMongoDB() {
 
   try {
     await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 10000,
     });
 
-    console.log("✅ MongoDB connected successfully at:", MONGO_URI);
+    const dbName = mongoose.connection?.db?.databaseName || "(database)";
+    console.log("✅ MongoDB connected successfully →", dbName);
     return mongoose.connection;
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);

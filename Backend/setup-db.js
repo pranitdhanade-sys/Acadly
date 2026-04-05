@@ -5,7 +5,7 @@
  *   node Backend/setup-db.js
  *
  * Executes:  DataBase/schema.sql  (users, profiles, video progress, attendance)
- * Video catalog lives in MongoDB — see Backend/upload-videos.js
+ * Video catalog: MongoDB. Demo dashboard student: dashboard_demo_seed.sql
  */
 
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
@@ -33,7 +33,10 @@ connection.connect((err) => {
   }
   console.log("\u2705  Connected to MySQL server");
 
-  const files = [path.join(DB_ROOT, "schema.sql")];
+  const files = [
+    path.join(DB_ROOT, "schema.sql"),
+    path.join(DB_ROOT, "dashboard_demo_seed.sql"),
+  ];
 
   let completed = 0;
 

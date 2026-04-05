@@ -16,15 +16,17 @@ USE acadly_db;
 -- USERS
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
-  id           INT          AUTO_INCREMENT PRIMARY KEY,
-  email        VARCHAR(255) UNIQUE NOT NULL,
-  password     VARCHAR(255) NOT NULL,
-  name         VARCHAR(100),
-  role         ENUM('student','teacher','admin') NOT NULL DEFAULT 'student',
-  avatar_url   VARCHAR(500),
-  is_active    TINYINT(1)   NOT NULL DEFAULT 1,
-  created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  last_login   TIMESTAMP    NULL
+  id               INT          AUTO_INCREMENT PRIMARY KEY,
+  email            VARCHAR(255) UNIQUE NOT NULL,
+  password         VARCHAR(255) NOT NULL,
+  name             VARCHAR(100),
+  role             ENUM('student','teacher','admin') NOT NULL DEFAULT 'student',
+  avatar_url       VARCHAR(500),
+  is_active        TINYINT(1)   NOT NULL DEFAULT 1,
+  date_of_birth    DATE         NULL,
+  education_level  VARCHAR(80)  NULL,
+  created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login       TIMESTAMP    NULL
 );
 
 -- ------------------------------------------------------------
@@ -125,6 +127,99 @@ CREATE TABLE IF NOT EXISTS assignment_submissions (
   FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (graded_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- ------------------------------------------------------------
+-- DASHBOARD v2 (MySQL-driven UI — one row per user in kpi)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_dashboard_kpi (
+  user_id                 INT NOT NULL PRIMARY KEY,
+  active_courses          INT NOT NULL DEFAULT 0,
+  courses_delta_note      VARCHAR(120) NOT NULL DEFAULT '',
+  course_coverage_pct     TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  certificates_count      INT NOT NULL DEFAULT 0,
+  cert_subnote            VARCHAR(200) NOT NULL DEFAULT '',
+  latest_cert_name        VARCHAR(255) NOT NULL DEFAULT '',
+  learning_hours          DECIMAL(6,1) NOT NULL DEFAULT 0,
+  hours_week_note         VARCHAR(120) NOT NULL DEFAULT '',
+  peak_study_day          VARCHAR(40) NOT NULL DEFAULT '',
+  peer_connections        INT NOT NULL DEFAULT 0,
+  peer_delta_note         VARCHAR(120) NOT NULL DEFAULT '',
+  peer_footer_note        VARCHAR(200) NOT NULL DEFAULT '',
+  modules_header_count    INT NOT NULL DEFAULT 0,
+  streak_days             INT NOT NULL DEFAULT 0,
+  updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_study_modules (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,
+  title        VARCHAR(255) NOT NULL,
+  subtitle     VARCHAR(255) NOT NULL DEFAULT '',
+  progress_pct TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  sort_order   INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_sort (user_id, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS user_certificate_rows (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  user_id        INT NOT NULL,
+  kind           ENUM('hero','secondary') NOT NULL DEFAULT 'hero',
+  title          VARCHAR(255) NOT NULL,
+  subtitle_line  VARCHAR(255) NOT NULL DEFAULT '',
+  verifiable_id  VARCHAR(120) NOT NULL DEFAULT '',
+  issued_date    DATE NULL,
+  sort_order     INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_cert (user_id, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS user_badge_gallery (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,
+  name         VARCHAR(255) NOT NULL,
+  subtitle     VARCHAR(255) NOT NULL DEFAULT '',
+  status       ENUM('earned','in_progress','locked') NOT NULL DEFAULT 'locked',
+  icon_hint    VARCHAR(40) NOT NULL DEFAULT 'moon',
+  sort_order   INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_badge (user_id, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS user_badge_quest (
+  user_id           INT NOT NULL PRIMARY KEY,
+  title             VARCHAR(255) NOT NULL,
+  description       VARCHAR(500) NOT NULL DEFAULT '',
+  progress_current  INT NOT NULL DEFAULT 0,
+  progress_total    INT NOT NULL DEFAULT 1,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_gamification_tags (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  user_id    INT NOT NULL,
+  label      VARCHAR(80) NOT NULL,
+  variant    ENUM('brand','cyan','muted') NOT NULL DEFAULT 'brand',
+  sort_order INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_tag (user_id, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS dashboard_chart_hours (
+  user_id  INT NOT NULL,
+  weekday  TINYINT UNSIGNED NOT NULL COMMENT '0=Mon .. 6=Sun',
+  hours    DECIMAL(4,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, weekday),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS dashboard_chart_completion (
+  user_id           INT NOT NULL PRIMARY KEY,
+  completed_pct     TINYINT UNSIGNED NOT NULL,
+  in_progress_pct   TINYINT UNSIGNED NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- ------------------------------------------------------------
