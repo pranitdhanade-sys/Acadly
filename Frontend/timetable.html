@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Timetable Builder</title>
+  <style>
+    :root {
+      --bg: #f4f7ff;
+      --card: #ffffff;
+      --primary: #3056d3;
+      --primary-soft: #e9eeff;
+      --text: #1f2a44;
+      --muted: #5f6b87;
+      --border: #d9e0f2;
+      --success: #1f8f55;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef2ff, #f8fbff);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(24, 39, 75, 0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 24px;
+      background: var(--primary-soft);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.7rem;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 20px 24px 0;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s ease, box-shadow .2s ease;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(48, 86, 211, 0.25);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: #fff;
+      border: 1px solid #f0c7c7;
+      color: var(--danger);
+    }
+
+    .status {
+      margin-left: auto;
+      font-size: .95rem;
+      color: var(--muted);
+      min-height: 1.2rem;
+    }
+
+    .status.success { color: var(--success); }
+
+    .table-wrap {
+      overflow-x: auto;
+      padding: 16px 24px 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9fbff;
+      font-size: .95rem;
+    }
+
+    th.time-col, td.time-col {
+      position: sticky;
+      left: 0;
+      background: #fdfdff;
+      z-index: 2;
+      min-width: 140px;
+      font-weight: 700;
+    }
+
+    td input {
+      width: 100%;
+      border: 1px solid #dbe2f5;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: .92rem;
+      outline: none;
+      transition: border-color .2s ease;
+    }
+
+    td input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+    }
+
+    .footer-note {
+      padding: 0 24px 24px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .header h1 { font-size: 1.35rem; }
+      .controls { padding: 16px 16px 0; }
+      .table-wrap { padding: 12px 16px 16px; }
+      .footer-note { padding: 0 16px 16px; }
+      .status {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="header">
+      <h1>Weekly Timetable Builder</h1>
+      <p>Fill each slot with subject, class name, room, or activity. Your timetable is saved in your browser.</p>
+    </section>
+
+    <section class="controls">
+      <button id="saveBtn" class="btn btn-primary">Save Timetable</button>
+      <button id="downloadBtn" class="btn btn-secondary">Download as JSON</button>
+      <button id="resetBtn" class="btn btn-danger">Reset Timetable</button>
+      <span id="status" class="status" aria-live="polite"></span>
+    </section>
+
+    <section class="table-wrap">
+      <table id="timetable" aria-label="Student weekly timetable"></table>
+    </section>
+
+    <p class="footer-note">Tip: Press <strong>Tab</strong> to move quickly between cells while entering your schedule.</p>
+  </main>
+
+  <script>
+    const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const SLOTS = [
+      "08:00 - 09:00",
+      "09:00 - 10:00",
+      "10:00 - 11:00",
+      "11:00 - 12:00",
+      "12:00 - 01:00",
+      "01:00 - 02:00",
+      "02:00 - 03:00",
+      "03:00 - 04:00"
+    ];
+
+    const STORAGE_KEY = "acadly_student_timetable";
+    const table = document.getElementById("timetable");
+    const statusEl = document.getElementById("status");
+
+    function getDefaultData() {
+      return SLOTS.map(() => Object.fromEntries(DAYS.map(day => [day, ""])));
+    }
+
+    function showStatus(message, success = false) {
+      statusEl.textContent = message;
+      statusEl.className = success ? "status success" : "status";
+      if (message) {
+        setTimeout(() => {
+          statusEl.textContent = "";
+          statusEl.className = "status";
+        }, 2500);
+      }
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultData();
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length !== SLOTS.length) return getDefaultData();
+        return parsed;
+      } catch {
+        return getDefaultData();
+      }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function readTableData() {
+      return SLOTS.map((_, slotIndex) => {
+        const rowData = {};
+        DAYS.forEach((day, dayIndex) => {
+          const input = table.querySelector(`input[data-slot="${slotIndex}"][data-day="${dayIndex}"]`);
+          rowData[day] = input ? input.value.trim() : "";
+        });
+        return rowData;
+      });
+    }
+
+    function renderTable(data) {
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      const timeHeader = document.createElement("th");
+      timeHeader.textContent = "Time";
+      timeHeader.className = "time-col";
+      headerRow.appendChild(timeHeader);
+
+      DAYS.forEach(day => {
+        const th = document.createElement("th");
+        th.textContent = day;
+        headerRow.appendChild(th);
+      });
+
+      thead.appendChild(headerRow);
+
+      const tbody = document.createElement("tbody");
+      SLOTS.forEach((slot, slotIndex) => {
+        const row = document.createElement("tr");
+
+        const timeCell = document.createElement("td");
+        timeCell.textContent = slot;
+        timeCell.className = "time-col";
+        row.appendChild(timeCell);
+
+        DAYS.forEach((day, dayIndex) => {
+          const cell = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          input.placeholder = "Subject / Activity";
+          input.setAttribute("data-slot", slotIndex);
+          input.setAttribute("data-day", dayIndex);
+          input.value = data?.[slotIndex]?.[day] || "";
+          cell.appendChild(input);
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+
+      table.innerHTML = "";
+      table.appendChild(thead);
+      table.appendChild(tbody);
+    }
+
+    function downloadAsJson(data) {
+      const blob = new Blob([JSON.stringify({ days: DAYS, slots: SLOTS, timetable: data }, null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "student-timetable.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const data = readTableData();
+      saveData(data);
+      showStatus("Timetable saved successfully.", true);
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const data = readTableData();
+      downloadAsJson(data);
+      showStatus("Download started.", true);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      const confirmed = window.confirm("Reset all timetable entries?");
+      if (!confirmed) return;
+      const empty = getDefaultData();
+      saveData(empty);
+      renderTable(empty);
+      showStatus("Timetable reset.", true);
+    });
+
+    renderTable(loadData());
+  </script>
+</body>
+</html>
