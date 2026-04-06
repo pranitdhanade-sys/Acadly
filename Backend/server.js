@@ -68,6 +68,15 @@ const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
 console.log("✅ Video routes mounted at /api/videos");
 
+// PDF library routes (MongoDB metadata + /Frontend/pdfs files)
+try {
+  const pdfLibraryRoutes = require("./routes/pdf-library");
+  app.use("/api/pdfs", pdfLibraryRoutes);
+  console.log("✅ PDF library routes mounted at /api/pdfs");
+} catch (err) {
+  console.warn("⚠️  PDF library routes not found:", err.message);
+}
+
 // Basic progress routes (XP / video completion)
 try {
   const progressRoutes = require("./routes/progress");
@@ -107,6 +116,10 @@ app.get("/home", (req, res) => {
 
 app.get("/chatbot", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "chatbot.html"));
+});
+
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
 });
 
 // Video player page
