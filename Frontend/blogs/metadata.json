@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Welcome to Acadly Blogs",
+    "author": "Acadly Team",
+    "date": "2026-04-06",
+    "slug": "welcome-to-acadly-blogs",
+    "excerpt": "Introducing the new blog system with markdown support and LaTeX rendering.",
+    "tags": ["announcement", "markdown", "latex"],
+    "format": "markdown",
+    "ext": "md"
+  }
+]
