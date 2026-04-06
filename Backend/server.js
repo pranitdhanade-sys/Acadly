@@ -114,6 +114,11 @@ app.get("/videoplayer", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "videoplayer.html"));
 });
 
+// Video upload page
+app.get("/upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "upload.html"));
+});
+
 // -------------------- ADMIN ROUTES (owner-only) -------------------- //
 // Protected by x-admin-key header — see DataBase/admin_middleware.js
 try {

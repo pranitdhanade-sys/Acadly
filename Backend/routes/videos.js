@@ -4,8 +4,8 @@
 "use strict";
 
 const express = require("express");
+const fs = require("fs");
 const path = require("path");
-const { Readable } = require("stream");
 const multer = require("multer");
 const mongoose = require("mongoose");
 
@@ -14,9 +14,23 @@ const { VideoMetadata } = require("../../DataBase/schema-mongo");
 
 const router = express.Router();
 const GRIDFS_BUCKET = "videos";
+const LOCAL_VIDEOS_DIR = path.join(__dirname, "../../Videos");
 
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      fs.mkdirSync(LOCAL_VIDEOS_DIR, { recursive: true });
+      cb(null, LOCAL_VIDEOS_DIR);
+    },
+    filename: (req, file, cb) => {
+      const safeBase = path
+        .basename(file.originalname, path.extname(file.originalname))
+        .replace(/[^a-zA-Z0-9-_]/g, "_")
+        .slice(0, 80);
+      const ext = path.extname(file.originalname) || ".mp4";
+      cb(null, `${Date.now()}-${safeBase || "video"}${ext}`);
+    },
+  }),
   limits: { fileSize: 1024 * 1024 * 1024 }, // 1 GB
 });
 
@@ -100,7 +114,7 @@ router.post("/upload", upload.single("video"), async (req, res) => {
     });
 
     await new Promise((resolve, reject) => {
-      Readable.from(req.file.buffer)
+      fs.createReadStream(req.file.path)
         .pipe(uploadStream)
         .on("error", reject);
       uploadStream.on("error", reject);
@@ -153,6 +167,7 @@ router.post("/upload", upload.single("video"), async (req, res) => {
       notes,
       quiz,
       subtitleTracks,
+      localFilePath: req.file.path,
     });
 
     res.status(201).json(toPlaylistItem(doc));
