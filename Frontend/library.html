@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acadly — PDF Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto max-w-5xl px-4 py-10">
+      <div class="mb-6 flex items-center justify-between gap-3">
+        <h1 class="text-3xl font-semibold text-cyan-300">PDF Library</h1>
+        <a href="/upload" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">Upload New PDF</a>
+      </div>
+
+      <p class="mb-6 text-sm text-slate-300">
+        Documents listed below are loaded from MongoDB.
+      </p>
+
+      <div id="libraryStatus" class="mb-4 rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-300">
+        Loading documents…
+      </div>
+
+      <section id="cards" class="grid gap-4 md:grid-cols-2"></section>
+    </main>
+
+    <script>
+      const statusEl = document.getElementById("libraryStatus");
+      const cards = document.getElementById("cards");
+
+      function formatBytes(bytes) {
+        if (!bytes) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        let i = 0;
+        let val = bytes;
+        while (val >= 1024 && i < units.length - 1) {
+          val /= 1024;
+          i += 1;
+        }
+        return `${val.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+
+      function cardTemplate(item) {
+        const tags = (item.tags || []).map((tag) => `<span class="rounded bg-slate-800 px-2 py-1 text-xs">${tag}</span>`).join(" ");
+        const uploaded = item.uploadedAt ? new Date(item.uploadedAt).toLocaleString() : "Unknown";
+
+        return `
+          <article class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm">
+            <h2 class="text-lg font-semibold text-cyan-200">${item.title}</h2>
+            <p class="mt-2 text-sm text-slate-300">${item.description || "No description"}</p>
+            <div class="mt-3 flex flex-wrap gap-2 text-xs text-slate-300">
+              <span class="rounded bg-slate-800 px-2 py-1">Category: ${item.category || "General"}</span>
+              <span class="rounded bg-slate-800 px-2 py-1">Size: ${formatBytes(item.fileSize)}</span>
+            </div>
+            ${tags ? `<div class="mt-2 flex flex-wrap gap-2">${tags}</div>` : ""}
+            <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+              <span>Uploaded: ${uploaded}</span>
+              <a href="${item.viewUrl}" target="_blank" rel="noopener noreferrer" class="rounded bg-cyan-500 px-3 py-1.5 font-semibold text-slate-950 hover:bg-cyan-400">Open PDF</a>
+            </div>
+          </article>
+        `;
+      }
+
+      async function loadLibrary() {
+        try {
+          const response = await fetch("/api/pdfs");
+          const list = await response.json();
+
+          if (!response.ok) {
+            throw new Error(list.error || "Failed to load library");
+          }
+
+          statusEl.textContent = `${list.length} PDF document(s) found.`;
+
+          if (!list.length) {
+            cards.innerHTML = "<p class='text-slate-400'>No PDFs uploaded yet. Go to Upload page to add one.</p>";
+            return;
+          }
+
+          cards.innerHTML = list.map(cardTemplate).join("");
+        } catch (error) {
+          statusEl.className = "mb-4 rounded-lg border border-red-700 bg-slate-900/60 p-3 text-sm text-red-300";
+          statusEl.textContent = `Could not load library: ${error.message}`;
+        }
+      }
+
+      loadLibrary();
+    </script>
+  </body>
+</html>
