@@ -3,26 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acadly — Upload Video</title>
+    <title>Acadly — Upload PDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="min-h-screen bg-slate-950 text-slate-100">
     <main class="mx-auto max-w-3xl px-4 py-10">
       <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-        <h1 class="text-2xl font-semibold text-cyan-300">Upload video to Acadly</h1>
+        <h1 class="text-2xl font-semibold text-cyan-300">Upload PDF to Acadly Library</h1>
         <p class="mt-2 text-sm text-slate-300">
-          This page uploads your video to the server's <code class="rounded bg-slate-800 px-1">Videos/</code>
-          folder and stores metadata in MongoDB.
+          Choose a PDF from your local <code class="rounded bg-slate-800 px-1">pdfs/</code> folder.
+          The file binary + metadata are stored in MongoDB and shown on the library page.
         </p>
 
         <form id="uploadForm" class="mt-6 space-y-4">
+          <div class="rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <label class="mb-2 block text-sm font-medium">Import directly from server <code class="rounded bg-slate-800 px-1">pdfs/</code> folder</label>
+            <div class="flex flex-wrap gap-3">
+              <select id="serverPdfSelect" class="min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"></select>
+              <button id="importLocalBtn" type="button" class="rounded-lg border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/10">
+                Import selected PDF
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">Use this when your files already exist in the backend <code>pdfs/</code> directory.</p>
+          </div>
+
           <div>
-            <label class="mb-1 block text-sm font-medium">Video file</label>
+            <label class="mb-1 block text-sm font-medium">PDF file</label>
             <input
-              id="video"
-              name="video"
+              id="pdf"
+              name="pdf"
               type="file"
-              accept="video/*"
+              accept="application/pdf,.pdf"
               required
               class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
             />
@@ -39,15 +50,9 @@
             </div>
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="mb-1 block text-sm font-medium">Topic</label>
-              <input name="topic" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium">XP Reward</label>
-              <input name="xpReward" type="number" min="0" value="25" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-            </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium">Tags (comma separated)</label>
+            <input name="tags" type="text" placeholder="python, notes, semester-1" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
           </div>
 
           <div>
@@ -55,9 +60,14 @@
             <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></textarea>
           </div>
 
-          <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
-            Upload video
-          </button>
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
+              Upload PDF
+            </button>
+            <a href="/library" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">
+              Open Library
+            </a>
+          </div>
         </form>
 
         <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
@@ -69,6 +79,8 @@
     <script>
       const form = document.getElementById("uploadForm");
       const statusBox = document.getElementById("status");
+      const serverPdfSelect = document.getElementById("serverPdfSelect");
+      const importLocalBtn = document.getElementById("importLocalBtn");
 
       function setStatus(message, tone = "info") {
         const tones = {
@@ -80,20 +92,41 @@
         statusBox.textContent = message;
       }
 
+      async function loadServerPdfs() {
+        try {
+          const response = await fetch("/api/pdfs/local-files");
+          const files = await response.json();
+          if (!response.ok) throw new Error(files.error || "Failed to read local files");
+
+          if (!Array.isArray(files) || !files.length) {
+            serverPdfSelect.innerHTML = "<option value=''>No PDFs found in server pdfs/ folder</option>";
+            importLocalBtn.disabled = true;
+            return;
+          }
+
+          serverPdfSelect.innerHTML = files.map((name) => `<option value=\"${name}\">${name}</option>`).join("");
+          importLocalBtn.disabled = false;
+        } catch (error) {
+          serverPdfSelect.innerHTML = "<option value=''>Could not load server PDF list</option>";
+          importLocalBtn.disabled = true;
+          setStatus(`Could not load server folder PDFs: ${error.message}`, "error");
+        }
+      }
+
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const fileInput = document.getElementById("video");
+        const fileInput = document.getElementById("pdf");
         if (!fileInput.files.length) {
-          setStatus("Please choose a video file first.", "error");
+          setStatus("Please choose a PDF file first.", "error");
           return;
         }
 
         const formData = new FormData(form);
-        setStatus("Uploading video… please wait.");
+        setStatus("Uploading PDF… please wait.");
 
         try {
-          const response = await fetch("/api/videos/upload", {
+          const response = await fetch("/api/pdfs/upload", {
             method: "POST",
             body: formData,
           });
@@ -103,12 +136,47 @@
             throw new Error(result.detail || result.error || "Upload failed");
           }
 
-          setStatus(`Upload complete. Video ID: ${result.id}`, "success");
+          setStatus(`Upload complete. Document ID: ${result.id}`, "success");
           form.reset();
         } catch (error) {
           setStatus(`Upload failed: ${error.message}`, "error");
         }
       });
+
+      importLocalBtn.addEventListener("click", async () => {
+        const fileName = serverPdfSelect.value;
+        if (!fileName) {
+          setStatus("Select a PDF from server folder first.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        const payload = {
+          fileName,
+          title: formData.get("title") || "",
+          category: formData.get("category") || "General",
+          tags: formData.get("tags") || "",
+          description: formData.get("description") || "",
+        };
+
+        setStatus(`Importing ${fileName} from server pdfs/ folder...`);
+        try {
+          const response = await fetch("/api/pdfs/import-local", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Local import failed");
+          }
+          setStatus(`Import complete. Document ID: ${result.id}`, "success");
+        } catch (error) {
+          setStatus(`Local import failed: ${error.message}`, "error");
+        }
+      });
+
+      loadServerPdfs();
     </script>
   </body>
 </html>

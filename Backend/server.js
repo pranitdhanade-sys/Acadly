@@ -68,6 +68,11 @@ const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
 console.log("✅ Video routes mounted at /api/videos");
 
+// PDF library routes (uploads + listing)
+const pdfRoutes = require("./routes/pdfs");
+app.use("/api/pdfs", pdfRoutes);
+console.log("✅ PDF routes mounted at /api/pdfs");
+
 // Basic progress routes (XP / video completion)
 try {
   const progressRoutes = require("./routes/progress");
@@ -117,6 +122,11 @@ app.get("/videoplayer", (req, res) => {
 // Video upload page
 app.get("/upload", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "upload.html"));
+});
+
+// PDF library page
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
 });
 
 // -------------------- ADMIN ROUTES (owner-only) -------------------- //
