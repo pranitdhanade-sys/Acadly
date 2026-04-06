@@ -65,6 +65,55 @@ function toLibraryItem(doc) {
   };
 }
 
+async function uploadPdfFromPath(filePath, originalName, body = {}) {
+  const bucket = getGridFSBucket(GRIDFS_BUCKET);
+  const uploadStream = bucket.openUploadStream(originalName, {
+    contentType: "application/pdf",
+  });
+
+  await new Promise((resolve, reject) => {
+    fs.createReadStream(filePath)
+      .pipe(uploadStream)
+      .on("error", reject);
+    uploadStream.on("error", reject);
+    uploadStream.on("finish", resolve);
+  });
+
+  const stat = fs.statSync(filePath);
+  const doc = await PdfDocument.create({
+    file_id: uploadStream.id,
+    title: body.title || path.parse(originalName).name,
+    description: body.description || "",
+    category: body.category || "General",
+    tags: body.tags
+      ? String(body.tags)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+    fileSize: stat.size,
+    mimeType: "application/pdf",
+    localFilePath: filePath,
+    isActive: true,
+  });
+
+  return doc;
+}
+
+router.get("/local-files", async (req, res) => {
+  try {
+    fs.mkdirSync(LOCAL_PDFS_DIR, { recursive: true });
+    const files = fs
+      .readdirSync(LOCAL_PDFS_DIR)
+      .filter((name) => path.extname(name).toLowerCase() === ".pdf")
+      .sort((a, b) => a.localeCompare(b));
+    res.json(files);
+  } catch (err) {
+    console.error("GET /api/pdfs/local-files:", err.message);
+    res.status(500).json({ error: "Could not list local PDFs", detail: err.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     await ensureMongo();
@@ -83,40 +132,32 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
       return res.status(400).json({ error: "Missing file (use field name: pdf)" });
     }
 
-    const bucket = getGridFSBucket(GRIDFS_BUCKET);
-    const uploadStream = bucket.openUploadStream(req.file.originalname, {
-      contentType: "application/pdf",
-    });
-
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(req.file.path)
-        .pipe(uploadStream)
-        .on("error", reject);
-      uploadStream.on("error", reject);
-      uploadStream.on("finish", resolve);
-    });
-
-    const doc = await PdfDocument.create({
-      file_id: uploadStream.id,
-      title: req.body.title || path.parse(req.file.originalname).name,
-      description: req.body.description || "",
-      category: req.body.category || "General",
-      tags: req.body.tags
-        ? String(req.body.tags)
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [],
-      fileSize: req.file.size,
-      mimeType: "application/pdf",
-      localFilePath: req.file.path,
-      isActive: true,
-    });
-
+    const doc = await uploadPdfFromPath(req.file.path, req.file.originalname, req.body);
     res.status(201).json(toLibraryItem(doc));
   } catch (err) {
     console.error("POST /api/pdfs/upload:", err.message);
     res.status(500).json({ error: "Upload failed", detail: err.message });
+  }
+});
+
+router.post("/import-local", async (req, res) => {
+  try {
+    await ensureMongo();
+    const fileName = String(req.body.fileName || "").trim();
+    if (!fileName || fileName.includes("/") || fileName.includes("\\")) {
+      return res.status(400).json({ error: "Valid fileName is required" });
+    }
+
+    const fullPath = path.join(LOCAL_PDFS_DIR, fileName);
+    if (!fs.existsSync(fullPath) || path.extname(fullPath).toLowerCase() !== ".pdf") {
+      return res.status(404).json({ error: "PDF not found in local pdfs folder" });
+    }
+
+    const doc = await uploadPdfFromPath(fullPath, fileName, req.body);
+    res.status(201).json(toLibraryItem(doc));
+  } catch (err) {
+    console.error("POST /api/pdfs/import-local:", err.message);
+    res.status(500).json({ error: "Local import failed", detail: err.message });
   }
 });
 

@@ -16,6 +16,17 @@
         </p>
 
         <form id="uploadForm" class="mt-6 space-y-4">
+          <div class="rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <label class="mb-2 block text-sm font-medium">Import directly from server <code class="rounded bg-slate-800 px-1">pdfs/</code> folder</label>
+            <div class="flex flex-wrap gap-3">
+              <select id="serverPdfSelect" class="min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"></select>
+              <button id="importLocalBtn" type="button" class="rounded-lg border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/10">
+                Import selected PDF
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">Use this when your files already exist in the backend <code>pdfs/</code> directory.</p>
+          </div>
+
           <div>
             <label class="mb-1 block text-sm font-medium">PDF file</label>
             <input
@@ -68,6 +79,8 @@
     <script>
       const form = document.getElementById("uploadForm");
       const statusBox = document.getElementById("status");
+      const serverPdfSelect = document.getElementById("serverPdfSelect");
+      const importLocalBtn = document.getElementById("importLocalBtn");
 
       function setStatus(message, tone = "info") {
         const tones = {
@@ -77,6 +90,27 @@
         };
         statusBox.className = `mt-4 rounded-lg bg-slate-950 p-3 text-sm ${tones[tone] || tones.info}`;
         statusBox.textContent = message;
+      }
+
+      async function loadServerPdfs() {
+        try {
+          const response = await fetch("/api/pdfs/local-files");
+          const files = await response.json();
+          if (!response.ok) throw new Error(files.error || "Failed to read local files");
+
+          if (!Array.isArray(files) || !files.length) {
+            serverPdfSelect.innerHTML = "<option value=''>No PDFs found in server pdfs/ folder</option>";
+            importLocalBtn.disabled = true;
+            return;
+          }
+
+          serverPdfSelect.innerHTML = files.map((name) => `<option value=\"${name}\">${name}</option>`).join("");
+          importLocalBtn.disabled = false;
+        } catch (error) {
+          serverPdfSelect.innerHTML = "<option value=''>Could not load server PDF list</option>";
+          importLocalBtn.disabled = true;
+          setStatus(`Could not load server folder PDFs: ${error.message}`, "error");
+        }
       }
 
       form.addEventListener("submit", async (event) => {
@@ -108,6 +142,41 @@
           setStatus(`Upload failed: ${error.message}`, "error");
         }
       });
+
+      importLocalBtn.addEventListener("click", async () => {
+        const fileName = serverPdfSelect.value;
+        if (!fileName) {
+          setStatus("Select a PDF from server folder first.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        const payload = {
+          fileName,
+          title: formData.get("title") || "",
+          category: formData.get("category") || "General",
+          tags: formData.get("tags") || "",
+          description: formData.get("description") || "",
+        };
+
+        setStatus(`Importing ${fileName} from server pdfs/ folder...`);
+        try {
+          const response = await fetch("/api/pdfs/import-local", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Local import failed");
+          }
+          setStatus(`Import complete. Document ID: ${result.id}`, "success");
+        } catch (error) {
+          setStatus(`Local import failed: ${error.message}`, "error");
+        }
+      });
+
+      loadServerPdfs();
     </script>
   </body>
 </html>
