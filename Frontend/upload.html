@@ -3,116 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acadly — Upload Video</title>
+    <title>Acadly — Upload PDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="min-h-screen bg-slate-950 text-slate-100">
-    <main class="mx-auto max-w-5xl px-4 py-10">
-      <div class="grid gap-6 lg:grid-cols-3">
-        <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl lg:col-span-2">
-          <h1 class="text-2xl font-semibold text-cyan-300">Upload video to Acadly</h1>
-          <p class="mt-2 text-sm text-slate-300">
-            Upload stores your file in server <code class="rounded bg-slate-800 px-1">Videos/</code> folder and video data in MongoDB.
-          </p>
+    <main class="mx-auto max-w-3xl px-4 py-10">
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+        <h1 class="text-2xl font-semibold text-cyan-300">Upload PDF to Acadly Library</h1>
+        <p class="mt-2 text-sm text-slate-300">
+          Choose a PDF from your local <code class="rounded bg-slate-800 px-1">pdfs/</code> folder.
+          The file binary + metadata are stored in MongoDB and shown on the library page.
+        </p>
 
-          <form id="uploadForm" class="mt-6 space-y-4">
-            <div>
-              <label class="mb-2 block text-sm font-medium">Video file</label>
-              <label for="video" id="dropZone" class="block cursor-pointer rounded-xl border-2 border-dashed border-slate-700 bg-slate-950/70 p-5 text-center transition hover:border-cyan-400">
-                <p class="text-sm text-slate-300">Drop video here or click to choose</p>
-                <p id="fileName" class="mt-2 text-xs text-slate-500">No file selected</p>
-                <input id="video" name="video" type="file" accept="video/*" required class="hidden" />
-              </label>
+        <form id="uploadForm" class="mt-6 space-y-4">
+          <div class="rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <label class="mb-2 block text-sm font-medium">Import directly from server <code class="rounded bg-slate-800 px-1">pdfs/</code> folder</label>
+            <div class="flex flex-wrap gap-3">
+              <select id="serverPdfSelect" class="min-w-[220px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"></select>
+              <button id="importLocalBtn" type="button" class="rounded-lg border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/10">
+                Import selected PDF
+              </button>
             </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-sm font-medium">Title</label>
-                <input id="title" name="title" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium">Category</label>
-                <input name="category" type="text" value="General" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-sm font-medium">Topic</label>
-                <input name="topic" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium">Subcategory</label>
-                <input name="subcategory" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label class="mb-1 block text-sm font-medium">XP Reward</label>
-                <input name="xpReward" type="number" min="0" value="25" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium">Duration (sec)</label>
-                <input name="duration" type="number" min="0" value="0" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium">Tags (comma-separated)</label>
-                <input name="tags" type="text" placeholder="ai, ml, basics" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
-              </div>
-            </div>
-
-            <div>
-              <label class="mb-1 block text-sm font-medium">Description</label>
-              <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></textarea>
-            </div>
-
-            <label class="inline-flex items-center gap-2 text-sm text-slate-300">
-              <input type="checkbox" id="isPublished" checked class="h-4 w-4 rounded border-slate-700 bg-slate-950" />
-              Publish immediately
-            </label>
-
-            <div>
-              <div class="mb-1 flex justify-between text-xs text-slate-400">
-                <span>Upload progress</span>
-                <span id="progressText">0%</span>
-              </div>
-              <div class="h-2 overflow-hidden rounded-full bg-slate-800">
-                <div id="progressBar" class="h-full w-0 bg-cyan-400 transition-all"></div>
-              </div>
-            </div>
-
-            <div class="flex gap-3">
-              <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">Upload video</button>
-              <button id="resetBtn" type="button" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Reset</button>
-            </div>
-          </form>
-
-          <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">Waiting for upload…</div>
-        </section>
-
-        <aside class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl">
-          <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-cyan-300">Recent uploads</h2>
-            <button id="refreshBtn" class="rounded border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800">Refresh</button>
+            <p class="mt-2 text-xs text-slate-400">Use this when your files already exist in the backend <code>pdfs/</code> directory.</p>
           </div>
-          <div id="recentList" class="space-y-2 text-xs text-slate-300">
-            <p class="text-slate-500">Loading...</p>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">PDF file</label>
+            <input
+              id="pdf"
+              name="pdf"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+              class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            />
           </div>
-        </aside>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm font-medium">Title</label>
+              <input name="title" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">Category</label>
+              <input name="category" type="text" value="General" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">Tags (comma separated)</label>
+            <input name="tags" type="text" placeholder="python, notes, semester-1" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">Description</label>
+            <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
+              Upload PDF
+            </button>
+            <a href="/library" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">
+              Open Library
+            </a>
+          </div>
+        </form>
+
+        <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
+          Waiting for upload…
+        </div>
       </div>
     </main>
 
     <script>
       const form = document.getElementById("uploadForm");
-      const videoInput = document.getElementById("video");
-      const dropZone = document.getElementById("dropZone");
-      const fileName = document.getElementById("fileName");
       const statusBox = document.getElementById("status");
-      const progressBar = document.getElementById("progressBar");
-      const progressText = document.getElementById("progressText");
-      const titleInput = document.getElementById("title");
-      const recentList = document.getElementById("recentList");
+      const serverPdfSelect = document.getElementById("serverPdfSelect");
+      const importLocalBtn = document.getElementById("importLocalBtn");
 
       function setStatus(message, tone = "info") {
         const tones = {
@@ -124,127 +92,91 @@
         statusBox.textContent = message;
       }
 
-      function updateProgress(percent) {
-        const safe = Math.max(0, Math.min(100, Math.round(percent)));
-        progressBar.style.width = `${safe}%`;
-        progressText.textContent = `${safe}%`;
-      }
-
-      function syncFileUI(file) {
-        if (!file) {
-          fileName.textContent = "No file selected";
-          return;
-        }
-        fileName.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-        if (!titleInput.value.trim()) {
-          titleInput.value = file.name.replace(/\.[^.]+$/, "");
-        }
-      }
-
-      videoInput.addEventListener("change", () => syncFileUI(videoInput.files[0]));
-
-      ["dragenter", "dragover"].forEach((type) => {
-        dropZone.addEventListener(type, (e) => {
-          e.preventDefault();
-          dropZone.classList.add("border-cyan-400");
-        });
-      });
-      ["dragleave", "drop"].forEach((type) => {
-        dropZone.addEventListener(type, (e) => {
-          e.preventDefault();
-          dropZone.classList.remove("border-cyan-400");
-        });
-      });
-      dropZone.addEventListener("drop", (e) => {
-        const file = e.dataTransfer?.files?.[0];
-        if (!file) return;
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        videoInput.files = dt.files;
-        syncFileUI(file);
-      });
-
-      function uploadWithProgress(formData) {
-        return new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("POST", "/api/videos/upload");
-          xhr.upload.onprogress = (e) => {
-            if (!e.lengthComputable) return;
-            updateProgress((e.loaded / e.total) * 100);
-          };
-          xhr.onload = () => {
-            const body = xhr.responseText ? JSON.parse(xhr.responseText) : {};
-            if (xhr.status >= 200 && xhr.status < 300) resolve(body);
-            else reject(new Error(body.detail || body.error || "Upload failed"));
-          };
-          xhr.onerror = () => reject(new Error("Network error during upload"));
-          xhr.send(formData);
-        });
-      }
-
-      async function loadRecentUploads() {
-        recentList.innerHTML = '<p class="text-slate-500">Loading...</p>';
+      async function loadServerPdfs() {
         try {
-          const response = await fetch("/api/videos/upload/recent");
-          if (!response.ok) throw new Error("Could not load uploads");
-          const items = await response.json();
-          if (!items.length) {
-            recentList.innerHTML = '<p class="text-slate-500">No uploads yet.</p>';
+          const response = await fetch("/api/pdfs/local-files");
+          const files = await response.json();
+          if (!response.ok) throw new Error(files.error || "Failed to read local files");
+
+          if (!Array.isArray(files) || !files.length) {
+            serverPdfSelect.innerHTML = "<option value=''>No PDFs found in server pdfs/ folder</option>";
+            importLocalBtn.disabled = true;
             return;
           }
-          recentList.innerHTML = items
-            .map(
-              (item) => `
-              <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2">
-                <p class="font-medium text-slate-200">${item.title}</p>
-                <p class="text-slate-400">${item.category} · ${item.isPublished ? "Published" : "Draft"}</p>
-              </div>`
-            )
-            .join("");
+
+          serverPdfSelect.innerHTML = files.map((name) => `<option value=\"${name}\">${name}</option>`).join("");
+          importLocalBtn.disabled = false;
         } catch (error) {
-          recentList.innerHTML = `<p class="text-red-300">${error.message}</p>`;
+          serverPdfSelect.innerHTML = "<option value=''>Could not load server PDF list</option>";
+          importLocalBtn.disabled = true;
+          setStatus(`Could not load server folder PDFs: ${error.message}`, "error");
         }
       }
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const file = videoInput.files[0];
-        if (!file) {
-          setStatus("Please choose a video file first.", "error");
-          return;
-        }
-        if (!file.type.startsWith("video/")) {
-          setStatus("Please upload only video files.", "error");
+
+        const fileInput = document.getElementById("pdf");
+        if (!fileInput.files.length) {
+          setStatus("Please choose a PDF file first.", "error");
           return;
         }
 
         const formData = new FormData(form);
-        formData.set("isPublished", String(document.getElementById("isPublished").checked));
-
-        setStatus("Uploading video… please wait.");
-        updateProgress(0);
+        setStatus("Uploading PDF… please wait.");
 
         try {
-          const result = await uploadWithProgress(formData);
-          updateProgress(100);
-          setStatus(`Upload complete. Video ID: ${result.id}`, "success");
+          const response = await fetch("/api/pdfs/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Upload failed");
+          }
+
+          setStatus(`Upload complete. Document ID: ${result.id}`, "success");
           form.reset();
-          syncFileUI(null);
-          loadRecentUploads();
         } catch (error) {
           setStatus(`Upload failed: ${error.message}`, "error");
         }
       });
 
-      document.getElementById("refreshBtn").addEventListener("click", loadRecentUploads);
-      document.getElementById("resetBtn").addEventListener("click", () => {
-        form.reset();
-        syncFileUI(null);
-        updateProgress(0);
-        setStatus("Form reset.");
+      importLocalBtn.addEventListener("click", async () => {
+        const fileName = serverPdfSelect.value;
+        if (!fileName) {
+          setStatus("Select a PDF from server folder first.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        const payload = {
+          fileName,
+          title: formData.get("title") || "",
+          category: formData.get("category") || "General",
+          tags: formData.get("tags") || "",
+          description: formData.get("description") || "",
+        };
+
+        setStatus(`Importing ${fileName} from server pdfs/ folder...`);
+        try {
+          const response = await fetch("/api/pdfs/import-local", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Local import failed");
+          }
+          setStatus(`Import complete. Document ID: ${result.id}`, "success");
+        } catch (error) {
+          setStatus(`Local import failed: ${error.message}`, "error");
+        }
       });
 
-      loadRecentUploads();
+      loadServerPdfs();
     </script>
   </body>
 </html>

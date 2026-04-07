@@ -68,6 +68,15 @@ const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
 console.log("✅ Video routes mounted at /api/videos");
 
+// PDF library routes (MongoDB metadata + /Frontend/pdfs files)
+try {
+  const pdfLibraryRoutes = require("./routes/pdf-library");
+  app.use("/api/pdfs", pdfLibraryRoutes);
+  console.log("✅ PDF library routes mounted at /api/pdfs");
+} catch (err) {
+  console.warn("⚠️  PDF library routes not found:", err.message);
+}
+
 // Basic progress routes (XP / video completion)
 try {
   const progressRoutes = require("./routes/progress");
@@ -95,6 +104,16 @@ try {
   console.warn("⚠️  Practice lab routes not found:", err.message);
 }
 
+// Blog listing page
+app.get("/blogs", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "blogs.html"));
+});
+
+// Blog editor page
+app.get("/blog-editor", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "blog-editor.html"));
+});
+
 // Home route
 app.get("/", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "Homepage.html"));
@@ -109,6 +128,10 @@ app.get("/chatbot", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "chatbot.html"));
 });
 
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
+});
+
 // Video player page
 app.get("/videoplayer", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "videoplayer.html"));
@@ -117,6 +140,11 @@ app.get("/videoplayer", (req, res) => {
 // Video upload page
 app.get("/upload", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "upload.html"));
+});
+
+// PDF library page
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
 });
 
 // -------------------- ADMIN ROUTES (owner-only) -------------------- //

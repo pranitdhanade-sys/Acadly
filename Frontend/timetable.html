@@ -167,6 +167,55 @@
   </style>
 </head>
 <body>
+  <!-- AcadLy Navigation Header -->
+  <nav style="
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid #d9e0f2;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 2px 16px rgba(24,39,75,0.07);
+  ">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="Homepage.html" style="display:inline-flex;align-items:center;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        <img src="js/public 2.0/image.png" alt="AcadLy Logo" style="height:48px;width:auto;object-fit:contain;">
+      </a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="dashboard_v2.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#fff;border:1px solid #d9e0f2;color:#1f2a44;text-decoration:none;
+        transition:box-shadow .2s,background .2s;
+      " onmouseover="this.style.boxShadow='0 0 0 3px rgba(48,86,211,0.18)'" onmouseout="this.style.boxShadow='none'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Dashboard
+      </a>
+      <a href="acadly_learning_path.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#fff;border:1px solid #d9e0f2;color:#1f2a44;text-decoration:none;
+        transition:box-shadow .2s,background .2s;
+      " onmouseover="this.style.boxShadow='0 0 0 3px rgba(48,86,211,0.18)'" onmouseout="this.style.boxShadow='none'">
+        📚 Learning Path
+      </a>
+      <a href="ai-assistant.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#3056d3;color:#fff;text-decoration:none;
+        box-shadow:0 4px 14px rgba(48,86,211,0.28);
+        transition:transform .15s,box-shadow .2s;
+      " onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(48,86,211,0.38)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(48,86,211,0.28)'">
+        ✨ AI Assistant
+      </a>
+    </div>
+  </nav>
+
+  <!-- Spacer for fixed nav -->
+  <div style="height:72px;"></div>
+
   <main class="container">
     <section class="header">
       <h1>Weekly Timetable Builder</h1>
