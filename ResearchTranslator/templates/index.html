@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Paper Translator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="container">
+    <h1>Research Paper Translator (PDF to PDF)</h1>
+    <p class="subtitle">Upload a PDF research paper and get back a translated PDF that keeps layout, tables, and images as much as possible.</p>
+
+    <section class="panel">
+      <form id="translate-form">
+        <label for="paper">Research paper (PDF)</label>
+        <input id="paper" name="paper" type="file" accept="application/pdf" required />
+
+        <label for="targetLanguage">Target language</label>
+        <select id="targetLanguage" name="targetLanguage" required>
+          <option value="" disabled selected>Select a language</option>
+          {% for code, name in languages.items() %}
+          <option value="{{ code }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+
+        <button id="translate-btn" type="submit">Translate & Download PDF</button>
+      </form>
+    </section>
+
+    <section class="panel actions hidden" id="actions-panel">
+      <a id="preview-link" href="#" target="_blank" rel="noopener">Open translated PDF preview</a>
+    </section>
+
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
