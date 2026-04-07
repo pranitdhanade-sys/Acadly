@@ -83,6 +83,11 @@ const videoMetadataSchema = new mongoose.Schema(
       description: "MIME type for HTTP headers",
     },
 
+    localFilePath: {
+      type: String,
+      description: "Absolute path of local backup in /Videos folder",
+    },
+
     // Thumbnail
     thumbnail: {
       type: String,
