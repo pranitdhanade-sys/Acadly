@@ -32,7 +32,20 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 1024 * 1024 * 1024 }, // 1 GB
+  fileFilter: (req, file, cb) => {
+    if (String(file.mimetype || "").startsWith("video/")) return cb(null, true);
+    cb(new Error("Only video files are allowed"));
+  },
 });
+
+function runSingleUpload(req, res) {
+  return new Promise((resolve, reject) => {
+    upload.single("video")(req, res, (err) => {
+      if (!err) return resolve();
+      reject(err);
+    });
+  });
+}
 
 function isObjectIdString(id) {
   return typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
@@ -101,11 +114,15 @@ router.get("/", async (req, res) => {
 // POST /api/videos/upload — multipart field "video"
 // Optional JSON strings: notes, quiz
 // ============================================
-router.post("/upload", upload.single("video"), async (req, res) => {
+router.post("/upload", async (req, res) => {
   try {
+    await runSingleUpload(req, res);
     await ensureMongo();
     if (!req.file) {
       return res.status(400).json({ error: "Missing file (use field name: video)" });
+    }
+    if (!String(req.file.mimetype || "").startsWith("video/")) {
+      return res.status(400).json({ error: "Unsupported file type. Please upload a video file." });
     }
 
     const bucket = getGridFSBucket(GRIDFS_BUCKET);
@@ -173,7 +190,37 @@ router.post("/upload", upload.single("video"), async (req, res) => {
     res.status(201).json(toPlaylistItem(doc));
   } catch (err) {
     console.error("POST /api/videos/upload:", err.message);
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ error: "Upload failed", detail: "File exceeds 1GB limit." });
+    }
     res.status(500).json({ error: "Upload failed", detail: err.message });
+  }
+});
+
+// ============================================
+// GET /api/videos/upload/recent — latest uploads for admin UI
+// ============================================
+router.get("/upload/recent", async (req, res) => {
+  try {
+    await ensureMongo();
+    const docs = await VideoMetadata.find({})
+      .sort({ uploadedAt: -1 })
+      .limit(12)
+      .lean()
+      .exec();
+    res.json(
+      docs.map((d) => ({
+        id: String(d._id),
+        title: d.title,
+        category: d.category || "General",
+        uploadedAt: d.uploadedAt,
+        isPublished: !!d.isPublished,
+        localFilePath: d.localFilePath || null,
+      }))
+    );
+  } catch (err) {
+    console.error("GET /api/videos/upload/recent:", err.message);
+    res.status(500).json({ error: "Could not fetch recent uploads" });
   }
 });
 

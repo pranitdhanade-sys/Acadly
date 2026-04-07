@@ -8,8 +8,8 @@
 </head>
 <body>
   <main class="container">
-    <h1>Research Paper Translator (PDF to PDF)</h1>
-    <p class="subtitle">Upload a PDF research paper and get back a translated PDF that keeps layout, tables, and images as much as possible.</p>
+    <h1>Research Paper Translator</h1>
+    <p class="subtitle">Upload a PDF research paper and translate it into another language.</p>
 
     <section class="panel">
       <form id="translate-form">
@@ -24,12 +24,19 @@
           {% endfor %}
         </select>
 
-        <button id="translate-btn" type="submit">Translate & Download PDF</button>
+        <button id="translate-btn" type="submit">Translate Paper</button>
       </form>
     </section>
 
     <section class="panel actions hidden" id="actions-panel">
-      <a id="preview-link" href="#" target="_blank" rel="noopener">Open translated PDF preview</a>
+      <button id="download-btn" type="button">Download Translation (.txt)</button>
+      <button id="copy-btn" type="button">Copy Translation</button>
+      <button id="clear-btn" type="button">Clear</button>
+    </section>
+
+    <section class="panel hidden" id="result-panel">
+      <h2 id="result-title"></h2>
+      <textarea id="translated-output" readonly></textarea>
     </section>
 
     <p id="status" role="status" aria-live="polite"></p>

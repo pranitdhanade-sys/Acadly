@@ -3,15 +3,14 @@ from __future__ import annotations
 from io import BytesIO
 from pathlib import Path
 
-import fitz  # PyMuPDF
 from deep_translator import GoogleTranslator
 from flask import Flask, jsonify, render_template, request, send_file
+from pypdf import PdfReader
 
 app = Flask(__name__)
 
 MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024
-CHUNK_SIZE = 3500
-MIN_FONT_SIZE = 5
+CHUNK_SIZE = 4000
 
 SUPPORTED_LANGUAGES = {
     "ar": "Arabic",
@@ -51,87 +50,20 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
     return chunks
 
 
-def translate_text(text: str, target_language: str, cache: dict[str, str]) -> str:
-    clean_text = text.strip()
-    if not clean_text:
-        return text
+def extract_pdf_text(file_bytes: bytes) -> str:
+    reader = PdfReader(BytesIO(file_bytes))
+    extracted_pages = [page.extract_text() or "" for page in reader.pages]
+    return "\n\n".join(extracted_pages).strip()
 
-    if clean_text in cache:
-        return cache[clean_text]
 
-    chunks = chunk_text(clean_text)
+def translate_text(text: str, target_language: str) -> str:
+    chunks = chunk_text(text)
     translated_parts: list[str] = []
 
-    translator = GoogleTranslator(source="auto", target=target_language)
     for chunk in chunks:
-        translated_parts.append(translator.translate(chunk))
+        translated_parts.append(GoogleTranslator(source="auto", target=target_language).translate(chunk))
 
-    translated = "\n".join(translated_parts)
-    cache[clean_text] = translated
-    return translated
-
-
-def insert_translated_text(page: fitz.Page, bbox: fitz.Rect, text: str, fontsize: float, color: int) -> None:
-    current_size = max(fontsize, MIN_FONT_SIZE)
-    while current_size >= MIN_FONT_SIZE:
-        result = page.insert_textbox(
-            bbox,
-            text,
-            fontsize=current_size,
-            fontname="helv",
-            color=fitz.sRGB_to_pdf(color),
-            align=fitz.TEXT_ALIGN_LEFT,
-        )
-        if result >= 0:
-            return
-        current_size -= 0.5
-
-    page.insert_textbox(
-        bbox,
-        text,
-        fontsize=MIN_FONT_SIZE,
-        fontname="helv",
-        color=fitz.sRGB_to_pdf(color),
-        align=fitz.TEXT_ALIGN_LEFT,
-    )
-
-
-def translate_pdf(pdf_bytes: bytes, target_language: str) -> bytes:
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-    translation_cache: dict[str, str] = {}
-
-    for page in doc:
-        blocks = page.get_text("dict").get("blocks", [])
-        replacements: list[tuple[fitz.Rect, str, float, int]] = []
-
-        for block in blocks:
-            if block.get("type") != 0:
-                continue
-
-            for line in block.get("lines", []):
-                for span in line.get("spans", []):
-                    original_text = span.get("text", "")
-                    if not original_text.strip():
-                        continue
-
-                    translated = translate_text(original_text, target_language, translation_cache)
-                    bbox = fitz.Rect(span.get("bbox"))
-                    fontsize = float(span.get("size", 10))
-                    color = int(span.get("color", 0))
-                    replacements.append((bbox, translated, fontsize, color))
-
-        for bbox, _, _, _ in replacements:
-            page.add_redact_annot(bbox, fill=(1, 1, 1))
-
-        if replacements:
-            page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
-
-        for bbox, translated, fontsize, color in replacements:
-            insert_translated_text(page, bbox, translated, fontsize, color)
-
-    output = doc.tobytes(garbage=4, deflate=True)
-    doc.close()
-    return output
+    return "\n\n".join(translated_parts)
 
 
 @app.get("/")
@@ -139,8 +71,13 @@ def index() -> str:
     return render_template("index.html", languages=SUPPORTED_LANGUAGES)
 
 
+@app.get("/api/languages")
+def languages() -> tuple[dict[str, dict[str, str]], int]:
+    return jsonify({"languages": SUPPORTED_LANGUAGES}), 200
+
+
 @app.post("/api/translate")
-def translate_pdf_route():
+def translate_pdf() -> tuple[dict[str, str], int]:
     pdf_file = request.files.get("paper")
     target_language = request.form.get("targetLanguage", "").strip()
 
@@ -155,18 +92,47 @@ def translate_pdf_route():
         return jsonify({"error": "PDF is too large. Maximum allowed size is 25MB."}), 400
 
     try:
-        translated_pdf = translate_pdf(pdf_bytes, target_language)
+        original_text = extract_pdf_text(pdf_bytes)
     except Exception as exc:  # pragma: no cover - defensive runtime path
+        return jsonify({"error": f"Unable to read PDF: {exc}"}), 400
+
+    if not original_text:
+        return jsonify({"error": "No readable text found in PDF."}), 400
+
+    try:
+        translated_text = translate_text(original_text, target_language)
+    except Exception as exc:  # pragma: no cover - network/runtime path
         return jsonify({"error": f"Translation failed: {exc}"}), 500
 
-    safe_name = Path(pdf_file.filename).stem
-    output_name = f"{safe_name}-{target_language}-translated.pdf"
+    return (
+        jsonify(
+            {
+                "fileName": Path(pdf_file.filename).stem,
+                "targetLanguage": target_language,
+                "targetLanguageName": SUPPORTED_LANGUAGES[target_language],
+                "originalText": original_text,
+                "translatedText": translated_text,
+            }
+        ),
+        200,
+    )
+
+
+@app.post("/api/download")
+def download_translation():
+    payload = request.get_json(silent=True) or {}
+    file_name = payload.get("fileName", "translated-paper")
+    content = payload.get("content", "")
+
+    safe_name = "".join(ch for ch in file_name if ch.isalnum() or ch in ("-", "_")) or "translated-paper"
+    buffer = BytesIO(content.encode("utf-8"))
+    buffer.seek(0)
 
     return send_file(
-        BytesIO(translated_pdf),
-        mimetype="application/pdf",
+        buffer,
+        mimetype="text/plain",
         as_attachment=True,
-        download_name=output_name,
+        download_name=f"{safe_name}-translation.txt",
     )
 
 

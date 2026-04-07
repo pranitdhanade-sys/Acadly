@@ -40,12 +40,13 @@ form {
 input,
 select,
 button,
-a {
+textarea {
   font: inherit;
 }
 
 input,
-select {
+select,
+textarea {
   border: 1px solid #c9cfdd;
   border-radius: 8px;
   padding: 0.6rem;
@@ -65,13 +66,16 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.actions a {
-  display: inline-block;
-  background: #eef2ff;
-  color: #2240b8;
-  text-decoration: none;
-  border-radius: 8px;
-  padding: 0.6rem 0.8rem;
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+textarea {
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
 }
 
 .hidden {

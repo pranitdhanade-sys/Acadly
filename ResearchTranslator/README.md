@@ -1,16 +1,16 @@
 # Research Paper Translator (Python + JS UI)
 
-This app lets users upload a **PDF research paper** and receive a **translated PDF** while keeping the original layout (images/tables/graphics) as intact as possible.
+This mini app lets users upload a **PDF research paper**, translate the extracted text into another language, and then copy/download the translated output from the browser.
 
 ## Features
 - Upload PDF paper
 - Translate into a selected target language
-- Replace original text in the PDF with translated text
-- Auto-download translated `.pdf`
-- Open translated PDF preview in browser
+- Display translated output in the browser (rendered via JavaScript)
+- Copy translation to clipboard
+- Download translation as `.txt`
 
 ## Tech stack
-- Python: Flask, PyMuPDF, deep-translator
+- Python: Flask, pypdf, deep-translator
 - Frontend: HTML/CSS + vanilla JavaScript
 
 ## Run locally
@@ -24,5 +24,4 @@ Then open: `http://localhost:5001`
 
 ## Notes
 - Translation uses `deep-translator` with Google Translate backend.
-- The app attempts to preserve the exact structure of the original PDF by redacting/reinserting text spans.
-- Scanned/image-only text cannot be translated without OCR.
+- PDFs with scanned images (no embedded text) cannot be translated until OCR is added.

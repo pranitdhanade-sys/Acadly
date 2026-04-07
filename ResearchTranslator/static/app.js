@@ -1,34 +1,33 @@
 const form = document.getElementById('translate-form');
 const statusText = document.getElementById('status');
+const outputBox = document.getElementById('translated-output');
+const resultPanel = document.getElementById('result-panel');
+const resultTitle = document.getElementById('result-title');
 const actionsPanel = document.getElementById('actions-panel');
-const previewLink = document.getElementById('preview-link');
 const translateBtn = document.getElementById('translate-btn');
+const downloadBtn = document.getElementById('download-btn');
+const copyBtn = document.getElementById('copy-btn');
+const clearBtn = document.getElementById('clear-btn');
 
-let latestBlobUrl = null;
+let currentFileName = 'translated-paper';
 
 function setStatus(message, isError = false) {
   statusText.textContent = message;
   statusText.className = isError ? 'error' : 'ok';
 }
 
-function cleanupBlobUrl() {
-  if (latestBlobUrl) {
-    URL.revokeObjectURL(latestBlobUrl);
-    latestBlobUrl = null;
-  }
+function toggleResult(isVisible) {
+  resultPanel.classList.toggle('hidden', !isVisible);
+  actionsPanel.classList.toggle('hidden', !isVisible);
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  cleanupBlobUrl();
-  actionsPanel.classList.add('hidden');
 
   const formData = new FormData(form);
-  const paper = document.getElementById('paper').files[0];
-  const languageCode = document.getElementById('targetLanguage').value;
-
   translateBtn.disabled = true;
-  setStatus('Translating PDF and rebuilding document layout...');
+  setStatus('Translating paper... this may take a while for longer PDFs.');
+  toggleResult(false);
 
   try {
     const response = await fetch('/api/translate', {
@@ -36,27 +35,16 @@ form.addEventListener('submit', async (event) => {
       body: formData,
     });
 
+    const payload = await response.json();
     if (!response.ok) {
-      const payload = await response.json();
-      throw new Error(payload.error || 'Translation failed.');
+      throw new Error(payload.error || 'Unable to translate file.');
     }
 
-    const translatedBlob = await response.blob();
-    latestBlobUrl = URL.createObjectURL(translatedBlob);
-
-    const originalName = (paper?.name || 'paper').replace(/\.pdf$/i, '');
-    const downloadedName = `${originalName}-${languageCode}-translated.pdf`;
-
-    const anchor = document.createElement('a');
-    anchor.href = latestBlobUrl;
-    anchor.download = downloadedName;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-
-    previewLink.href = latestBlobUrl;
-    actionsPanel.classList.remove('hidden');
-    setStatus('Done. The translated PDF download has started.');
+    currentFileName = payload.fileName;
+    resultTitle.textContent = `${payload.fileName}.pdf → ${payload.targetLanguageName}`;
+    outputBox.value = payload.translatedText;
+    toggleResult(true);
+    setStatus('Translation complete. You can copy or download the result.');
   } catch (error) {
     setStatus(error.message, true);
   } finally {
@@ -64,4 +52,59 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
-window.addEventListener('beforeunload', cleanupBlobUrl);
+downloadBtn.addEventListener('click', async () => {
+  if (!outputBox.value.trim()) {
+    setStatus('No translated content available to download.', true);
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: currentFileName,
+        content: outputBox.value,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not create download file.');
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${currentFileName}-translation.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+
+    setStatus('Download started.');
+  } catch (error) {
+    setStatus(error.message, true);
+  }
+});
+
+copyBtn.addEventListener('click', async () => {
+  if (!outputBox.value.trim()) {
+    setStatus('No translated content available to copy.', true);
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(outputBox.value);
+    setStatus('Translation copied to clipboard.');
+  } catch {
+    setStatus('Unable to access clipboard in this browser.', true);
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  form.reset();
+  outputBox.value = '';
+  toggleResult(false);
+  setStatus('Cleared. Upload another paper to translate.');
+});
