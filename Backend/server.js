@@ -95,6 +95,16 @@ try {
   console.warn("⚠️  Practice lab routes not found:", err.message);
 }
 
+// Blog listing page
+app.get("/blogs", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "blogs.html"));
+});
+
+// Blog editor page
+app.get("/blog-editor", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "blog-editor.html"));
+});
+
 // Home route
 app.get("/", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "Homepage.html"));
