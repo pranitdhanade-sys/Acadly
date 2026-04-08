@@ -1,18 +1,16 @@
-# Research Paper Translator to LaTeX PDF
+# Research Paper Translator (Python + JS UI)
 
-This app uploads a research paper PDF, detects document elements (title, headings, list items, paragraphs), translates text, converts the structure into LaTeX, and shows the compiled PDF output.
+This mini app lets users upload a **PDF research paper**, translate the extracted text into another language, and then copy/download the translated output from the browser.
 
 ## Features
-- Upload PDF research paper
-- Detect structural elements with heuristics (title/heading/list/paragraph)
-- Translate extracted text into a selected language
-- Generate LaTeX source code from detected elements
-- Compile and preview PDF generated from LaTeX
-- Download generated `.pdf` and `.tex`
+- Upload PDF paper
+- Translate into a selected target language
+- Display translated output in the browser (rendered via JavaScript)
+- Copy translation to clipboard
+- Download translation as `.txt`
 
 ## Tech stack
-- Python: Flask, PyMuPDF, deep-translator
-- LaTeX compilation: `pdflatex` binary on server
+- Python: Flask, pypdf, deep-translator
 - Frontend: HTML/CSS + vanilla JavaScript
 
 ## Run locally
@@ -22,9 +20,8 @@ pip install -r requirements.txt
 python ResearchTranslator/app.py
 ```
 
-Open `http://localhost:5001`
+Then open: `http://localhost:5001`
 
 ## Notes
-- You must have `pdflatex` installed and available in PATH.
-- Structure detection is heuristic-based and may need refinement for complex papers.
-- Image-only scanned PDFs require OCR before meaningful conversion.
+- Translation uses `deep-translator` with Google Translate backend.
+- PDFs with scanned images (no embedded text) cannot be translated until OCR is added.

@@ -191,7 +191,7 @@
     // Preserve "next" when user clicks "Sign up"
     try {
       const params = new URLSearchParams(window.location.search);
-      const nextUrl = params.get("next") || "js/public 2.0/ai-assistant.html";
+      const nextUrl = params.get("next") || "ai-assistant.html";
       const signUpLink = document.querySelector('a[href="signin.html"]');
       if (signUpLink) {
         signUpLink.setAttribute(
