@@ -145,6 +145,7 @@
     </section>
   </main>
 
+  <script src="js/auth.js"></script>
   <script>
     function syncThemeToggle() {
       const isDark = document.documentElement.classList.contains("dark");
@@ -216,36 +217,28 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Logging in...';
 
-      // NOTE: Backend auth may not exist yet in your project.
-      // For now we support a working UI gate by storing a local login flag.
-      let user = null;
       try {
         const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         });
-        if (response.ok) {
-          const data = await response.json();
-          user = data?.user || null;
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.error || 'Login failed');
         }
+
+        window.AcadlyAuth?.setSession(data);
+        localStorage.setItem('acadly-last-login-at', new Date().toISOString());
+        window.location.href = nextUrl;
       } catch (error) {
-        // ignore, fallback to mock login below
+        alert(error.message || 'Unable to login. Please check your credentials.');
       } finally {
         // Re-enable button
         submitBtn.disabled = false;
         submitBtn.textContent = 'Log in';
       }
-
-      if (!user) {
-        user = { name: (email || '').split('@')[0] || 'Student', email };
-      }
-
-      localStorage.setItem('acadly-user', JSON.stringify(user));
-      localStorage.setItem('acadly-authenticated', 'true');
-
-      // Redirect to what user requested (or default)
-      window.location.href = nextUrl;
     });
   </script>
 </body>
