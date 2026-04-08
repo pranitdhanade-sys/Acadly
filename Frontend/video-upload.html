@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acadly — Upload Video</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto max-w-4xl px-4 py-10">
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+        <h1 class="text-2xl font-semibold text-cyan-300">Upload Video to Acadly</h1>
+        <p class="mt-2 text-sm text-slate-300">
+          Upload a video file and optional metadata. The original file is stored in GridFS and metadata is saved in MongoDB.
+        </p>
+
+        <form id="videoUploadForm" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium">Video file</label>
+            <input
+              id="video"
+              name="video"
+              type="file"
+              accept="video/*"
+              required
+              class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm font-medium">Title</label>
+              <input name="title" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">Topic</label>
+              <input name="topic" type="text" placeholder="Arrays, Mechanics, OS..." class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-sm font-medium">Category</label>
+              <input name="category" type="text" value="General" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">Subcategory</label>
+              <input name="subcategory" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">XP Reward</label>
+              <input name="xpReward" type="number" min="0" value="25" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm font-medium">Duration (seconds)</label>
+              <input name="duration" type="number" min="0" value="0" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">Tags (comma separated)</label>
+              <input name="tags" type="text" placeholder="dsa, beginner, unit-1" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">Thumbnail URL (optional)</label>
+            <input name="thumbnail" type="url" placeholder="https://..." class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">Description</label>
+            <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input id="isPublished" name="isPublished" type="checkbox" checked class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+            <label for="isPublished" class="text-sm text-slate-300">Publish immediately</label>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
+              Upload Video
+            </button>
+            <a href="/videoplayer" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">
+              Open Video Player
+            </a>
+          </div>
+        </form>
+
+        <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
+          Waiting for upload…
+        </div>
+
+        <section class="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-cyan-200">Recent Uploads</h2>
+            <button id="refreshRecent" type="button" class="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300 hover:bg-slate-900">Refresh</button>
+          </div>
+          <ul id="recentList" class="mt-3 space-y-2 text-sm text-slate-300">
+            <li class="text-slate-500">No uploads yet.</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("videoUploadForm");
+      const statusBox = document.getElementById("status");
+      const recentList = document.getElementById("recentList");
+      const refreshRecentBtn = document.getElementById("refreshRecent");
+
+      function setStatus(message, tone = "info") {
+        const tones = {
+          info: "border-slate-800 text-slate-300",
+          success: "border-emerald-700 text-emerald-300",
+          error: "border-red-700 text-red-300",
+        };
+        statusBox.className = `mt-4 rounded-lg bg-slate-950 p-3 text-sm ${tones[tone] || tones.info}`;
+        statusBox.textContent = message;
+      }
+
+      function readPublishedFlag() {
+        const checked = document.getElementById("isPublished").checked;
+        return checked ? "true" : "false";
+      }
+
+      async function loadRecentUploads() {
+        try {
+          const response = await fetch("/api/videos/upload/recent");
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Could not load uploads");
+
+          if (!Array.isArray(data) || data.length === 0) {
+            recentList.innerHTML = '<li class="text-slate-500">No uploads yet.</li>';
+            return;
+          }
+
+          recentList.innerHTML = data
+            .map((item) => {
+              const uploadedAt = item.uploadedAt ? new Date(item.uploadedAt).toLocaleString() : "Unknown time";
+              const visibility = item.isPublished ? "Published" : "Draft";
+              return `
+                <li class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                  <p class="font-medium text-slate-100">${item.title || "Untitled"}</p>
+                  <p class="text-xs text-slate-400">${item.category || "General"} • ${visibility} • ${uploadedAt}</p>
+                  <p class="mt-1 text-xs text-cyan-300">ID: ${item.id}</p>
+                </li>
+              `;
+            })
+            .join("");
+        } catch (error) {
+          recentList.innerHTML = `<li class="text-red-300">${error.message}</li>`;
+        }
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById("video");
+        if (!fileInput.files.length) {
+          setStatus("Please choose a video file first.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        formData.set("isPublished", readPublishedFlag());
+
+        setStatus("Uploading video… this may take a while for large files.");
+
+        try {
+          const response = await fetch("/api/videos/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Upload failed");
+          }
+
+          setStatus(`Upload complete: ${result.title} (ID: ${result.id})`, "success");
+          form.reset();
+          document.getElementById("isPublished").checked = true;
+          loadRecentUploads();
+        } catch (error) {
+          setStatus(`Upload failed: ${error.message}`, "error");
+        }
+      });
+
+      refreshRecentBtn.addEventListener("click", loadRecentUploads);
+      loadRecentUploads();
+    </script>
+  </body>
+</html>
