@@ -77,6 +77,16 @@ try {
   console.warn("⚠️  PDF library routes not found:", err.message);
 }
 
+
+// 3D model hub routes (MongoDB metadata + Frontend/3d-models files)
+try {
+  const modelRoutes = require("./routes/models3d");
+  app.use("/api/models", modelRoutes);
+  console.log("✅ 3D model routes mounted at /api/models");
+} catch (err) {
+  console.warn("⚠️  3D model routes not found:", err.message);
+}
+
 // Basic progress routes (XP / video completion)
 try {
   const progressRoutes = require("./routes/progress");
@@ -145,6 +155,17 @@ app.get("/upload", (req, res) => {
 // PDF library page
 app.get("/library", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "library.html"));
+});
+
+
+// 3D lab page
+app.get("/3d-lab", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "3d-lab.html"));
+});
+
+// 3D model upload page
+app.get("/3d-upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "3d-upload.html"));
 });
 
 // -------------------- ADMIN ROUTES (owner-only) -------------------- //

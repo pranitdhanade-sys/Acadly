@@ -43,24 +43,6 @@ const MACHINE_CATALOG = [
     answer: "PTL{k8s_rbac_is_the_real_firewall}",
   },
   {
-    id: "kube-chaos-garden",
-    name: "Kube Chaos Garden",
-    track: "Kubernetes",
-    difficulty: "hard",
-    points: 300,
-    solveRate: "31%",
-    duration: "60-90 min",
-    tags: ["helm", "pod-security", "secrets"],
-    description:
-      "A Helm release has drifted from security baseline and pods are crashing. Stabilize workloads, fix policy gaps, and recover the incident flag.",
-    objectives: [
-      "Audit failing deployments and identify securityContext issues.",
-      "Lock down secret access and rotate compromised tokens.",
-      "Restore service health and retrieve the postmortem flag.",
-    ],
-    answer: "PTL{k8s_helm_without_guardrails_breaks_fast}",
-  },
-  {
     id: "db-blackout",
     name: "DB Blackout",
     track: "Database",
@@ -79,42 +61,6 @@ const MACHINE_CATALOG = [
     answer: "PTL{db_pooling_without_limits_hurts}",
   },
   {
-    id: "terraform-state-heist",
-    name: "Terraform State Heist",
-    track: "Terraform",
-    difficulty: "medium",
-    points: 240,
-    solveRate: "44%",
-    duration: "45-65 min",
-    tags: ["iac", "state-file", "cloud-security"],
-    description:
-      "A leaked Terraform state file exposed sensitive outputs. Repair the infrastructure plan, secure remote state, and submit the IaC flag.",
-    objectives: [
-      "Locate secrets exposed in local terraform.tfstate artifacts.",
-      "Migrate to a secure remote backend with locking enabled.",
-      "Apply sanitized plan and capture the compliance flag.",
-    ],
-    answer: "PTL{terraform_state_is_production_data}",
-  },
-  {
-    id: "terraform-drift-hunt",
-    name: "Terraform Drift Hunt",
-    track: "Terraform",
-    difficulty: "easy",
-    points: 140,
-    solveRate: "66%",
-    duration: "25-40 min",
-    tags: ["drift", "plan", "modules"],
-    description:
-      "Cloud resources were modified manually outside Terraform. Detect drift, refactor modules, and restore deterministic deployments.",
-    objectives: [
-      "Run drift checks and map unmanaged infrastructure changes.",
-      "Refactor duplicated resources into reusable modules.",
-      "Reconcile state and submit the drift-control flag.",
-    ],
-    answer: "PTL{terraform_plan_before_every_apply}",
-  },
-  {
     id: "ros2-relay",
     name: "ROS2 Relay",
     track: "ROS2",
@@ -131,42 +77,6 @@ const MACHINE_CATALOG = [
       "Extract final telemetry artifact and submit the mission flag.",
     ],
     answer: "PTL{ros2_topics_need_zero_trust}",
-  },
-  {
-    id: "ansys-sim-shield",
-    name: "ANSYS Sim Shield",
-    track: "ANSYS",
-    difficulty: "medium",
-    points: 260,
-    solveRate: "39%",
-    duration: "50-75 min",
-    tags: ["simulation", "hpc", "license-server"],
-    description:
-      "A simulation pipeline is failing because of broken solver configs and open license service ports. Harden the runbook and extract the engineering flag.",
-    objectives: [
-      "Inspect ANSYS batch job logs and fix solver parameter mismatch.",
-      "Restrict license server exposure to approved subnets only.",
-      "Validate successful simulation output and capture the lab flag.",
-    ],
-    answer: "PTL{ansys_workflows_need_secure_runtime}",
-  },
-  {
-    id: "docker-supply-chain",
-    name: "Docker Supply Chain",
-    track: "Docker",
-    difficulty: "medium",
-    points: 210,
-    solveRate: "47%",
-    duration: "40-60 min",
-    tags: ["image-signing", "sbom", "registry"],
-    description:
-      "A container registry has unsigned images and vulnerable base layers. Build a secure supply-chain workflow and prove integrity.",
-    objectives: [
-      "Generate an SBOM and identify vulnerable dependencies.",
-      "Sign trusted images and enforce admission checks.",
-      "Promote secure image and retrieve the pipeline flag.",
-    ],
-    answer: "PTL{signed_images_reduce_supply_chain_risk}",
   },
 ];
 
