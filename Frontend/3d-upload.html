@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acadly 3D Upload</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto max-w-3xl px-4 py-10">
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+        <h1 class="text-2xl font-semibold text-cyan-300">3D Model Upload Hub</h1>
+        <p class="mt-2 text-sm text-slate-300">
+          Upload .glb/.gltf/.obj/.stl/.fbx files. File will be saved in
+          <code class="rounded bg-slate-800 px-1">Frontend/3d-models</code> and metadata in MongoDB.
+        </p>
+
+        <form id="modelUploadForm" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium">3D model file</label>
+            <input id="model" name="model" type="file" accept=".glb,.gltf,.obj,.stl,.fbx" required class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm font-medium">Title</label>
+              <input name="title" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Human Heart Model" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium">Tags (comma separated)</label>
+              <input name="tags" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="biology, anatomy, organ" />
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium">Description</label>
+            <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Explain what this 3D model demonstrates..."></textarea>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
+              Upload 3D Model
+            </button>
+            <a href="/3d-lab" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">
+              Open 3D Lab
+            </a>
+          </div>
+        </form>
+
+        <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
+          Waiting for upload…
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("modelUploadForm");
+      const statusBox = document.getElementById("status");
+
+      function setStatus(message, tone = "info") {
+        const tones = {
+          info: "border-slate-800 text-slate-300",
+          success: "border-emerald-700 text-emerald-300",
+          error: "border-red-700 text-red-300",
+        };
+        statusBox.className = `mt-4 rounded-lg bg-slate-950 p-3 text-sm ${tones[tone] || tones.info}`;
+        statusBox.textContent = message;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById("model");
+        if (!fileInput.files.length) {
+          setStatus("Please choose a 3D model file first.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        setStatus("Uploading model… please wait.");
+
+        try {
+          const response = await fetch("/api/models/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(result.detail || result.error || "Upload failed");
+          }
+
+          setStatus(`Upload complete. Model ID: ${result.id}`, "success");
+          form.reset();
+        } catch (error) {
+          setStatus(`Upload failed: ${error.message}`, "error");
+        }
+      });
+    </script>
+  </body>
+</html>
