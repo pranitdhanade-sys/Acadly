@@ -147,9 +147,14 @@ app.get("/videoplayer", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "videoplayer.html"));
 });
 
-// Video upload page
+// PDF upload page
 app.get("/upload", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "upload.html"));
+});
+
+// Video upload page
+app.get("/video-upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "video-upload.html"));
 });
 
 // PDF library page
