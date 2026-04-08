@@ -14,6 +14,14 @@
     .status-dot { width: .6rem; height: .6rem; border-radius: 999px; display: inline-block; }
     .feature-pill { border: 1px solid rgba(148,163,184,.35); background: rgba(15,23,42,.35); }
     .active-quarter { border-color: rgba(167,139,250,.9) !important; box-shadow: 0 0 0 1px rgba(167,139,250,.6), 0 0 22px rgba(167,139,250,.2); }
+
+    .mindmap-node { border: 1px solid rgba(148,163,184,.25); background: rgba(2,6,23,.6); }
+    .tree-root { position: relative; }
+    .tree-root::before { content: ''; position: absolute; left: 10px; top: 1.1rem; bottom: .4rem; border-left: 2px dashed rgba(34,211,238,.45); }
+    .tree-branch { position: relative; padding-left: 1.25rem; }
+    .tree-branch::before { content: ''; position: absolute; left: .55rem; top: .95rem; width: .7rem; border-top: 2px solid rgba(34,211,238,.45); }
+    .arrow-chip { background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.3); }
+    .hidden-tree { display: none; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
@@ -39,6 +47,10 @@
 
   <main class="relative z-10 max-w-7xl mx-auto px-6 py-10 space-y-10">
     <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">Planned Features</p><p class="text-3xl font-bold mt-2">36</p></article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">In Progress</p><p class="text-3xl font-bold mt-2 text-amber-300">11</p></article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">Released</p><p class="text-3xl font-bold mt-2 text-emerald-300">19</p></article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">Community Votes</p><p class="text-3xl font-bold mt-2 text-cyan-300">4,280</p></article>
       <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
         <p class="text-slate-400 text-sm">Planned Features</p>
         <p class="text-3xl font-bold mt-2">36</p>
@@ -66,6 +78,7 @@
           <button class="quarter-btn px-3 py-1.5 rounded-lg text-sm border border-white/20" data-quarter="Q4">Q4 2026</button>
         </div>
       </div>
+      <div id="quarterDescription" class="text-slate-300 leading-relaxed">Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.</div>
       <div id="quarterDescription" class="text-slate-300 leading-relaxed">
         Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.
       </div>
@@ -75,6 +88,21 @@
       <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
         <h2 class="text-xl md:text-2xl font-bold">Feature Backlog (Many Features)</h2>
         <select id="statusFilter" class="bg-slate-900 border border-white/20 rounded-lg px-3 py-2 text-sm">
+          <option value="all">All statuses</option><option value="planned">Planned</option><option value="progress">In Progress</option><option value="released">Released</option>
+        </select>
+      </div>
+      <div id="roadmapGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section class="rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-5 md:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 class="text-xl md:text-2xl font-bold">Mindmap Library (50+)</h2>
+          <p class="text-slate-300 text-sm">Each mindmap has arrow connectors and expands Topic → Subtopic → Concepts.</p>
+        </div>
+        <p class="text-xs text-cyan-300" id="mindmapCount"></p>
+      </div>
+      <div id="mindmapGrid" class="grid md:grid-cols-2 gap-4"></div>
           <option value="all">All statuses</option>
           <option value="planned">Planned</option>
           <option value="progress">In Progress</option>
@@ -114,6 +142,80 @@
       released: { label: "Released", color: "bg-emerald-400" }
     };
 
+    const baseMindmaps = [
+      "Algebra", "Geometry", "Calculus", "Probability", "Statistics", "Mechanics", "Electricity", "Magnetism", "Thermodynamics", "Optics",
+      "Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry", "Data Structures", "Algorithms", "Operating Systems", "Databases", "Computer Networks", "Machine Learning", "Cybersecurity",
+      "English Grammar", "Essay Writing", "Public Speaking", "Critical Reading", "Creative Writing", "World History", "Indian History", "Geography", "Political Science", "Economics",
+      "Accounting", "Business Studies", "Marketing", "Entrepreneurship", "Psychology", "Sociology", "Biology", "Genetics", "Ecology", "Human Anatomy",
+      "Environmental Science", "Astronomy", "Robotics", "Cloud Computing", "Web Development", "Mobile Development", "UI/UX Design", "Project Management", "Time Management", "Exam Strategy",
+      "Research Methods", "Presentation Skills", "Communication", "Digital Literacy", "Ethics", "Financial Literacy", "Career Planning", "Interview Prep", "Resume Building", "Leadership"
+    ];
+
+    const mindmaps = baseMindmaps.map((topic, index) => ({
+      id: `mindmap-${index + 1}`,
+      title: topic,
+      subtopics: [
+        {
+          name: `${topic} Foundations`,
+          concepts: [`Core definitions in ${topic}`, `${topic} terminology`, `${topic} starter exercises`]
+        },
+        {
+          name: `${topic} Intermediate`,
+          concepts: [`Problem solving patterns`, `Common mistakes in ${topic}`, `Practice framework`]
+        },
+        {
+          name: `${topic} Advanced`,
+          concepts: [`Real-world applications`, `Higher-order questions`, `${topic} capstone checklist`]
+        }
+      ]
+    }));
+
+    function renderRoadmap() {
+      const selected = document.getElementById("statusFilter").value;
+      const items = selected === "all" ? roadmapItems : roadmapItems.filter(item => item.status === selected);
+      document.getElementById("roadmapGrid").innerHTML = items.map(item => {
+        const meta = statusMeta[item.status];
+        return `<article class="roadmap-card rounded-2xl border border-white/10 bg-slate-900/70 p-5"><div class="flex items-center justify-between gap-2 mb-3"><span class="feature-pill text-xs px-2 py-1 rounded-full text-slate-200">${item.area}</span><span class="text-xs text-slate-300 inline-flex items-center gap-2"><i class="status-dot ${meta.color}"></i>${meta.label}</span></div><h3 class="font-bold text-lg leading-snug">${item.title}</h3><p class="text-slate-300 text-sm mt-2 leading-relaxed">${item.details}</p><div class="mt-4 text-xs text-cyan-300 font-semibold">Target: ${item.quarter} 2026</div></article>`;
+      }).join("");
+    }
+
+    function renderMindmaps() {
+      document.getElementById("mindmapCount").textContent = `${mindmaps.length} mindmaps available`;
+      document.getElementById("mindmapGrid").innerHTML = mindmaps.map(map => `
+        <article class="mindmap-node rounded-2xl p-4">
+          <button class="w-full flex items-center justify-between gap-3 text-left" data-toggle="${map.id}">
+            <div>
+              <p class="text-xs text-cyan-300">Topic</p>
+              <h3 class="text-lg font-bold">${map.title}</h3>
+            </div>
+            <span class="arrow-chip text-cyan-200 text-xs px-2 py-1 rounded-full"><i class="fa-solid fa-arrow-right"></i> Expand</span>
+          </button>
+          <div id="${map.id}" class="hidden-tree mt-4 tree-root pl-2 space-y-2">
+            ${map.subtopics.map(sub => `
+              <div class="tree-branch">
+                <div class="rounded-lg border border-purple-400/25 bg-purple-500/10 p-2 text-sm font-semibold text-purple-200 inline-flex items-center gap-2">
+                  <i class="fa-solid fa-arrow-right"></i> ${sub.name}
+                </div>
+                <ul class="mt-2 ml-2 space-y-2">
+                  ${sub.concepts.map(concept => `<li class="tree-branch"><div class="rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-sm text-slate-200 inline-flex items-center gap-2"><i class="fa-solid fa-arrow-right text-cyan-300"></i> ${concept}</div></li>`).join("")}
+                </ul>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const node = document.getElementById(btn.dataset.toggle);
+          node.classList.toggle("hidden-tree");
+        });
+      });
+    }
+
+    document.getElementById("statusFilter").addEventListener("change", renderRoadmap);
+    renderRoadmap();
+    renderMindmaps();
     const grid = document.getElementById("roadmapGrid");
     const filter = document.getElementById("statusFilter");
 
