@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Practice The Lab (PTL)</title>
+<title>Practical Lab (CTF Style)</title>
 <style>
   :root {
     --bg: #030712;
@@ -12,12 +12,9 @@
     --text: #e5e7eb;
     --muted: #9ca3af;
     --accent: #4f46e5;
-    --accent-soft: rgba(79, 70, 229, 0.2);
     --success: #22c55e;
   }
-
   * { box-sizing: border-box; }
-
   body {
     margin: 0;
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -25,13 +22,7 @@
     background: radial-gradient(circle at 10% 0%, #111827, var(--bg) 45%);
     min-height: 100vh;
   }
-
-  .wrap {
-    max-width: 1160px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-  }
-
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 24px 16px 48px; }
   .hero {
     border: 1px solid var(--line);
     background: linear-gradient(130deg, rgba(79,70,229,0.28), rgba(17,24,39,0.8));
@@ -39,150 +30,44 @@
     padding: 22px;
     margin-bottom: 20px;
   }
-
-  .hero h1 {
-    margin: 0 0 8px;
-    font-size: clamp(1.4rem, 2.7vw, 2rem);
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.4rem, 2.7vw, 2rem); }
+  .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+  .toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .toolbar input, .toolbar select {
+    width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 10px; padding: 10px;
   }
-
-  .hero p {
-    margin: 0;
-    color: var(--muted);
-    max-width: 760px;
-  }
-
-  .toolbar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .toolbar input,
-  .toolbar select {
-    width: 100%;
-    border: 1px solid var(--line);
-    background: var(--card);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
-  }
-
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
   .machine {
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgba(17, 24, 39, 0.85);
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    border: 1px solid var(--line); border-radius: 14px; background: rgba(17, 24, 39, 0.85);
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
   }
-
   .pill {
-    display: inline-flex;
-    border: 1px solid var(--line);
-    background: #0b1220;
-    border-radius: 999px;
-    padding: 3px 9px;
-    font-size: 0.78rem;
-    color: var(--muted);
+    display: inline-flex; border: 1px solid var(--line); background: #0b1220; border-radius: 999px;
+    padding: 3px 9px; font-size: 0.78rem; color: var(--muted);
   }
-
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .machine h3 { margin: 0; font-size: 1.05rem; }
+  .machine p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
+  .machine button, .lab-panel button {
+    border: none; border-radius: 10px; padding: 10px; color: white; cursor: pointer; font-weight: 600;
   }
-
-  .machine h3 {
-    margin: 0;
-    font-size: 1.05rem;
-  }
-
-  .machine p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-    line-height: 1.4;
-  }
-
-  .machine button,
-  .lab-panel button {
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .primary {
-    background: var(--accent);
-  }
-
-  .primary:hover {
-    filter: brightness(1.1);
-  }
-
-  .panel-wrap {
-    margin-top: 22px;
-  }
-
-  .lab-panel {
-    border: 1px solid var(--line);
-    background: var(--card);
-    border-radius: 14px;
-    padding: 16px;
-  }
-
-  .lab-panel h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
-  }
-
-  .lab-panel ul {
-    color: var(--muted);
-    line-height: 1.5;
-    margin-top: 10px;
-  }
-
+  .primary { background: var(--accent); }
+  .primary:hover { filter: brightness(1.1); }
+  .panel-wrap { margin-top: 22px; }
+  .lab-panel { border: 1px solid var(--line); background: var(--card); border-radius: 14px; padding: 16px; }
+  .lab-panel h2 { margin-top: 0; font-size: 1.1rem; }
+  .lab-panel ul { color: var(--muted); line-height: 1.5; margin-top: 10px; }
   .connection {
-    border: 1px dashed #374151;
-    background: #0b1220;
-    border-radius: 10px;
-    padding: 10px;
-    margin-top: 12px;
-    font-size: 0.87rem;
+    border: 1px dashed #374151; background: #0b1220; border-radius: 10px; padding: 10px;
+    margin-top: 12px; font-size: 0.87rem;
   }
-
-  .flag-box {
-    margin-top: 14px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
+  .flag-box { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
   .flag-box input {
-    flex: 1;
-    min-width: 230px;
-    border: 1px solid var(--line);
-    background: #0b1220;
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px;
+    flex: 1; min-width: 230px; border: 1px solid var(--line); background: #0b1220;
+    color: var(--text); border-radius: 10px; padding: 10px;
   }
-
-  #status {
-    margin-top: 10px;
-    font-size: 0.9rem;
-  }
-
+  #status { margin-top: 10px; font-size: 0.9rem; }
   .ok { color: var(--success); }
   .muted { color: var(--muted); }
 </style>
@@ -190,10 +75,10 @@
 <body>
   <main class="wrap">
     <section class="hero">
-      <h1>Practice The Lab (PTL)</h1>
+      <h1>Practical Lab (CTF Style)</h1>
       <p>
-        CTF-style practical missions for Docker, Kubernetes, database operations, and ROS2.
-        Pick a machine, spawn your lab, solve objectives, and submit the flag.
+        Hands-on practical missions for Docker, Kubernetes, Terraform, ANSYS, Database and ROS2.
+        Start a machine, solve objectives, then submit the captured flag.
       </p>
     </section>
 
@@ -203,6 +88,8 @@
         <option value="all">All Tracks</option>
         <option value="docker">Docker</option>
         <option value="kubernetes">Kubernetes</option>
+        <option value="terraform">Terraform</option>
+        <option value="ansys">ANSYS</option>
         <option value="database">Database</option>
         <option value="ros2">ROS2</option>
       </select>

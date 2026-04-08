@@ -83,6 +83,11 @@ const videoMetadataSchema = new mongoose.Schema(
       description: "MIME type for HTTP headers",
     },
 
+    localFilePath: {
+      type: String,
+      description: "Absolute path of local backup in /Videos folder",
+    },
+
     // Thumbnail
     thumbnail: {
       type: String,
@@ -247,6 +252,67 @@ const videoFeedbackSchema = new mongoose.Schema(
 const VideoFeedback = mongoose.model("VideoFeedback", videoFeedbackSchema);
 
 // ============================================================
+// PDF LIBRARY SCHEMA
+// Stores metadata for PDFs stored in GridFS
+// ============================================================
+const pdfDocumentSchema = new mongoose.Schema(
+  {
+    file_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    category: {
+      type: String,
+      default: "General",
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    fileSize: {
+      type: Number,
+      default: 0,
+    },
+    mimeType: {
+      type: String,
+      default: "application/pdf",
+    },
+    localFilePath: {
+      type: String,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    collection: "pdf_documents",
+    timestamps: true,
+  }
+);
+
+pdfDocumentSchema.index({ title: "text", description: "text", tags: 1 });
+pdfDocumentSchema.index({ category: 1 });
+pdfDocumentSchema.index({ uploadedAt: -1 });
+
+const PdfDocument = mongoose.model("PdfDocument", pdfDocumentSchema);
+
+// ============================================================
 // EXPORT SCHEMAS AND INITIALIZATION
 // ============================================================
 
@@ -266,6 +332,13 @@ async function initializeCollections() {
       video_id: 1,
       user_id: 1,
     });
+    await PdfDocument.collection.createIndex({
+      title: "text",
+      description: "text",
+    });
+    await PdfDocument.collection.createIndex({
+      uploadedAt: -1,
+    });
 
     console.log("✅ MongoDB collections initialized");
     return true;
@@ -278,5 +351,6 @@ async function initializeCollections() {
 module.exports = {
   VideoMetadata,
   VideoFeedback,
+  PdfDocument,
   initializeCollections,
 };

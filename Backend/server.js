@@ -68,6 +68,25 @@ const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
 console.log("✅ Video routes mounted at /api/videos");
 
+// PDF library routes (MongoDB metadata + /Frontend/pdfs files)
+try {
+  const pdfLibraryRoutes = require("./routes/pdf-library");
+  app.use("/api/pdfs", pdfLibraryRoutes);
+  console.log("✅ PDF library routes mounted at /api/pdfs");
+} catch (err) {
+  console.warn("⚠️  PDF library routes not found:", err.message);
+}
+
+
+// 3D model hub routes (MongoDB metadata + Frontend/3d-models files)
+try {
+  const modelRoutes = require("./routes/models3d");
+  app.use("/api/models", modelRoutes);
+  console.log("✅ 3D model routes mounted at /api/models");
+} catch (err) {
+  console.warn("⚠️  3D model routes not found:", err.message);
+}
+
 // Basic progress routes (XP / video completion)
 try {
   const progressRoutes = require("./routes/progress");
@@ -119,9 +138,39 @@ app.get("/chatbot", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "chatbot.html"));
 });
 
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
+});
+
 // Video player page
 app.get("/videoplayer", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "videoplayer.html"));
+});
+
+// PDF upload page
+app.get("/upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "upload.html"));
+});
+
+// Video upload page
+app.get("/video-upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "video-upload.html"));
+});
+
+// PDF library page
+app.get("/library", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
+});
+
+
+// 3D lab page
+app.get("/3d-lab", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "3d-lab.html"));
+});
+
+// 3D model upload page
+app.get("/3d-upload", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "3d-upload.html"));
 });
 
 // -------------------- ADMIN ROUTES (owner-only) -------------------- //
