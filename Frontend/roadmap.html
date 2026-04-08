@@ -51,6 +51,22 @@
       <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">In Progress</p><p class="text-3xl font-bold mt-2 text-amber-300">11</p></article>
       <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">Released</p><p class="text-3xl font-bold mt-2 text-emerald-300">19</p></article>
       <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70"><p class="text-slate-400 text-sm">Community Votes</p><p class="text-3xl font-bold mt-2 text-cyan-300">4,280</p></article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Planned Features</p>
+        <p class="text-3xl font-bold mt-2">36</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">In Progress</p>
+        <p class="text-3xl font-bold mt-2 text-amber-300">11</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Released</p>
+        <p class="text-3xl font-bold mt-2 text-emerald-300">19</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Community Votes</p>
+        <p class="text-3xl font-bold mt-2 text-cyan-300">4,280</p>
+      </article>
     </section>
 
     <section class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 md:p-7">
@@ -63,6 +79,9 @@
         </div>
       </div>
       <div id="quarterDescription" class="text-slate-300 leading-relaxed">Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.</div>
+      <div id="quarterDescription" class="text-slate-300 leading-relaxed">
+        Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.
+      </div>
     </section>
 
     <section>
@@ -84,6 +103,14 @@
         <p class="text-xs text-cyan-300" id="mindmapCount"></p>
       </div>
       <div id="mindmapGrid" class="grid md:grid-cols-2 gap-4"></div>
+          <option value="all">All statuses</option>
+          <option value="planned">Planned</option>
+          <option value="progress">In Progress</option>
+          <option value="released">Released</option>
+        </select>
+      </div>
+
+      <div id="roadmapGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
     </section>
   </main>
 
@@ -189,6 +216,31 @@
     document.getElementById("statusFilter").addEventListener("change", renderRoadmap);
     renderRoadmap();
     renderMindmaps();
+    const grid = document.getElementById("roadmapGrid");
+    const filter = document.getElementById("statusFilter");
+
+    function render() {
+      const selected = filter.value;
+      const items = selected === "all" ? roadmapItems : roadmapItems.filter(item => item.status === selected);
+
+      grid.innerHTML = items.map(item => {
+        const meta = statusMeta[item.status];
+        return `
+          <article class="roadmap-card rounded-2xl border border-white/10 bg-slate-900/70 p-5">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="feature-pill text-xs px-2 py-1 rounded-full text-slate-200">${item.area}</span>
+              <span class="text-xs text-slate-300 inline-flex items-center gap-2"><i class="status-dot ${meta.color}"></i>${meta.label}</span>
+            </div>
+            <h3 class="font-bold text-lg leading-snug">${item.title}</h3>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${item.details}</p>
+            <div class="mt-4 text-xs text-cyan-300 font-semibold">Target: ${item.quarter} 2026</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    filter.addEventListener("change", render);
+    render();
 
     document.querySelectorAll('.quarter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
