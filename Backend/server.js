@@ -8,16 +8,14 @@ const http = require("http");
 const https = require("https");
 const cors = require("cors");
 const helmet = require("helmet");
-const cookieParser = require("cookie-parser");
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const isProduction = process.env.NODE_ENV === "production";
-const tlsKeyPath = process.env.TLS_KEY_PATH;
-const tlsCertPath = process.env.TLS_CERT_PATH;
-const tlsCaPath = process.env.TLS_CA_PATH;
-const shouldForceHttps = process.env.FORCE_HTTPS === "true";
-const allowedOrigins = (process.env.CORS_ORIGIN || "")
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
@@ -50,6 +48,17 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -65,7 +74,23 @@ if (shouldForceHttps) {
 const FRONTEND_PATH = path.join(__dirname, "../Frontend");
 
 // Serve static files
-app.use(express.static(FRONTEND_PATH));
+app.use(
+  express.static(FRONTEND_PATH, {
+    etag: true,
+    lastModified: true,
+    maxAge: IS_PRODUCTION ? "7d" : 0,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+        return;
+      }
+      res.setHeader(
+        "Cache-Control",
+        IS_PRODUCTION ? "public, max-age=604800, immutable" : "no-cache"
+      );
+    },
+  })
+);
 
 // -------------------- DATABASE INITIALIZATION -------------------- //
 // Initialize MySQL connection (existing)
