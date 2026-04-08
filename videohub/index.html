@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VideoHub - Multilingual Dubbing</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+      .card { border: 1px solid #ddd; border-radius: 10px; padding: 1rem; }
+      label { display: block; margin-top: 1rem; }
+      button { margin-top: 1rem; padding: 0.6rem 1rem; cursor: pointer; }
+      #status { margin-top: 1rem; white-space: pre-wrap; }
+      #downloadLink { display: none; margin-top: 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <h1>VideoHub Translator</h1>
+    <div class="card">
+      <p>Upload a video, select output language, and get a dubbed video.</p>
+
+      <label for="videoFile">Video file</label>
+      <input id="videoFile" type="file" accept="video/*" />
+
+      <label for="languageSelect">Target language</label>
+      <select id="languageSelect"></select>
+
+      <button id="translateBtn">Translate & Dub</button>
+
+      <div id="status"></div>
+      <a id="downloadLink" target="_blank">Download dubbed video</a>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
