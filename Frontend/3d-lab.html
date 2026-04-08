@@ -30,6 +30,8 @@
           </div>
         </div>
 
+        <p id="viewerStatus" class="mb-3 text-xs text-slate-400">Viewer ready.</p>
+
         <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
           <model-viewer
             id="viewer"
@@ -54,6 +56,9 @@
       const descEl = document.getElementById("activeDescription");
       const downloadEl = document.getElementById("downloadModel");
       const toggleRotateBtn = document.getElementById("toggleRotate");
+      const viewerStatusEl = document.getElementById("viewerStatus");
+
+      const VIEWABLE_FORMATS = new Set(["glb", "gltf"]);
 
       let models = [];
       let filteredModels = [];
@@ -67,6 +72,22 @@
       }
 
       function setActiveModel(model) {
+        const format = String(model.format || "").toLowerCase();
+        const modelUrl = new URL(model.path, window.location.origin).href;
+
+        titleEl.textContent = model.title;
+        descEl.textContent = model.description || `Format: ${format.toUpperCase()} | Size: ${bytesToSize(model.fileSize)}`;
+        downloadEl.href = model.downloadUrl || modelUrl;
+        downloadEl.setAttribute("download", model.fileName || `${model.title}.${format}`);
+
+        if (!VIEWABLE_FORMATS.has(format)) {
+          viewerEl.src = "";
+          viewerStatusEl.textContent = `Preview is available for GLB/GLTF only. You can still download this ${format.toUpperCase()} file.`;
+          return;
+        }
+
+        viewerStatusEl.textContent = "Loading model preview...";
+        viewerEl.src = modelUrl;
         titleEl.textContent = model.title;
         descEl.textContent = model.description || `Format: ${model.format.toUpperCase()} | Size: ${bytesToSize(model.fileSize)}`;
         viewerEl.src = model.path;
@@ -124,6 +145,14 @@
         }
       });
 
+      viewerEl.addEventListener("load", () => {
+        viewerStatusEl.textContent = "Model loaded. Drag to rotate, scroll to zoom.";
+      });
+
+      viewerEl.addEventListener("error", () => {
+        viewerStatusEl.textContent = "Preview failed to load. Use download and verify model integrity/format.";
+      });
+
       async function loadModels() {
         try {
           const response = await fetch("/api/models");
@@ -136,6 +165,8 @@
 
           if (models.length) {
             setActiveModel(models[0]);
+          } else {
+            viewerStatusEl.textContent = "No models found yet. Upload one from the Upload page.";
           }
         } catch (error) {
           listEl.innerHTML = `<p class="rounded-lg border border-red-700 p-3 text-sm text-red-300">Failed to load models: ${error.message}</p>`;

@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Factorize: x\u00b2 - 9",
+      "options": [
+        "(x-3)(x+3)",
+        "(x-9)(x+1)",
+        "(x-3)\u00b2",
+        "x(x-9)"
+      ],
+      "answer": "(x-3)(x+3)"
+    },
+    {
+      "question": "If 2x - 7 = 11, x =",
+      "options": [
+        "9",
+        "2",
+        "4",
+        "7"
+      ],
+      "answer": "9"
+    },
+    {
+      "question": "Solve: 3(x - 2) = 12",
+      "options": [
+        "x = 6",
+        "x = 4",
+        "x = 2",
+        "x = 8"
+      ],
+      "answer": "x = 6"
+    }
+  ]
+}

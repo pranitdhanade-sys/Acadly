@@ -188,6 +188,153 @@
 </style>
 </head>
 <body>
+
+<div class="container">
+  <h2>Practice Lab</h2>
+
+  <label>Subject</label>
+  <select id="subject">
+    <option>Physics</option>
+    <option>Chemistry</option>
+    <option>Mathematics</option>
+    <option>Computer Science</option>
+  </select>
+
+  <label>Class</label>
+  <select id="class">
+    <option>Class 8</option>
+    <option>Class 9</option>
+    <option>Class 10</option>
+    <option>Class 11</option>
+    <option>Class 12</option>
+  </select>
+
+  <label>Topic</label>
+  <select id="topic"></select>
+
+  <label>Number of Questions</label>
+  <input type="range" min="5" max="50" value="10" id="questions">
+  <div class="range-value" id="qValue">10</div>
+
+  <label>Difficulty</label>
+  <div class="toggle" id="difficulty">
+    <button type="button" data-level="easy">Easy</button>
+    <button type="button" data-level="medium" class="active">Medium</button>
+    <button type="button" data-level="hard">Hard</button>
+  </div>
+
+  <label>Timer</label>
+  <select id="timer">
+    <option value="0">No Timer</option>
+    <option value="600">10 min</option>
+    <option value="1800">30 min</option>
+    <option value="3600">60 min</option>
+  </select>
+
+  <button class="start" onclick="startLab()">Start Practice</button>
+
+  <div id="testArea" hidden>
+    <div id="testMeta" class="meta"></div>
+    <div id="questionsList"></div>
+  </div>
+</div>
+
+<script>
+let difficulty = 'medium';
+
+const qSlider = document.getElementById('questions');
+const qValue = document.getElementById('qValue');
+const difficultyButtons = document.querySelectorAll('#difficulty button');
+
+const topicCatalog = {
+  Physics: ["All Topics", "Gravity", "Thermodynamics", "Electricity"],
+  Chemistry: ["All Topics", "Organic Chemistry", "Inorganic Chemistry"],
+  Mathematics: ["All Topics", "Algebra"],
+  "Computer Science": ["All Topics", "Data Structures"],
+};
+
+const subjectSelect = document.getElementById('subject');
+const topicSelect = document.getElementById('topic');
+
+function refreshTopics() {
+  const topics = topicCatalog[subjectSelect.value] || ["All Topics"];
+  topicSelect.innerHTML = topics.map((topic) => `<option>${topic}</option>`).join('');
+}
+
+subjectSelect.addEventListener('change', refreshTopics);
+refreshTopics();
+
+qSlider.oninput = () => {
+  qValue.textContent = qSlider.value;
+};
+
+difficultyButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    difficulty = button.dataset.level;
+    difficultyButtons.forEach((btn) => btn.classList.remove('active'));
+    button.classList.add('active');
+  });
+});
+
+function renderTest(data) {
+  const testArea = document.getElementById('testArea');
+  const testMeta = document.getElementById('testMeta');
+  const list = document.getElementById('questionsList');
+
+  testArea.hidden = false;
+  testMeta.textContent = `Generated ${data.generatedCount} of ${data.totalAvailable} available question(s).`;
+
+  list.innerHTML = '';
+
+  data.questions.forEach((question, index) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+
+    const options = Array.isArray(question.options)
+      ? question.options.map((option) => `<li>${option}</li>`).join('')
+      : '<li>No options available</li>';
+
+    card.innerHTML = `
+      <h4>Q${index + 1}. ${question.question || 'Untitled question'}</h4>
+      <ul>${options}</ul>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+function startLab() {
+  const config = {
+    subject: document.getElementById('subject').value,
+    class: document.getElementById('class').value,
+    topic: document.getElementById('topic').value,
+    questions: qSlider.value,
+    difficulty,
+    timer: document.getElementById('timer').value
+  };
+
+  fetch('/api/start-lab', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(config)
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().then((payload) => {
+          throw new Error(payload.error || 'Could not start lab.');
+        });
+      }
+
+      return res.json();
+    })
+    .then((data) => {
+      renderTest(data);
+    })
+    .catch((err) => {
+      alert(err.message);
+      console.error(err);
   <main class="wrap">
     <section class="hero">
       <h1>Practice The Lab (PTL)</h1>

@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Which compound is known as common salt?",
+      "options": [
+        "NaCl",
+        "KCl",
+        "Na2CO3",
+        "CaCO3"
+      ],
+      "answer": "NaCl"
+    },
+    {
+      "question": "The oxidation state of oxygen in H2O is:",
+      "options": [
+        "-2",
+        "+2",
+        "0",
+        "-1"
+      ],
+      "answer": "-2"
+    },
+    {
+      "question": "Which metal is extracted from bauxite?",
+      "options": [
+        "Aluminium",
+        "Iron",
+        "Copper",
+        "Zinc"
+      ],
+      "answer": "Aluminium"
+    }
+  ]
+}

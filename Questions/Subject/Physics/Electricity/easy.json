@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "What is the SI unit of electric current?",
+      "options": [
+        "Ampere",
+        "Volt",
+        "Ohm",
+        "Watt"
+      ],
+      "answer": "Ampere"
+    },
+    {
+      "question": "Which device measures electric current?",
+      "options": [
+        "Ammeter",
+        "Voltmeter",
+        "Galvanometer",
+        "Barometer"
+      ],
+      "answer": "Ammeter"
+    },
+    {
+      "question": "What type of charge does an electron have?",
+      "options": [
+        "Negative",
+        "Positive",
+        "Neutral",
+        "Variable"
+      ],
+      "answer": "Negative"
+    }
+  ]
+}

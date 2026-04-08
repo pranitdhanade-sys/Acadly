@@ -34,6 +34,34 @@ model3DSchema.index({ uploadedAt: -1 });
 
 const Model3D = mongoose.models.Model3D || mongoose.model("Model3D", model3DSchema);
 
+let indexesEnsured = false;
+
+async function ensureModelIndexes() {
+  if (indexesEnsured) return;
+
+  const existingIndexes = await Model3D.collection.indexes();
+  const invalidTextIndexes = existingIndexes.filter((indexDef) => {
+    const key = indexDef?.key || {};
+    const weights = indexDef?.weights || {};
+    const isTextIndex = key._fts === "text";
+    const referencesTags =
+      Object.prototype.hasOwnProperty.call(key, "tags") ||
+      Object.prototype.hasOwnProperty.call(weights, "tags") ||
+      String(indexDef?.name || "").toLowerCase().includes("tags");
+
+    return isTextIndex && referencesTags;
+  });
+
+  for (const invalidIndex of invalidTextIndexes) {
+    if (invalidIndex?.name) {
+      await Model3D.collection.dropIndex(invalidIndex.name);
+    }
+  }
+
+  await Model3D.syncIndexes();
+  indexesEnsured = true;
+}
+
 function safeFileName(fileName = "") {
   const extension = path.extname(fileName).toLowerCase();
   const baseName = path.basename(fileName, extension).replace(/[^a-zA-Z0-9-_]/g, "_").slice(0, 80);
@@ -81,6 +109,7 @@ function formatModelResponse(doc) {
 router.get("/", async (req, res) => {
   try {
     await connectMongoDB();
+    await ensureModelIndexes();
 
     const models = await Model3D.find({})
       .sort({ uploadedAt: -1 })
@@ -106,6 +135,7 @@ router.post("/upload", (req, res) => {
 
     try {
       await connectMongoDB();
+      await ensureModelIndexes();
 
       if (!req.file) {
         return res.status(400).json({ error: "Missing model file (field name: model)" });
