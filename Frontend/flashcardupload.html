@@ -335,6 +335,7 @@
         }));
         return;
       }
+      if (!raw) return;
       try {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed.cards)) {
