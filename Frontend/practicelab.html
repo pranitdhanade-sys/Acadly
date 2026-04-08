@@ -146,12 +146,7 @@ button:hover {
   </select>
 
   <label>Topic</label>
-  <select id="topic">
-    <option>All Topics</option>
-    <option>Gravity</option>
-    <option>Thermodynamics</option>
-    <option>Organic Chemistry</option>
-  </select>
+  <select id="topic"></select>
 
   <label>Number of Questions</label>
   <input type="range" min="5" max="50" value="10" id="questions">
@@ -186,6 +181,24 @@ let difficulty = 'medium';
 const qSlider = document.getElementById('questions');
 const qValue = document.getElementById('qValue');
 const difficultyButtons = document.querySelectorAll('#difficulty button');
+
+const topicCatalog = {
+  Physics: ["All Topics", "Gravity", "Thermodynamics", "Electricity"],
+  Chemistry: ["All Topics", "Organic Chemistry", "Inorganic Chemistry"],
+  Mathematics: ["All Topics", "Algebra"],
+  "Computer Science": ["All Topics", "Data Structures"],
+};
+
+const subjectSelect = document.getElementById('subject');
+const topicSelect = document.getElementById('topic');
+
+function refreshTopics() {
+  const topics = topicCatalog[subjectSelect.value] || ["All Topics"];
+  topicSelect.innerHTML = topics.map((topic) => `<option>${topic}</option>`).join('');
+}
+
+subjectSelect.addEventListener('change', refreshTopics);
+refreshTopics();
 
 qSlider.oninput = () => {
   qValue.textContent = qSlider.value;

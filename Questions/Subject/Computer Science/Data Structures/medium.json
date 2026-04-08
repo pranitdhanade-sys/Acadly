@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Average case search complexity of binary search is:",
+      "options": [
+        "O(log n)",
+        "O(n)",
+        "O(1)",
+        "O(n log n)"
+      ],
+      "answer": "O(log n)"
+    },
+    {
+      "question": "Which traversal visits root-left-right?",
+      "options": [
+        "Preorder",
+        "Inorder",
+        "Postorder",
+        "Level order"
+      ],
+      "answer": "Preorder"
+    },
+    {
+      "question": "Best data structure for implementing recursion call stack:",
+      "options": [
+        "Stack",
+        "Queue",
+        "Linked List",
+        "Heap"
+      ],
+      "answer": "Stack"
+    }
+  ]
+}

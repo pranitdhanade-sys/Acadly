@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Which data structure follows FIFO?",
+      "options": [
+        "Queue",
+        "Stack",
+        "Tree",
+        "Graph"
+      ],
+      "answer": "Queue"
+    },
+    {
+      "question": "Which data structure uses LIFO?",
+      "options": [
+        "Stack",
+        "Queue",
+        "Array",
+        "Heap"
+      ],
+      "answer": "Stack"
+    },
+    {
+      "question": "What is the first index in most programming arrays?",
+      "options": [
+        "0",
+        "1",
+        "-1",
+        "Depends"
+      ],
+      "answer": "0"
+    }
+  ]
+}
