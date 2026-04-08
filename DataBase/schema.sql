@@ -236,3 +236,75 @@ ON DUPLICATE KEY UPDATE user_id = user_id;
 INSERT INTO user_progress (user_id, total_videos_watched, total_watch_time_minutes)
 SELECT id, 0, 0 FROM users WHERE email = 'admin@acadly.com'
 ON DUPLICATE KEY UPDATE user_id = user_id;
+
+-- ------------------------------------------------------------
+-- AUTH + SESSION SUPPORT (required by Backend/routes/auth.js)
+-- ------------------------------------------------------------
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) NULL AFTER password,
+  ADD COLUMN IF NOT EXISTS locked_until DATETIME NULL,
+  ADD COLUMN IF NOT EXISTS login_attempts INT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_ip_address VARCHAR(64) NULL;
+
+UPDATE users SET password_hash = COALESCE(password_hash, password);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  user_id       INT NOT NULL,
+  session_token TEXT NOT NULL,
+  refresh_token TEXT NOT NULL,
+  expires_at    DATETIME NOT NULL,
+  ip_address    VARCHAR(64),
+  user_agent    TEXT,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_session_user (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS login_audit (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT NULL,
+  email       VARCHAR(255),
+  status      ENUM('success','failed','locked') NOT NULL,
+  ip_address  VARCHAR(64),
+  reason      VARCHAR(255),
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_login_user (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT NOT NULL UNIQUE,
+  reset_token TEXT NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- ROADMAP + ACTIVITY TRACKING
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS roadmap_progress (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,
+  module_id    VARCHAR(40) NOT NULL,
+  lesson_id    INT NOT NULL,
+  status       ENUM('locked','in_progress','done') NOT NULL DEFAULT 'done',
+  xp_awarded   INT NOT NULL DEFAULT 0,
+  completed_at DATETIME NULL,
+  updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_user_module_lesson (user_id, module_id, lesson_id),
+  INDEX idx_roadmap_user_module (user_id, module_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_activity_log (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id       INT NOT NULL,
+  event_type    VARCHAR(120) NOT NULL,
+  metadata_json JSON NULL,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_activity_user_date (user_id, created_at),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

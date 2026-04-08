@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "question": "What is the SI unit of heat?",
+      "options": ["Joule", "Calorie", "Watt", "Kelvin"],
+      "answer": "Joule"
+    },
+    {
+      "question": "Which law states energy cannot be created or destroyed?",
+      "options": ["First law of thermodynamics", "Second law of thermodynamics", "Zeroth law", "Third law"],
+      "answer": "First law of thermodynamics"
+    }
+  ]
+}

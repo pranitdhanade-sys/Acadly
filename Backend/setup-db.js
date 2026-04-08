@@ -11,16 +11,16 @@
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 
 const mysql = require("mysql2");
-const fs    = require("fs");
-const path  = require("path");
+const fs = require("fs");
+const path = require("path");
 
 const DB_ROOT = path.join(__dirname, "../DataBase");
 
 // Connect without specifying a database so we can CREATE it
 const connection = mysql.createConnection({
-  host    : process.env.DB_HOST     || "localhost",
-  port    : Number(process.env.DB_PORT) || 3306,
-  user    : process.env.DB_USER     || "root",
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   multipleStatements: true,
 });

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Acadly</title>
+  <meta name="description" content="Get in touch with Acadly support, partnerships, and academic guidance." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(140deg, #f8fafc, #eef2ff 40%, #ecfeff);
+      min-height: 100vh;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+
+<body class="text-slate-800 antialiased">
+  <header class="max-w-6xl mx-auto px-6 pt-10 pb-4">
+    <a href="Homepage.html" class="inline-flex items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+      <span aria-hidden="true">←</span>
+      Back to homepage
+    </a>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 pb-16">
+    <section class="grid lg:grid-cols-2 gap-8 items-start">
+      <div class="glass rounded-2xl p-8 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.2em] text-cyan-700 font-bold">Contact</p>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mt-3 text-slate-900">We'd love to hear from you</h1>
+        <p class="mt-4 text-slate-600 leading-relaxed">
+          Whether you're a student, educator, or institution, the Acadly team is here to help with platform access,
+          onboarding, and learning support.
+        </p>
+
+        <div class="mt-8 space-y-5">
+          <div>
+            <p class="font-semibold text-slate-900">Email</p>
+            <a href="mailto:support@acadly.com" class="text-cyan-700 hover:underline">support@acadly.com</a>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Phone</p>
+            <a href="tel:+18005551234" class="text-cyan-700 hover:underline">+1 (800) 555-1234</a>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Office Hours</p>
+            <p class="text-slate-600">Monday - Friday, 9:00 AM to 6:00 PM (UTC)</p>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Head Office</p>
+            <p class="text-slate-600">Acadly Learning Labs, 410 Education Plaza, Austin, TX 78701</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-8 shadow-lg">
+        <h2 class="text-2xl font-bold text-slate-900">Send a message</h2>
+        <p class="text-slate-600 mt-2">Fill out the form and we will respond within 1 business day.</p>
+
+        <form class="mt-6 space-y-5" action="#" method="post">
+          <div>
+            <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <input id="name" name="name" type="text" required placeholder="Jane Doe"
+              class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+            <input id="email" name="email" type="email" required placeholder="jane@example.com"
+              class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+          </div>
+
+          <div>
+            <label for="topic" class="block text-sm font-medium text-slate-700 mb-1">Topic</label>
+            <select id="topic" name="topic"
+              class="w-full rounded-xl border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+              <option value="general">General Inquiry</option>
+              <option value="support">Technical Support</option>
+              <option value="partnership">Partnerships</option>
+              <option value="feedback">Feedback</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-medium text-slate-700 mb-1">Message</label>
+            <textarea id="message" name="message" rows="5" required placeholder="How can we help you today?"
+              class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"></textarea>
+          </div>
+
+          <button type="submit"
+            class="w-full rounded-xl bg-slate-900 text-white font-semibold px-4 py-3 hover:bg-slate-800 transition-colors">
+            Send Message
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>

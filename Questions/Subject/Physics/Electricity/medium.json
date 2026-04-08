@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "According to Ohm's law, V = ?",
+      "options": [
+        "IR",
+        "I/R",
+        "R/I",
+        "I+R"
+      ],
+      "answer": "IR"
+    },
+    {
+      "question": "What is equivalent resistance of two 4\u03a9 resistors in series?",
+      "options": [
+        "8 \u03a9",
+        "2 \u03a9",
+        "4 \u03a9",
+        "16 \u03a9"
+      ],
+      "answer": "8 \u03a9"
+    },
+    {
+      "question": "Electric power is calculated by:",
+      "options": [
+        "P = VI",
+        "P = V/I",
+        "P = I/R",
+        "P = R/V"
+      ],
+      "answer": "P = VI"
+    }
+  ]
+}

@@ -79,13 +79,13 @@ async function uploadVideoFile(videoPath, metadata = {}) {
     notes: Array.isArray(metadata.notes) ? metadata.notes : [],
     quiz:
       metadata.quiz &&
-      metadata.quiz.question &&
-      Array.isArray(metadata.quiz.options)
+        metadata.quiz.question &&
+        Array.isArray(metadata.quiz.options)
         ? {
-            question: metadata.quiz.question,
-            options: metadata.quiz.options,
-            correctIndex: Number(metadata.quiz.correctIndex) || 0,
-          }
+          question: metadata.quiz.question,
+          options: metadata.quiz.options,
+          correctIndex: Number(metadata.quiz.correctIndex) || 0,
+        }
         : undefined,
     subtitleTracks: Array.isArray(metadata.subtitleTracks) ? metadata.subtitleTracks : [],
     uploadedBy: metadata.uploadedBy,

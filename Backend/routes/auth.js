@@ -5,8 +5,20 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db_config');
+const { logUserActivity } = require('../middleware_auth');
 
 const router = express.Router();
+const isProduction = process.env.NODE_ENV === 'production';
+
+function getCookieOptions(maxAgeMs) {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    maxAge: maxAgeMs
+  };
+}
 
 // ============================================
 // HELPER FUNCTIONS
@@ -81,9 +93,9 @@ router.post('/register', async (req, res) => {
 
     // Insert user
     const [result] = await db.query(
-      `INSERT INTO users (email, password_hash, name, role, is_active) 
-       VALUES (?, ?, ?, ?, 1)`,
-      [email, passwordHash, name, role]
+      `INSERT INTO users (email, password_hash, password, name, role, is_active) 
+       VALUES (?, ?, ?, ?, ?, 1)`,
+      [email, passwordHash, passwordHash, name, role]
     );
 
     const userId = result.insertId;
@@ -134,7 +146,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await db.query(
-      `SELECT id, password_hash, name, role, is_active, locked_until, login_attempts 
+      `SELECT id, COALESCE(password_hash, password) AS password_hash, name, role, is_active, locked_until, COALESCE(login_attempts, 0) AS login_attempts 
        FROM users WHERE email = ?`,
       [email]
     );
@@ -222,7 +234,7 @@ router.post('/login', async (req, res) => {
     await db.query(
       `INSERT INTO user_sessions (user_id, session_token, refresh_token, expires_at, ip_address, user_agent) 
        VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR), ?, ?)`,
-      [user.id, accessToken, refreshToken, req.get('user-agent')]
+      [user.id, accessToken, refreshToken, req.ip, req.get('user-agent')]
     );
 
     // Log successful login
@@ -232,11 +244,16 @@ router.post('/login', async (req, res) => {
       [user.id, email, 'success', req.ip, 'Login successful']
     );
 
+    await logUserActivity(user.id, 'auth.login.success', { ip: req.ip, user_agent: req.get('user-agent') });
+
     // Get user full profile
     const [profile] = await db.query(
       'SELECT xp_total, level, badges_earned FROM user_profiles WHERE user_id = ?',
       [user.id]
     );
+
+    res.cookie('acadly_access_token', accessToken, getCookieOptions(24 * 60 * 60 * 1000));
+    res.cookie('acadly_refresh_token', refreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000));
 
     res.status(200).json({
       message: 'Login successful',
@@ -264,7 +281,9 @@ router.post('/login', async (req, res) => {
 // ============================================
 router.post('/refresh', async (req, res) => {
   try {
-    const { refresh_token } = req.body;
+    const refreshTokenFromCookie = req.cookies?.acadly_refresh_token;
+    const { refresh_token: refreshTokenFromBody } = req.body;
+    const refresh_token = refreshTokenFromBody || refreshTokenFromCookie;
 
     if (!refresh_token) {
       return res.status(400).json({ error: 'Refresh token required' });
@@ -303,6 +322,8 @@ router.post('/refresh', async (req, res) => {
       users[0].role
     );
 
+    res.cookie('acadly_access_token', newAccessToken, getCookieOptions(24 * 60 * 60 * 1000));
+
     res.status(200).json({
       access_token: newAccessToken
     });
@@ -318,7 +339,7 @@ router.post('/refresh', async (req, res) => {
 // ============================================
 router.post('/logout', async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.acadly_access_token;
 
     if (!token) {
       return res.status(400).json({ error: 'No token provided' });
@@ -336,6 +357,8 @@ router.post('/logout', async (req, res) => {
       [decoded.user_id, token]
     );
 
+    res.clearCookie('acadly_access_token', { path: '/' });
+    res.clearCookie('acadly_refresh_token', { path: '/' });
     res.status(200).json({ message: 'Logged out successfully' });
 
   } catch (error) {
@@ -465,7 +488,7 @@ router.post('/reset-password', async (req, res) => {
 // ============================================
 router.get('/verify', async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.acadly_access_token;
 
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
@@ -486,6 +509,8 @@ router.get('/verify', async (req, res) => {
     if (sessions.length === 0) {
       return res.status(403).json({ error: 'Session expired or invalid' });
     }
+
+    await logUserActivity(decoded.user_id, 'auth.token.verify', { ip: req.ip });
 
     res.status(200).json({
       valid: true,

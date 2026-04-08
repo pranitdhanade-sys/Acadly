@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {
+      "question": "Which functional group is present in alcohols?",
+      "options": ["-OH", "-CHO", "-COOH", "-NH2"],
+      "answer": "-OH"
+    }
+  ]
+}

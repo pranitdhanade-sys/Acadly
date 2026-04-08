@@ -25,24 +25,24 @@ async function testConnection() {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 10000,
     });
-    
+
     console.log("✅ Connection successful!");
     console.log(`   Database: ${mongoose.connection.db.getName()}`);
     console.log(`   Host: ${mongoose.connection.host}`);
-    
+
     // List collections
     const collections = await mongoose.connection.db.listCollections().toArray();
     console.log(`\n📚 Collections found: ${collections.length}`);
     collections.forEach(c => console.log(`   - ${c.name}`));
-    
+
     await mongoose.disconnect();
     console.log("\n🔌 Disconnected\n");
-    
+
   } catch (error) {
     console.error("\n❌ Connection failed!");
     console.error(`   Error: ${error.message}`);
     console.error(`   Code: ${error.code}`);
-    
+
     if (error.message.includes("bad auth")) {
       console.error("\n⚠️  AUTHENTICATION ERROR");
       console.error("   - Check username/password in MongoDB Atlas");
@@ -54,7 +54,7 @@ async function testConnection() {
       console.error("   - Check your internet connection");
       console.error("   - Verify cluster name is correct");
     }
-    
+
     console.error("\n");
     process.exit(1);
   }
