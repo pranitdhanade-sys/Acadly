@@ -29,8 +29,7 @@ const model3DSchema = new mongoose.Schema(
   }
 );
 
-model3DSchema.index({ title: "text", description: "text" });
-model3DSchema.index({ tags: 1 });
+model3DSchema.index({ title: "text", description: "text", tags: 1 });
 model3DSchema.index({ uploadedAt: -1 });
 
 const Model3D = mongoose.models.Model3D || mongoose.model("Model3D", model3DSchema);

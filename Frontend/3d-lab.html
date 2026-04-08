@@ -59,6 +59,7 @@
       const viewerStatusEl = document.getElementById("viewerStatus");
 
       const VIEWABLE_FORMATS = new Set(["glb", "gltf"]);
+
       let models = [];
       let filteredModels = [];
 
@@ -87,6 +88,11 @@
 
         viewerStatusEl.textContent = "Loading model preview...";
         viewerEl.src = modelUrl;
+        titleEl.textContent = model.title;
+        descEl.textContent = model.description || `Format: ${model.format.toUpperCase()} | Size: ${bytesToSize(model.fileSize)}`;
+        viewerEl.src = model.path;
+        downloadEl.href = model.downloadUrl;
+        downloadEl.setAttribute("download", model.fileName || `${model.title}.${model.format}`);
       }
 
       function renderList() {
