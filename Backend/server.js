@@ -3,6 +3,9 @@ require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
+const http = require("http");
+const https = require("https");
 const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
@@ -18,15 +21,21 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .filter(Boolean);
 
 // -------------------- MIDDLEWARE -------------------- //
-app.disable("x-powered-by");
+if (process.env.TRUST_PROXY === "true") {
+  app.set("trust proxy", 1);
+}
 
 app.use(
   helmet({
-    crossOriginResourcePolicy: false,
-    contentSecurityPolicy: false,
+    hsts: isProduction
+      ? {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        }
+      : false,
   })
 );
-app.use(compression());
 
 app.use(
   cors({
@@ -50,8 +59,16 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+if (shouldForceHttps) {
+  app.use((req, res, next) => {
+    if (req.secure) return next();
+    return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+  });
+}
 
 // Absolute path to Frontend folder (moved from Frontend 2.0)
 const FRONTEND_PATH = path.join(__dirname, "../Frontend");
@@ -260,6 +277,24 @@ app.use((req, res) => {
 });
 
 // -------------------- SERVER -------------------- //
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+const canStartTlsServer = tlsKeyPath && tlsCertPath;
+
+if (canStartTlsServer) {
+  const httpsOptions = {
+    key: fs.readFileSync(path.resolve(tlsKeyPath)),
+    cert: fs.readFileSync(path.resolve(tlsCertPath)),
+  };
+
+  if (tlsCaPath) {
+    httpsOptions.ca = fs.readFileSync(path.resolve(tlsCaPath));
+  }
+
+  https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`🔐 HTTPS server running at https://localhost:${PORT}`);
+  });
+} else {
+  http.createServer(app).listen(PORT, () => {
+    console.log(`🚀 HTTP server running at http://localhost:${PORT}`);
+    console.log("ℹ️ TLS not enabled. Set TLS_KEY_PATH and TLS_CERT_PATH to enable HTTPS.");
+  });
+}

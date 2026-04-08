@@ -8,6 +8,17 @@ const db = require('../db_config');
 const { logUserActivity } = require('../middleware_auth');
 
 const router = express.Router();
+const isProduction = process.env.NODE_ENV === 'production';
+
+function getCookieOptions(maxAgeMs) {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    maxAge: maxAgeMs
+  };
+}
 
 // ============================================
 // HELPER FUNCTIONS
@@ -241,6 +252,9 @@ router.post('/login', async (req, res) => {
       [user.id]
     );
 
+    res.cookie('acadly_access_token', accessToken, getCookieOptions(24 * 60 * 60 * 1000));
+    res.cookie('acadly_refresh_token', refreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000));
+
     res.status(200).json({
       message: 'Login successful',
       access_token: accessToken,
@@ -267,7 +281,9 @@ router.post('/login', async (req, res) => {
 // ============================================
 router.post('/refresh', async (req, res) => {
   try {
-    const { refresh_token } = req.body;
+    const refreshTokenFromCookie = req.cookies?.acadly_refresh_token;
+    const { refresh_token: refreshTokenFromBody } = req.body;
+    const refresh_token = refreshTokenFromBody || refreshTokenFromCookie;
 
     if (!refresh_token) {
       return res.status(400).json({ error: 'Refresh token required' });
@@ -306,6 +322,8 @@ router.post('/refresh', async (req, res) => {
       users[0].role
     );
 
+    res.cookie('acadly_access_token', newAccessToken, getCookieOptions(24 * 60 * 60 * 1000));
+
     res.status(200).json({
       access_token: newAccessToken
     });
@@ -321,7 +339,7 @@ router.post('/refresh', async (req, res) => {
 // ============================================
 router.post('/logout', async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.acadly_access_token;
 
     if (!token) {
       return res.status(400).json({ error: 'No token provided' });
@@ -339,6 +357,8 @@ router.post('/logout', async (req, res) => {
       [decoded.user_id, token]
     );
 
+    res.clearCookie('acadly_access_token', { path: '/' });
+    res.clearCookie('acadly_refresh_token', { path: '/' });
     res.status(200).json({ message: 'Logged out successfully' });
 
   } catch (error) {
@@ -468,7 +488,7 @@ router.post('/reset-password', async (req, res) => {
 // ============================================
 router.get('/verify', async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.acadly_access_token;
 
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
