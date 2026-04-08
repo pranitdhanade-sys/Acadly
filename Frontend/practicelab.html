@@ -1,266 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Practice Lab</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Practice The Lab (PTL)</title>
 <style>
-:root {
-  --bg: #020617;
-  --card: rgba(255,255,255,0.05);
-  --accent: #6366f1;
-  --text: #e2e8f0;
-}
+  :root {
+    --bg: #030712;
+    --card: #111827;
+    --line: #1f2937;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #4f46e5;
+    --accent-soft: rgba(79, 70, 229, 0.2);
+    --success: #22c55e;
+  }
 
-body {
-  margin:0;
-  font-family:sans-serif;
-  background: radial-gradient(circle, #0f172a, #020617);
-  color:var(--text);
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  min-height:100vh;
-  padding:30px 16px;
-}
+  * { box-sizing: border-box; }
 
-.container {
-  width:min(700px, 100%);
-  padding:25px;
-  border-radius:20px;
-  background:var(--card);
-  backdrop-filter: blur(20px);
-}
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--text);
+    background: radial-gradient(circle at 10% 0%, #111827, var(--bg) 45%);
+    min-height: 100vh;
+  }
 
-h2 {
-  text-align:center;
-  margin-bottom:20px;
-}
+  .wrap {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
 
-label {
-  font-size:0.9rem;
-  opacity:0.8;
-}
+  .hero {
+    border: 1px solid var(--line);
+    background: linear-gradient(130deg, rgba(79,70,229,0.28), rgba(17,24,39,0.8));
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
 
-select, input[type=range] {
-  width:100%;
-  margin:8px 0 15px;
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  background:#1e293b;
-  color:white;
-}
+  .hero h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.4rem, 2.7vw, 2rem);
+  }
 
-.range-value {
-  text-align:right;
-  font-size:0.8rem;
-}
+  .hero p {
+    margin: 0;
+    color: var(--muted);
+    max-width: 760px;
+  }
 
-button {
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  background:#1e293b;
-  color:white;
-}
+  .toolbar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
 
-button:hover {
-  background:var(--accent);
-}
+  .toolbar input,
+  .toolbar select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px;
+  }
 
-.toggle {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:15px;
-  gap: 10px;
-}
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+  }
 
-.toggle button {
-  flex: 1;
-}
+  .machine {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(17, 24, 39, 0.85);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.toggle button.active {
-  background:var(--accent);
-}
+  .pill {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    background: #0b1220;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
 
-.start {
-  margin-top:10px;
-  background:var(--accent);
-  width:100%;
-}
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
 
-#testArea {
-  margin-top: 24px;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  padding-top: 16px;
-}
+  .machine h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
 
-.question-card {
-  background: rgba(15,23,42,0.8);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
-}
+  .machine p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
 
-.question-card h4 {
-  margin: 0 0 8px;
-  font-size: 1rem;
-}
+  .machine button,
+  .lab-panel button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+  }
 
-.question-card ul {
-  margin: 0;
-  padding-left: 18px;
-}
+  .primary {
+    background: var(--accent);
+  }
 
-.meta {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  margin-bottom: 12px;
-}
+  .primary:hover {
+    filter: brightness(1.1);
+  }
+
+  .panel-wrap {
+    margin-top: 22px;
+  }
+
+  .lab-panel {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .lab-panel h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+
+  .lab-panel ul {
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+
+  .connection {
+    border: 1px dashed #374151;
+    background: #0b1220;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 12px;
+    font-size: 0.87rem;
+  }
+
+  .flag-box {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .flag-box input {
+    flex: 1;
+    min-width: 230px;
+    border: 1px solid var(--line);
+    background: #0b1220;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  #status {
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+
+  .ok { color: var(--success); }
+  .muted { color: var(--muted); }
 </style>
 </head>
-
 <body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Practice The Lab (PTL)</h1>
+      <p>
+        CTF-style practical missions for Docker, Kubernetes, database operations, and ROS2.
+        Pick a machine, spawn your lab, solve objectives, and submit the flag.
+      </p>
+    </section>
 
-<div class="container">
-  <h2>Practice Lab</h2>
+    <section class="toolbar">
+      <input id="search" placeholder="Search by machine, tag, or keyword" />
+      <select id="track">
+        <option value="all">All Tracks</option>
+        <option value="docker">Docker</option>
+        <option value="kubernetes">Kubernetes</option>
+        <option value="database">Database</option>
+        <option value="ros2">ROS2</option>
+      </select>
+      <select id="difficulty">
+        <option value="all">All Difficulties</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <button class="primary" id="refresh" type="button">Refresh Machines</button>
+    </section>
 
-  <label>Subject</label>
-  <select id="subject">
-    <option>Physics</option>
-    <option>Chemistry</option>
-    <option>Mathematics</option>
-    <option>Computer Science</option>
-  </select>
+    <section class="grid" id="machineGrid"></section>
 
-  <label>Class</label>
-  <select id="class">
-    <option>Class 8</option>
-    <option>Class 9</option>
-    <option>Class 10</option>
-    <option>Class 11</option>
-    <option>Class 12</option>
-  </select>
-
-  <label>Topic</label>
-  <select id="topic">
-    <option>All Topics</option>
-    <option>Gravity</option>
-    <option>Thermodynamics</option>
-    <option>Organic Chemistry</option>
-  </select>
-
-  <label>Number of Questions</label>
-  <input type="range" min="5" max="50" value="10" id="questions">
-  <div class="range-value" id="qValue">10</div>
-
-  <label>Difficulty</label>
-  <div class="toggle" id="difficulty">
-    <button type="button" data-level="easy">Easy</button>
-    <button type="button" data-level="medium" class="active">Medium</button>
-    <button type="button" data-level="hard">Hard</button>
-  </div>
-
-  <label>Timer</label>
-  <select id="timer">
-    <option value="0">No Timer</option>
-    <option value="600">10 min</option>
-    <option value="1800">30 min</option>
-    <option value="3600">60 min</option>
-  </select>
-
-  <button class="start" onclick="startLab()">Start Practice</button>
-
-  <div id="testArea" hidden>
-    <div id="testMeta" class="meta"></div>
-    <div id="questionsList"></div>
-  </div>
-</div>
+    <section class="panel-wrap" id="panelWrap" hidden>
+      <article class="lab-panel" id="labPanel"></article>
+    </section>
+  </main>
 
 <script>
-let difficulty = 'medium';
+  const grid = document.getElementById('machineGrid');
+  const panelWrap = document.getElementById('panelWrap');
+  const labPanel = document.getElementById('labPanel');
 
-const qSlider = document.getElementById('questions');
-const qValue = document.getElementById('qValue');
-const difficultyButtons = document.querySelectorAll('#difficulty button');
+  const searchInput = document.getElementById('search');
+  const trackSelect = document.getElementById('track');
+  const difficultySelect = document.getElementById('difficulty');
+  const refreshButton = document.getElementById('refresh');
 
-qSlider.oninput = () => {
-  qValue.textContent = qSlider.value;
-};
+  let currentSession = null;
 
-difficultyButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    difficulty = button.dataset.level;
-    difficultyButtons.forEach((btn) => btn.classList.remove('active'));
-    button.classList.add('active');
-  });
-});
-
-function renderTest(data) {
-  const testArea = document.getElementById('testArea');
-  const testMeta = document.getElementById('testMeta');
-  const list = document.getElementById('questionsList');
-
-  testArea.hidden = false;
-  testMeta.textContent = `Generated ${data.generatedCount} of ${data.totalAvailable} available question(s).`;
-
-  list.innerHTML = '';
-
-  data.questions.forEach((question, index) => {
-    const card = document.createElement('div');
-    card.className = 'question-card';
-
-    const options = Array.isArray(question.options)
-      ? question.options.map((option) => `<li>${option}</li>`).join('')
-      : '<li>No options available</li>';
-
-    card.innerHTML = `
-      <h4>Q${index + 1}. ${question.question || 'Untitled question'}</h4>
-      <ul>${options}</ul>
-    `;
-
-    list.appendChild(card);
-  });
-}
-
-function startLab() {
-  const config = {
-    subject: document.getElementById('subject').value,
-    class: document.getElementById('class').value,
-    topic: document.getElementById('topic').value,
-    questions: qSlider.value,
-    difficulty,
-    timer: document.getElementById('timer').value
-  };
-
-  fetch('/api/start-lab', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(config)
-  })
-    .then((res) => {
-      if (!res.ok) {
-        return res.json().then((payload) => {
-          throw new Error(payload.error || 'Could not start lab.');
-        });
-      }
-
-      return res.json();
-    })
-    .then((data) => {
-      renderTest(data);
-    })
-    .catch((err) => {
-      alert(err.message);
-      console.error(err);
+  async function fetchMachines() {
+    const params = new URLSearchParams({
+      search: searchInput.value.trim(),
+      track: trackSelect.value,
+      difficulty: difficultySelect.value,
     });
-}
-</script>
 
+    const response = await fetch(`/api/ptl/machines?${params.toString()}`);
+    if (!response.ok) throw new Error('Could not load machines right now.');
+    return response.json();
+  }
+
+  function renderMachines(payload) {
+    if (!payload.machines.length) {
+      grid.innerHTML = '<p class="muted">No machine matched this filter.</p>';
+      return;
+    }
+
+    grid.innerHTML = payload.machines.map((machine) => `
+      <article class="machine">
+        <span class="pill">${machine.track}</span>
+        <h3>${machine.name}</h3>
+        <p>${machine.description}</p>
+        <div class="meta">
+          <span class="pill">${machine.difficulty}</span>
+          <span class="pill">${machine.points} pts</span>
+          <span class="pill">Solve rate: ${machine.solveRate}</span>
+          <span class="pill">${machine.duration}</span>
+        </div>
+        <div class="meta">
+          ${machine.tags.map((tag) => `<span class="pill">#${tag}</span>`).join('')}
+        </div>
+        <button class="primary" type="button" onclick="startMachine('${machine.id}')">Start Machine</button>
+      </article>
+    `).join('');
+  }
+
+  async function loadMachines() {
+    try {
+      const payload = await fetchMachines();
+      renderMachines(payload);
+    } catch (error) {
+      grid.innerHTML = `<p>${error.message}</p>`;
+    }
+  }
+
+  async function startMachine(machineId) {
+    try {
+      const response = await fetch('/api/ptl/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ machineId }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Unable to start machine.');
+
+      currentSession = payload.instanceId;
+      panelWrap.hidden = false;
+
+      labPanel.innerHTML = `
+        <h2>Active Session: ${payload.machine.name}</h2>
+        <p class="muted">Instance <strong>${payload.instanceId}</strong> • Expires in ${payload.expiresIn}</p>
+        <ul>
+          ${payload.machine.objectives.map((item) => `<li>${item}</li>`).join('')}
+        </ul>
+        <div class="connection">
+          <strong>Connection:</strong> ${payload.connection.protocol}<br />
+          <strong>Endpoint:</strong> ${payload.connection.endpoint}<br />
+          <strong>User:</strong> ${payload.connection.username}<br />
+          <strong>Password:</strong> ${payload.connection.password}<br />
+          <span class="muted">Flag format: PTL{...}</span>
+        </div>
+        <div class="flag-box">
+          <input id="flagInput" placeholder="Submit captured flag" />
+          <button class="primary" type="button" onclick="submitFlag()">Submit Flag</button>
+        </div>
+        <div id="status" class="muted"></div>
+      `;
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  async function submitFlag() {
+    const flagInput = document.getElementById('flagInput');
+    const status = document.getElementById('status');
+
+    if (!flagInput || !currentSession) return;
+
+    try {
+      const response = await fetch('/api/ptl/submit-flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instanceId: currentSession,
+          flag: flagInput.value,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || payload.error || 'Submission failed.');
+
+      status.textContent = `${payload.message} +${payload.reward} XP`;
+      status.className = 'ok';
+      currentSession = null;
+      flagInput.value = '';
+    } catch (error) {
+      status.textContent = error.message;
+      status.className = 'muted';
+    }
+  }
+
+  refreshButton.addEventListener('click', loadMachines);
+  searchInput.addEventListener('input', loadMachines);
+  trackSelect.addEventListener('change', loadMachines);
+  difficultySelect.addEventListener('change', loadMachines);
+
+  loadMachines();
+  window.startMachine = startMachine;
+  window.submitFlag = submitFlag;
+</script>
 </body>
 </html>
