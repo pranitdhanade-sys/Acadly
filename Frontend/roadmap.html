@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy — Product Roadmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .roadmap-card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+    .roadmap-card:hover { transform: translateY(-4px); box-shadow: 0 20px 55px rgba(0,0,0,.35); border-color: rgba(34,211,238,.6); }
+    .status-dot { width: .6rem; height: .6rem; border-radius: 999px; display: inline-block; }
+    .feature-pill { border: 1px solid rgba(148,163,184,.35); background: rgba(15,23,42,.35); }
+    .active-quarter { border-color: rgba(167,139,250,.9) !important; box-shadow: 0 0 0 1px rgba(167,139,250,.6), 0 0 22px rgba(167,139,250,.2); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="fixed -top-24 -left-16 h-96 w-96 rounded-full bg-purple-700/20 blur-3xl"></div>
+  <div class="fixed -bottom-20 -right-16 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl"></div>
+
+  <header class="relative z-10 border-b border-white/10 backdrop-blur bg-slate-950/70">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-cyan-300 text-sm tracking-wide uppercase">AcadLy</p>
+        <h1 class="text-2xl md:text-3xl font-extrabold">Roadmap & Feature Delivery Hub</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="dashboard_v2.html" class="px-4 py-2 rounded-lg border border-white/20 hover:border-cyan-300/70 text-sm font-medium">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Dashboard
+        </a>
+        <a href="acadly_learning_path.html" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 text-sm font-semibold">
+          <i class="fa-solid fa-route mr-1"></i> Learning Path
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10 max-w-7xl mx-auto px-6 py-10 space-y-10">
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Planned Features</p>
+        <p class="text-3xl font-bold mt-2">36</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">In Progress</p>
+        <p class="text-3xl font-bold mt-2 text-amber-300">11</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Released</p>
+        <p class="text-3xl font-bold mt-2 text-emerald-300">19</p>
+      </article>
+      <article class="rounded-2xl p-5 border border-white/10 bg-slate-900/70">
+        <p class="text-slate-400 text-sm">Community Votes</p>
+        <p class="text-3xl font-bold mt-2 text-cyan-300">4,280</p>
+      </article>
+    </section>
+
+    <section class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 md:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        <h2 class="text-xl md:text-2xl font-bold">Quarterly Plan</h2>
+        <div class="flex flex-wrap gap-2" id="quarterTabs">
+          <button class="quarter-btn active-quarter px-3 py-1.5 rounded-lg text-sm border border-white/20" data-quarter="Q2">Q2 2026</button>
+          <button class="quarter-btn px-3 py-1.5 rounded-lg text-sm border border-white/20" data-quarter="Q3">Q3 2026</button>
+          <button class="quarter-btn px-3 py-1.5 rounded-lg text-sm border border-white/20" data-quarter="Q4">Q4 2026</button>
+        </div>
+      </div>
+      <div id="quarterDescription" class="text-slate-300 leading-relaxed">
+        Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.
+      </div>
+    </section>
+
+    <section>
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <h2 class="text-xl md:text-2xl font-bold">Feature Backlog (Many Features)</h2>
+        <select id="statusFilter" class="bg-slate-900 border border-white/20 rounded-lg px-3 py-2 text-sm">
+          <option value="all">All statuses</option>
+          <option value="planned">Planned</option>
+          <option value="progress">In Progress</option>
+          <option value="released">Released</option>
+        </select>
+      </div>
+
+      <div id="roadmapGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
+  </main>
+
+  <script>
+    const roadmapItems = [
+      { title: "AI Study Copilot", status: "progress", quarter: "Q2", area: "AI", details: "Contextual hints, step-by-step breakdowns, and confidence scoring for every session." },
+      { title: "Personalized Learning Streaks", status: "released", quarter: "Q2", area: "Gamification", details: "Streak protection tokens, smart reminders, and streak freeze calendar." },
+      { title: "Group Study Rooms", status: "planned", quarter: "Q3", area: "Collaboration", details: "Shared whiteboard, synchronized timers, and breakout channels." },
+      { title: "Offline Lesson Packs", status: "planned", quarter: "Q4", area: "Mobile", details: "Download modules with encrypted sync for low-connectivity learners." },
+      { title: "Live Mentor Sessions", status: "progress", quarter: "Q3", area: "Mentorship", details: "Book 1:1 sessions with built-in notes, replay, and action items." },
+      { title: "Advanced Roadmap Analytics", status: "progress", quarter: "Q2", area: "Analytics", details: "Completion heatmaps, module drop-off reasons, and weekly insights." },
+      { title: "Badge Marketplace", status: "planned", quarter: "Q4", area: "Community", details: "Redeem achievements for profile upgrades and peer recognition." },
+      { title: "Project-Based Assessments", status: "released", quarter: "Q2", area: "Assessment", details: "Rubric-driven submissions with instant formative feedback." },
+      { title: "Voice Q&A Tutor", status: "planned", quarter: "Q3", area: "AI", details: "Ask questions by voice and receive transcript-backed answers." },
+      { title: "Syllabus Auto Import", status: "released", quarter: "Q2", area: "Setup", details: "Import academic goals from CSV, PDF, and LMS exports." },
+      { title: "Leaderboards 2.0", status: "progress", quarter: "Q3", area: "Gamification", details: "Course-level and cohort-level rankings with anti-cheat checks." },
+      { title: "Career Path Alignments", status: "planned", quarter: "Q4", area: "Career", details: "Map skills to internships and role-based competency matrices." }
+    ];
+
+    const quarterCopy = {
+      Q2: "Q2 focuses on core learning quality: adaptive recommendations, deeper analytics, and consistency across web experiences.",
+      Q3: "Q3 expands collaboration and live teaching: group rooms, mentor sessions, and leaderboard upgrades.",
+      Q4: "Q4 targets scale and long-term value: offline support, careers mapping, and community growth systems."
+    };
+
+    const statusMeta = {
+      planned: { label: "Planned", color: "bg-slate-400" },
+      progress: { label: "In Progress", color: "bg-amber-400" },
+      released: { label: "Released", color: "bg-emerald-400" }
+    };
+
+    const grid = document.getElementById("roadmapGrid");
+    const filter = document.getElementById("statusFilter");
+
+    function render() {
+      const selected = filter.value;
+      const items = selected === "all" ? roadmapItems : roadmapItems.filter(item => item.status === selected);
+
+      grid.innerHTML = items.map(item => {
+        const meta = statusMeta[item.status];
+        return `
+          <article class="roadmap-card rounded-2xl border border-white/10 bg-slate-900/70 p-5">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="feature-pill text-xs px-2 py-1 rounded-full text-slate-200">${item.area}</span>
+              <span class="text-xs text-slate-300 inline-flex items-center gap-2"><i class="status-dot ${meta.color}"></i>${meta.label}</span>
+            </div>
+            <h3 class="font-bold text-lg leading-snug">${item.title}</h3>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${item.details}</p>
+            <div class="mt-4 text-xs text-cyan-300 font-semibold">Target: ${item.quarter} 2026</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    filter.addEventListener("change", render);
+    render();
+
+    document.querySelectorAll('.quarter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.quarter-btn').forEach(other => other.classList.remove('active-quarter'));
+        btn.classList.add('active-quarter');
+        document.getElementById('quarterDescription').textContent = quarterCopy[btn.dataset.quarter];
+      });
+    });
+  </script>
+</body>
+</html>
