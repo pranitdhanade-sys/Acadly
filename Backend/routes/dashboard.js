@@ -3,6 +3,7 @@
 const express = require("express");
 const path = require("path");
 const router = express.Router();
+const { verifyJwtSession, logUserActivity } = require("../middleware_auth");
 
 let pool;
 try {
@@ -24,12 +25,15 @@ function userIdParam(req, res, next) {
  * GET /api/dashboard/summary/:userId
  * Full payload for dashboard_v2.html (read-only demo / live data).
  */
-router.get("/summary/:userId", userIdParam, async (req, res) => {
+router.get("/summary/:userId", verifyJwtSession, userIdParam, async (req, res) => {
   if (!pool) {
     return res.status(503).json({ error: "MySQL unavailable" });
   }
   const userId = req.dashboardUserId;
   try {
+    if (req.auth.user_id !== userId && req.auth.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
     const [[user]] = await pool.query(
       `SELECT id, email, name, role, avatar_url, date_of_birth, education_level
        FROM users WHERE id = ? AND is_active = 1`,
@@ -100,6 +104,8 @@ router.get("/summary/:userId", userIdParam, async (req, res) => {
       }
     }
 
+    await logUserActivity(req.auth.user_id, "dashboard.summary.view", { target_user_id: userId });
+
     res.json({
       user: {
         id: user.id,
@@ -132,7 +138,7 @@ router.get("/summary/:userId", userIdParam, async (req, res) => {
  * PUT /api/dashboard/profile/:userId
  * Updates users + user_profiles (name, email, dob, education, department, bio).
  */
-router.put("/profile/:userId", userIdParam, async (req, res) => {
+router.put("/profile/:userId", verifyJwtSession, userIdParam, async (req, res) => {
   if (!pool) {
     return res.status(503).json({ error: "MySQL unavailable" });
   }
@@ -140,6 +146,9 @@ router.put("/profile/:userId", userIdParam, async (req, res) => {
   const { name, email, date_of_birth, education_level, department, bio } = req.body || {};
 
   try {
+    if (req.auth.user_id !== userId && req.auth.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
     const [[existing]] = await pool.query(
       "SELECT id FROM users WHERE id = ? AND is_active = 1",
       [userId]
@@ -194,6 +203,7 @@ router.put("/profile/:userId", userIdParam, async (req, res) => {
       [userId]
     );
 
+    await logUserActivity(req.auth.user_id, "dashboard.profile.update", { target_user_id: userId });
     res.json({ ok: true, user, profile: prof || {} });
   } catch (err) {
     if (err.code === "ER_DUP_ENTRY") {

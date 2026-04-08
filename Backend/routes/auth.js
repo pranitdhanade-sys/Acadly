@@ -5,6 +5,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db_config');
+const { logUserActivity } = require('../middleware_auth');
 
 const router = express.Router();
 
@@ -81,9 +82,9 @@ router.post('/register', async (req, res) => {
 
     // Insert user
     const [result] = await db.query(
-      `INSERT INTO users (email, password_hash, name, role, is_active) 
-       VALUES (?, ?, ?, ?, 1)`,
-      [email, passwordHash, name, role]
+      `INSERT INTO users (email, password_hash, password, name, role, is_active) 
+       VALUES (?, ?, ?, ?, ?, 1)`,
+      [email, passwordHash, passwordHash, name, role]
     );
 
     const userId = result.insertId;
@@ -134,7 +135,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await db.query(
-      `SELECT id, password_hash, name, role, is_active, locked_until, login_attempts 
+      `SELECT id, COALESCE(password_hash, password) AS password_hash, name, role, is_active, locked_until, COALESCE(login_attempts, 0) AS login_attempts 
        FROM users WHERE email = ?`,
       [email]
     );
@@ -222,7 +223,7 @@ router.post('/login', async (req, res) => {
     await db.query(
       `INSERT INTO user_sessions (user_id, session_token, refresh_token, expires_at, ip_address, user_agent) 
        VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR), ?, ?)`,
-      [user.id, accessToken, refreshToken, req.get('user-agent')]
+      [user.id, accessToken, refreshToken, req.ip, req.get('user-agent')]
     );
 
     // Log successful login
@@ -231,6 +232,8 @@ router.post('/login', async (req, res) => {
        VALUES (?, ?, ?, ?, ?)`,
       [user.id, email, 'success', req.ip, 'Login successful']
     );
+
+    await logUserActivity(user.id, 'auth.login.success', { ip: req.ip, user_agent: req.get('user-agent') });
 
     // Get user full profile
     const [profile] = await db.query(
@@ -486,6 +489,8 @@ router.get('/verify', async (req, res) => {
     if (sessions.length === 0) {
       return res.status(403).json({ error: 'Session expired or invalid' });
     }
+
+    await logUserActivity(decoded.user_id, 'auth.token.verify', { ip: req.ip });
 
     res.status(200).json({
       valid: true,

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AcadLy - Learning Path</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/auth.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -177,7 +178,7 @@
     body.light-theme #certModal { background:rgba(15,23,42,.7)!important; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200 overflow-hidden h-screen w-screen relative">
+<body class="bg-slate-950 text-slate-200 overflow-x-hidden md:overflow-hidden min-h-screen w-screen relative">
 
   <!-- BG accents -->
   <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none z-0"></div>
@@ -468,11 +469,51 @@
   let currentNodeId = null;
   let selectedAnswer = null;
 
+  const remoteProgressCache = {};
+
   function getProgress(modId) {
+    if (remoteProgressCache[modId]) return { ...remoteProgressCache[modId] };
     try { return JSON.parse(localStorage.getItem('alp_'+modId)||'{}'); } catch{ return {}; }
   }
   function saveProgress(modId, prog) {
+    remoteProgressCache[modId] = { ...prog };
     localStorage.setItem('alp_'+modId, JSON.stringify(prog));
+  }
+
+  async function loadRemoteProgress(modId) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      const response = await window.AcadlyAuth.authFetch(`/api/roadmap/${modId}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data?.progress) {
+        saveProgress(modId, data.progress);
+      }
+    } catch (err) {
+      console.warn('roadmap sync load failed:', err.message);
+    }
+  }
+
+  async function syncLessonCompletion(modId, lessonId) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      await window.AcadlyAuth.authFetch(`/api/roadmap/${modId}/lesson/${lessonId}/complete`, { method:'POST' });
+    } catch (err) {
+      console.warn('roadmap lesson sync failed:', err.message);
+    }
+  }
+
+  async function trackActivity(eventType, payload = {}) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      await window.AcadlyAuth.authFetch('/api/roadmap/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_type: eventType, payload }),
+      });
+    } catch (err) {
+      console.warn('activity track failed:', err.message);
+    }
   }
   function isUnlocked(modId, nodeId, prog) {
     if (nodeId === 1) return true;
@@ -524,7 +565,8 @@
   buildGrid();
 
   // ── View navigation ────────────────────────────────────────
-  function openModule(modId) {
+  async function openModule(modId) {
+    await loadRemoteProgress(modId);
     currentModule = MODULES.find(m=>m.id===modId);
     document.getElementById('courseTitle').textContent = currentModule.title;
     buildNodes();
@@ -532,6 +574,7 @@
     document.getElementById('viewA').classList.replace('view-a-active','view-a-hidden');
     document.getElementById('viewB').classList.replace('view-b-hidden','view-b-active');
     setTimeout(drawCurvyLine,120);
+    trackActivity("roadmap.module.open", { module_id: modId });
   }
   function navigateToViewA() {
     closePanel();
@@ -638,11 +681,12 @@
     if(e&&e.target!==overlay) return;
     overlay.classList.remove('panel-visible'); overlay.classList.add('panel-hidden');
   }
-  function markComplete() {
+  async function markComplete() {
     const prog=getProgress(currentModule.id);
     if(prog[currentNodeId]==='done') return;
     prog[currentNodeId]='done';
     saveProgress(currentModule.id,prog);
+    await syncLessonCompletion(currentModule.id, currentNodeId);
     updateNode(currentNodeId,'node-completed');
     // Unlock the very next lesson
     const next=currentNodeId+1;
@@ -763,6 +807,7 @@
       const prog=getProgress(currentModule.id);
       prog['cp']='passed'; prog[5]='done';
       saveProgress(currentModule.id,prog);
+      syncLessonCompletion(currentModule.id, 5);
       // Only unlock node 6 — the rest unlock one-by-one as each lesson is completed
       setTimeout(()=>{
         const l6=currentModule.lessons.find(x=>x.id===6);
@@ -815,10 +860,11 @@
     btn.disabled=false;
     btn.className='w-full py-4 rounded-xl font-bold text-lg bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_20px_rgba(34,211,238,.5)] transition-all cursor-pointer transform hover:-translate-y-1';
   }
-  function submitBoss() {
+  async function submitBoss() {
     if(selectedAnswer===null) return;
     const prog=getProgress(currentModule.id);
     prog[10]='done'; saveProgress(currentModule.id,prog);
+    await syncLessonCompletion(currentModule.id, 10);
     updateNode(10,'node-completed');
     updateHeaderProgress();
     confetti();
@@ -918,6 +964,10 @@
   }
   window.addEventListener('load',()=>setTimeout(drawCurvyLine,150));
   window.addEventListener('resize',drawCurvyLine);
+
+  if (!window.AcadlyAuth?.requireAuth('Login.html')) {
+    // redirected to login page
+  }
 
   // ── Theme ──────────────────────────────────────────────────
   function toggleTheme(){
