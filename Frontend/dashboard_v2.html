@@ -62,6 +62,7 @@
     referrerpolicy="no-referrer" />
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="js/auth.js"></script>
 
   <style>
     :root {
@@ -1242,7 +1243,7 @@
 
       const userId = getDashboardUserId();
       try {
-        const response = await fetch(`/api/dashboard/profile/${userId}`, {
+        const response = await window.AcadlyAuth.authFetch(`/api/dashboard/profile/${userId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -1370,7 +1371,7 @@
     async function loadDashboardData() {
       const userId = getDashboardUserId();
       try {
-        const response = await fetch(`/api/dashboard/summary/${userId}`);
+        const response = await window.AcadlyAuth.authFetch(`/api/dashboard/summary/${userId}`);
         if (!response.ok) throw new Error(`Dashboard API unavailable (${response.status})`);
         const data = await response.json();
         const kpi = data.kpi || {};
@@ -1531,8 +1532,10 @@
       donutChart.update();
     }
 
-    initCharts();
-    loadDashboardData();
+    if (window.AcadlyAuth?.requireAuth("Login.html")) {
+      initCharts();
+      loadDashboardData();
+    }
 
     // (Practice Sandbox removed) Badges section is display-focused
   </script>

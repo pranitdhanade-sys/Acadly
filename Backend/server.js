@@ -105,6 +105,16 @@ try {
   console.warn("⚠️  Dashboard routes not found:", err.message);
 }
 
+
+// Roadmap routes (JWT-protected learning path progress + activity)
+try {
+  const roadmapRoutes = require("./routes/roadmap");
+  app.use("/api/roadmap", roadmapRoutes);
+  console.log("✅ Roadmap routes mounted at /api/roadmap");
+} catch (err) {
+  console.warn("⚠️  Roadmap routes not found:", err.message);
+}
+
 // Practice lab routes (quiz configuration + test generation)
 try {
   const practiceLabRoutes = require("./routes/practicelab");
