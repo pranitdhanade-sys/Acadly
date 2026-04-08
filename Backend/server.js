@@ -4,12 +4,52 @@ require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
+const helmet = require("helmet");
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // -------------------- MIDDLEWARE -------------------- //
-app.use(cors());
+app.disable("x-powered-by");
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  })
+);
+app.use(compression());
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -17,7 +57,23 @@ app.use(express.urlencoded({ extended: true }));
 const FRONTEND_PATH = path.join(__dirname, "../Frontend");
 
 // Serve static files
-app.use(express.static(FRONTEND_PATH));
+app.use(
+  express.static(FRONTEND_PATH, {
+    etag: true,
+    lastModified: true,
+    maxAge: IS_PRODUCTION ? "7d" : 0,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+        return;
+      }
+      res.setHeader(
+        "Cache-Control",
+        IS_PRODUCTION ? "public, max-age=604800, immutable" : "no-cache"
+      );
+    },
+  })
+);
 
 // -------------------- DATABASE INITIALIZATION -------------------- //
 // Initialize MySQL connection (existing)
