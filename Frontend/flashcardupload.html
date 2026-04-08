@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy Flashcard Upload</title>
+  <meta name="description" content="Upload, build, and study decks with AcadLy Flashcard Upload." />
+
+  <script>
+    (function () {
+      const saved = localStorage.getItem("acadly-flashcards-theme");
+      const dark = saved ? saved === "dark" : true;
+      document.documentElement.classList.toggle("dark", dark);
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          colors: {
+            brand: { 500: "#7C3AED" },
+            electric: { 400: "#22D3EE" }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.2), transparent 45%),
+        radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.16), transparent 48%),
+        rgb(2 6 23);
+    }
+
+    html:not(.dark) body {
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 45%),
+        radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.08), transparent 48%),
+        rgb(248 250 252);
+    }
+
+    .glass {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    html:not(.dark) .glass {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(15, 23, 42, 0.1);
+    }
+
+    .flashcard {
+      transform-style: preserve-3d;
+      transition: transform 500ms ease;
+    }
+
+    .flashcard.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flash-face {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .flash-back {
+      transform: rotateY(180deg);
+    }
+
+    .pill {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+  </style>
+</head>
+
+<body class="font-sans text-slate-100 dark:text-slate-100">
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <header class="glass rounded-3xl p-5 shadow-2xl">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-brand-500">AcadLy Toolkit</p>
+          <h1 class="mt-2 text-2xl font-bold text-white dark:text-white sm:text-3xl">Flashcard Upload</h1>
+          <p class="mt-2 text-sm text-slate-300 dark:text-slate-300">Create decks, revise with spaced repetition, run quizzes,
+            and track progress in one page.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="dashboard_v2.html"
+            class="inline-flex items-center gap-2 rounded-xl bg-slate-900/70 px-4 py-2 text-sm font-semibold hover:bg-slate-900">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+          </a>
+          <button id="themeToggle"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-600">
+            <i class="fa-solid fa-circle-half-stroke"></i> Toggle Theme
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mt-6 grid gap-6 lg:grid-cols-12">
+      <section class="glass rounded-3xl p-5 lg:col-span-4">
+        <h2 class="text-lg font-semibold text-white dark:text-white">Deck Builder</h2>
+        <p class="mt-1 text-sm text-slate-300 dark:text-slate-300">Add and organize flashcards quickly.</p>
+
+        <div class="mt-4 space-y-3">
+          <label class="text-sm">Deck Name
+            <input id="deckName" type="text" placeholder="e.g., Biology Midterm"
+              class="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:text-white" />
+          </label>
+          <label class="text-sm">Front (Question)
+            <textarea id="cardFront" rows="3" placeholder="What is photosynthesis?"
+              class="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:text-white"></textarea>
+          </label>
+          <label class="text-sm">Back (Answer)
+            <textarea id="cardBack" rows="3" placeholder="Process plants use to convert light into energy"
+              class="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900/60 px-3 py-2 text-sm outline-none focus:border-brand-500 dark:text-white"></textarea>
+          </label>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button id="addCardBtn"
+              class="rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold hover:bg-violet-600">Add Card</button>
+            <button id="clearDeckBtn"
+              class="rounded-xl bg-rose-500/90 px-4 py-2 text-sm font-semibold hover:bg-rose-600">Clear Deck</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button id="exportBtn"
+              class="rounded-xl bg-cyan-500/90 px-4 py-2 text-sm font-semibold hover:bg-cyan-600">Export JSON</button>
+            <label
+              class="cursor-pointer rounded-xl bg-slate-700 px-4 py-2 text-center text-sm font-semibold hover:bg-slate-600">
+              Import JSON
+              <input id="importInput" type="file" accept="application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-2xl bg-slate-900/50 p-4">
+          <h3 class="font-semibold">Study Stats</h3>
+          <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div class="pill rounded-xl p-3">
+              <p class="text-slate-400">Cards</p>
+              <p id="statCards" class="mt-1 text-xl font-bold">0</p>
+            </div>
+            <div class="pill rounded-xl p-3">
+              <p class="text-slate-400">Mastered</p>
+              <p id="statMastered" class="mt-1 text-xl font-bold">0</p>
+            </div>
+            <div class="pill rounded-xl p-3">
+              <p class="text-slate-400">Accuracy</p>
+              <p id="statAccuracy" class="mt-1 text-xl font-bold">0%</p>
+            </div>
+            <div class="pill rounded-xl p-3">
+              <p class="text-slate-400">Streak</p>
+              <p id="statStreak" class="mt-1 text-xl font-bold">0</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="glass rounded-3xl p-5 lg:col-span-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-semibold">Study Arena</h2>
+          <div class="flex flex-wrap gap-2 text-xs sm:text-sm">
+            <input id="searchInput" type="search" placeholder="Search flashcards..."
+              class="rounded-xl border border-slate-600 bg-slate-900/60 px-3 py-2 outline-none focus:border-brand-500" />
+            <button id="shuffleBtn" class="rounded-xl bg-slate-700 px-3 py-2 font-semibold hover:bg-slate-600">Shuffle</button>
+            <button id="quizModeBtn" class="rounded-xl bg-emerald-500 px-3 py-2 font-semibold hover:bg-emerald-600">Quiz
+              Mode</button>
+          </div>
+        </div>
+
+        <div class="mt-5 grid gap-4 xl:grid-cols-5">
+          <div class="xl:col-span-3">
+            <div id="flashcardWrap" class="relative h-72">
+              <button id="flipBtn"
+                class="flashcard absolute inset-0 w-full rounded-3xl border border-slate-700 bg-slate-900/80 p-6 text-left">
+                <div class="flash-face flex h-full flex-col justify-between">
+                  <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Front</p>
+                  <p id="cardFrontPreview" class="text-xl font-semibold leading-relaxed">Add a card to begin.</p>
+                  <p class="text-sm text-slate-400">Click to flip</p>
+                </div>
+                <div class="flash-face flash-back absolute inset-0 flex h-full flex-col justify-between rounded-3xl p-6">
+                  <p class="text-xs uppercase tracking-[0.2em] text-cyan-300">Back</p>
+                  <p id="cardBackPreview" class="text-lg leading-relaxed">Your answer appears here.</p>
+                  <p class="text-sm text-slate-400">Click to flip back</p>
+                </div>
+              </button>
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2">
+              <button id="prevBtn" class="rounded-xl bg-slate-700 px-3 py-2 text-sm font-semibold hover:bg-slate-600">Previous</button>
+              <button id="knownBtn" class="rounded-xl bg-emerald-500 px-3 py-2 text-sm font-semibold hover:bg-emerald-600">I knew this</button>
+              <button id="nextBtn" class="rounded-xl bg-slate-700 px-3 py-2 text-sm font-semibold hover:bg-slate-600">Next</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-700 bg-slate-900/50 p-4 xl:col-span-2">
+            <h3 class="font-semibold">Deck Cards</h3>
+            <ul id="cardList" class="mt-3 max-h-72 space-y-2 overflow-auto pr-1"></ul>
+          </div>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
+          <h3 class="font-semibold">Spaced Repetition Planner</h3>
+          <p class="mt-1 text-sm text-slate-300">Mark cards as difficult, moderate, or easy and get an estimated review date.</p>
+          <div class="mt-3 grid gap-2 sm:grid-cols-3">
+            <button data-srs="hard" class="srsBtn rounded-xl bg-rose-500/90 px-3 py-2 text-sm font-semibold">Hard (+1 day)</button>
+            <button data-srs="medium" class="srsBtn rounded-xl bg-amber-500/90 px-3 py-2 text-sm font-semibold">Medium (+3 days)</button>
+            <button data-srs="easy" class="srsBtn rounded-xl bg-emerald-500/90 px-3 py-2 text-sm font-semibold">Easy (+7 days)</button>
+          </div>
+          <p id="srsResult" class="mt-3 text-sm text-cyan-300">No schedule set yet.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "acadly_flashcards_state_v1";
+    const DEFAULT_FLASHCARDS = [
+      // Advanced Physics (13)
+      { front: "Physics: State the covariant form of Maxwell's equations.", back: "∂μFμν = μ0Jν and ∂[αFβγ] = 0 (or ∂μ*Fμν = 0)." },
+      { front: "Physics: What is the physical meaning of the Lagrangian L = T − V?", back: "It encodes dynamics via stationary action; Euler–Lagrange equations from δS = 0 produce equations of motion." },
+      { front: "Physics: Write the time-independent Schrödinger equation.", back: "Ĥψ = Eψ." },
+      { front: "Physics: What is the uncertainty relation between position and momentum?", back: "ΔxΔp ≥ ħ/2." },
+      { front: "Physics: Define commutator of operators A and B.", back: "[A, B] = AB − BA." },
+      { front: "Physics: What does gauge invariance imply in electromagnetism?", back: "Potentials can transform as Aμ → Aμ + ∂μχ without changing measurable fields." },
+      { front: "Physics: Give the relativistic energy-momentum relation.", back: "E² = (pc)² + (mc²)²." },
+      { front: "Physics: What is Noether's theorem (core statement)?", back: "Every continuous symmetry of the action corresponds to a conserved quantity." },
+      { front: "Physics: Define partition function Z in statistical mechanics.", back: "Z = Σi e^(−βEi), generating thermodynamic observables." },
+      { front: "Physics: What condition defines adiabatic quantum evolution?", back: "Hamiltonian changes slowly enough that a system stays in its instantaneous eigenstate (up to phase)." },
+      { front: "Physics: What is the de Broglie wavelength?", back: "λ = h/p." },
+      { front: "Physics: Distinguish fermions and bosons by spin statistics.", back: "Fermions have half-integer spin and antisymmetric wavefunctions; bosons have integer spin and symmetric wavefunctions." },
+      { front: "Physics: What is the role of Green's functions?", back: "They are impulse responses used to solve linear differential equations with sources." },
+
+      // Advanced Computer Science (13)
+      { front: "CS: What is the amortized time for dynamic array append?", back: "O(1) amortized due to occasional resize costs spread across operations." },
+      { front: "CS: Define CAP theorem in distributed systems.", back: "Under partition, a system can provide at most one of consistency or availability (while tolerating partition)." },
+      { front: "CS: What problem does Raft consensus solve?", back: "Replicated log agreement with leader election and fault tolerance in distributed systems." },
+      { front: "CS: What is the complexity of Dijkstra with binary heap?", back: "O((V + E) log V)." },
+      { front: "CS: Explain ACID transactions briefly.", back: "Atomicity, Consistency, Isolation, Durability for reliable database transactions." },
+      { front: "CS: What is eventual consistency?", back: "Replicas converge to the same value over time without immediate global consistency." },
+      { front: "CS: Define NP-complete.", back: "Problems in NP that are NP-hard; every NP problem reduces to them in polynomial time." },
+      { front: "CS: Why are Bloom filters useful?", back: "They provide memory-efficient probabilistic set membership checks with false positives but no false negatives." },
+      { front: "CS: What does idempotent API operation mean?", back: "Applying it multiple times has the same effect as applying it once." },
+      { front: "CS: What is tail recursion optimization?", back: "Compiler/runtime replaces recursive calls in tail position with iteration to avoid stack growth." },
+      { front: "CS: Core idea of MapReduce?", back: "Map transforms data into key-value pairs; Reduce aggregates values by key in parallel." },
+      { front: "CS: Define vector clock purpose.", back: "Tracks partial ordering and causality of events in distributed systems." },
+      { front: "CS: What is zero-copy I/O?", back: "Data transfer without extra user/kernel buffer copies, improving throughput and CPU efficiency." },
+
+      // Advanced Chemistry (12)
+      { front: "Chemistry: State the Nernst equation.", back: "E = E° − (RT/nF) ln Q." },
+      { front: "Chemistry: What is Gibbs free energy criterion for spontaneity?", back: "ΔG < 0 at constant T and P indicates a spontaneous process." },
+      { front: "Chemistry: Define chemical potential μ.", back: "Partial molar Gibbs energy: μi = (∂G/∂ni)T,P,nj." },
+      { front: "Chemistry: What does Le Châtelier's principle predict?", back: "A system at equilibrium shifts to oppose applied concentration, pressure, or temperature changes." },
+      { front: "Chemistry: What is HOMO-LUMO gap significance?", back: "It approximates excitation energy and influences molecular reactivity and optical properties." },
+      { front: "Chemistry: Define rate law for reaction aA + bB → products.", back: "Rate = k[A]^m[B]^n where m and n are experimentally determined orders." },
+      { front: "Chemistry: What does pKa represent?", back: "−log10(Ka), measuring acid strength; lower pKa means stronger acid." },
+      { front: "Chemistry: Explain entropy at molecular level.", back: "It quantifies multiplicity/dispersion of microstates; higher when energy and matter are more distributed." },
+      { front: "Chemistry: What is Beer-Lambert law?", back: "A = εlc, relating absorbance to concentration and path length." },
+      { front: "Chemistry: Define coordination number in complexes.", back: "Number of ligand donor atoms directly bonded to a central metal ion." },
+      { front: "Chemistry: What is catalytic turnover frequency (TOF)?", back: "Moles of product formed per mole of catalyst per unit time." },
+      { front: "Chemistry: Distinguish kinetic vs thermodynamic control.", back: "Kinetic control favors lower activation barrier products; thermodynamic favors most stable products." },
+
+      // Advanced Biology (12)
+      { front: "Biology: What is central dogma?", back: "Genetic information flows DNA → RNA → Protein (with notable exceptions like reverse transcription)." },
+      { front: "Biology: Define allosteric regulation.", back: "Effector binding at non-active sites changes enzyme conformation and activity." },
+      { front: "Biology: What is Hardy-Weinberg equilibrium condition?", back: "In large random-mating populations with no mutation, migration, selection, or drift, allele frequencies remain constant." },
+      { front: "Biology: Role of ATP synthase in mitochondria?", back: "Uses proton motive force across inner membrane to synthesize ATP from ADP + Pi." },
+      { front: "Biology: What is epigenetics?", back: "Heritable changes in gene expression without DNA sequence change (e.g., methylation, histone modifications)." },
+      { front: "Biology: Define Km in Michaelis-Menten kinetics.", back: "Substrate concentration at which reaction rate is half of Vmax." },
+      { front: "Biology: What does CRISPR-Cas9 do?", back: "Guide RNA directs Cas9 nuclease to target DNA for sequence-specific editing." },
+      { front: "Biology: Difference between innate and adaptive immunity?", back: "Innate is rapid, non-specific; adaptive is specific, slower initially, and has memory." },
+      { front: "Biology: What is a morphogen?", back: "A signaling molecule forming concentration gradients that pattern tissue development." },
+      { front: "Biology: Define linkage disequilibrium.", back: "Non-random association of alleles at different loci in a population." },
+      { front: "Biology: Function of telomerase?", back: "Extends telomeres to maintain chromosome ends, especially in germline/stem/cancer cells." },
+      { front: "Biology: What is oxidative phosphorylation?", back: "Electron transport creates proton gradient used by ATP synthase to generate ATP." }
+    ];
+
+    const state = {
+      deckName: "",
+      cards: [],
+      index: 0,
+      stats: { known: 0, attempted: 0, streak: 0, mastered: 0 },
+      quizMode: false
+    };
+
+    const els = {
+      deckName: document.getElementById("deckName"),
+      cardFront: document.getElementById("cardFront"),
+      cardBack: document.getElementById("cardBack"),
+      addCardBtn: document.getElementById("addCardBtn"),
+      clearDeckBtn: document.getElementById("clearDeckBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      importInput: document.getElementById("importInput"),
+      searchInput: document.getElementById("searchInput"),
+      shuffleBtn: document.getElementById("shuffleBtn"),
+      quizModeBtn: document.getElementById("quizModeBtn"),
+      cardFrontPreview: document.getElementById("cardFrontPreview"),
+      cardBackPreview: document.getElementById("cardBackPreview"),
+      cardList: document.getElementById("cardList"),
+      flipBtn: document.getElementById("flipBtn"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      knownBtn: document.getElementById("knownBtn"),
+      statCards: document.getElementById("statCards"),
+      statMastered: document.getElementById("statMastered"),
+      statAccuracy: document.getElementById("statAccuracy"),
+      statStreak: document.getElementById("statStreak"),
+      srsResult: document.getElementById("srsResult"),
+      themeToggle: document.getElementById("themeToggle")
+    };
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        state.deckName = "Advanced STEM Master Deck";
+        state.cards = DEFAULT_FLASHCARDS.map((card) => ({
+          ...card,
+          level: "new",
+          nextReview: null
+        }));
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.cards)) {
+          Object.assign(state, parsed);
+        }
+      } catch (_) {
+        console.warn("Unable to parse flashcard state");
+        state.deckName = "Advanced STEM Master Deck";
+        state.cards = DEFAULT_FLASHCARDS.map((card) => ({
+          ...card,
+          level: "new",
+          nextReview: null
+        }));
+      }
+    }
+
+    function currentCard() {
+      if (!state.cards.length) return null;
+      if (state.index >= state.cards.length) state.index = 0;
+      return state.cards[state.index];
+    }
+
+    function updateStats() {
+      const { attempted, known, streak, mastered } = state.stats;
+      els.statCards.textContent = String(state.cards.length);
+      els.statMastered.textContent = String(mastered);
+      els.statStreak.textContent = String(streak);
+      els.statAccuracy.textContent = attempted ? `${Math.round((known / attempted) * 100)}%` : "0%";
+    }
+
+    function renderCard() {
+      const card = currentCard();
+      els.flipBtn.classList.remove("is-flipped");
+      if (!card) {
+        els.cardFrontPreview.textContent = "Add a card to begin.";
+        els.cardBackPreview.textContent = "Your answer appears here.";
+        return;
+      }
+      els.cardFrontPreview.textContent = card.front;
+      els.cardBackPreview.textContent = state.quizMode ? "Think before flipping..." : card.back;
+    }
+
+    function renderList() {
+      const q = els.searchInput.value.trim().toLowerCase();
+      els.cardList.innerHTML = "";
+      state.cards
+        .filter((c) => !q || c.front.toLowerCase().includes(q) || c.back.toLowerCase().includes(q))
+        .forEach((card, idx) => {
+          const li = document.createElement("li");
+          const active = idx === state.index;
+          li.className = `rounded-xl border px-3 py-2 text-sm ${active ? "border-brand-500 bg-violet-500/10" : "border-slate-700 bg-slate-800/50"}`;
+          li.innerHTML = `<div class="font-medium">${card.front}</div><div class="mt-1 text-xs text-slate-400">${card.back.slice(0, 72)}</div>`;
+          li.addEventListener("click", () => {
+            state.index = idx;
+            renderAll();
+            saveState();
+          });
+          els.cardList.appendChild(li);
+        });
+    }
+
+    function renderAll() {
+      els.deckName.value = state.deckName;
+      renderCard();
+      renderList();
+      updateStats();
+    }
+
+    function addCard() {
+      const front = els.cardFront.value.trim();
+      const back = els.cardBack.value.trim();
+      state.deckName = els.deckName.value.trim() || "Untitled Deck";
+      if (!front || !back) return alert("Please fill both front and back text.");
+      state.cards.push({ front, back, level: "new", nextReview: null });
+      state.index = state.cards.length - 1;
+      els.cardFront.value = "";
+      els.cardBack.value = "";
+      renderAll();
+      saveState();
+    }
+
+    function moveCard(step) {
+      if (!state.cards.length) return;
+      state.index = (state.index + step + state.cards.length) % state.cards.length;
+      renderAll();
+      saveState();
+    }
+
+    function markKnown() {
+      if (!state.cards.length) return;
+      state.stats.attempted += 1;
+      state.stats.known += 1;
+      state.stats.streak += 1;
+      state.stats.mastered = Math.min(state.cards.length, state.stats.mastered + 1);
+      moveCard(1);
+    }
+
+    function shuffleCards() {
+      for (let i = state.cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.cards[i], state.cards[j]] = [state.cards[j], state.cards[i]];
+      }
+      state.index = 0;
+      renderAll();
+      saveState();
+    }
+
+    function setSrs(level) {
+      const card = currentCard();
+      if (!card) return;
+      const days = { hard: 1, medium: 3, easy: 7 }[level];
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      card.level = level;
+      card.nextReview = date.toISOString();
+      els.srsResult.textContent = `Next review for this card: ${date.toDateString()} (${level.toUpperCase()})`;
+      saveState();
+    }
+
+    function toggleQuizMode() {
+      state.quizMode = !state.quizMode;
+      els.quizModeBtn.textContent = state.quizMode ? "Exit Quiz Mode" : "Quiz Mode";
+      els.quizModeBtn.classList.toggle("bg-emerald-500", !state.quizMode);
+      els.quizModeBtn.classList.toggle("bg-amber-500", state.quizMode);
+      renderCard();
+      saveState();
+    }
+
+    function exportDeck() {
+      const payload = JSON.stringify({
+        deckName: state.deckName,
+        cards: state.cards,
+        exportedAt: new Date().toISOString()
+      }, null, 2);
+      const blob = new Blob([payload], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${(state.deckName || "acadly-deck").replace(/\s+/g, "-").toLowerCase()}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function importDeck(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result || "{}"));
+          if (!Array.isArray(data.cards)) throw new Error("Invalid format");
+          state.deckName = data.deckName || "Imported Deck";
+          state.cards = data.cards.filter(c => c.front && c.back);
+          state.index = 0;
+          state.stats = { known: 0, attempted: 0, streak: 0, mastered: 0 };
+          renderAll();
+          saveState();
+        } catch {
+          alert("Invalid JSON file for flashcards.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearDeck() {
+      if (!confirm("Delete all flashcards from this deck?")) return;
+      state.cards = [];
+      state.deckName = "";
+      state.index = 0;
+      state.stats = { known: 0, attempted: 0, streak: 0, mastered: 0 };
+      els.srsResult.textContent = "No schedule set yet.";
+      renderAll();
+      saveState();
+    }
+
+    function initEvents() {
+      els.addCardBtn.addEventListener("click", addCard);
+      els.prevBtn.addEventListener("click", () => moveCard(-1));
+      els.nextBtn.addEventListener("click", () => {
+        if (state.cards.length) state.stats.attempted += 1;
+        state.stats.streak = 0;
+        moveCard(1);
+      });
+      els.knownBtn.addEventListener("click", markKnown);
+      els.shuffleBtn.addEventListener("click", shuffleCards);
+      els.quizModeBtn.addEventListener("click", toggleQuizMode);
+      els.exportBtn.addEventListener("click", exportDeck);
+      els.importInput.addEventListener("change", (e) => importDeck(e.target.files?.[0]));
+      els.clearDeckBtn.addEventListener("click", clearDeck);
+      els.searchInput.addEventListener("input", renderList);
+      els.flipBtn.addEventListener("click", () => {
+        els.flipBtn.classList.toggle("is-flipped");
+        if (state.quizMode) {
+          const card = currentCard();
+          if (card) els.cardBackPreview.textContent = card.back;
+        }
+      });
+      document.querySelectorAll(".srsBtn").forEach((btn) => {
+        btn.addEventListener("click", () => setSrs(btn.dataset.srs));
+      });
+      els.deckName.addEventListener("input", () => {
+        state.deckName = els.deckName.value;
+        saveState();
+      });
+      els.themeToggle.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+        const dark = document.documentElement.classList.contains("dark");
+        localStorage.setItem("acadly-flashcards-theme", dark ? "dark" : "light");
+      });
+    }
+
+    loadState();
+    initEvents();
+    renderAll();
+  </script>
+</body>
+
+</html>
