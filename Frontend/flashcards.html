@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AcadLy Flashcard Upload</title>
-  <meta name="description" content="Upload, build, and study decks with AcadLy Flashcard Upload." />
+  <title>AcadLy Flashcards Studio</title>
+  <meta name="description" content="Build, study, and quiz yourself with AcadLy Flashcards Studio." />
 
   <script>
     (function () {
@@ -90,7 +90,7 @@
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p class="text-xs uppercase tracking-[0.22em] text-brand-500">AcadLy Toolkit</p>
-          <h1 class="mt-2 text-2xl font-bold text-white dark:text-white sm:text-3xl">Flashcard Upload</h1>
+          <h1 class="mt-2 text-2xl font-bold text-white dark:text-white sm:text-3xl">Flashcards Studio</h1>
           <p class="mt-2 text-sm text-slate-300 dark:text-slate-300">Create decks, revise with spaced repetition, run quizzes,
             and track progress in one page.</p>
         </div>
@@ -226,65 +226,6 @@
 
   <script>
     const STORAGE_KEY = "acadly_flashcards_state_v1";
-    const DEFAULT_FLASHCARDS = [
-      // Advanced Physics (13)
-      { front: "Physics: State the covariant form of Maxwell's equations.", back: "∂μFμν = μ0Jν and ∂[αFβγ] = 0 (or ∂μ*Fμν = 0)." },
-      { front: "Physics: What is the physical meaning of the Lagrangian L = T − V?", back: "It encodes dynamics via stationary action; Euler–Lagrange equations from δS = 0 produce equations of motion." },
-      { front: "Physics: Write the time-independent Schrödinger equation.", back: "Ĥψ = Eψ." },
-      { front: "Physics: What is the uncertainty relation between position and momentum?", back: "ΔxΔp ≥ ħ/2." },
-      { front: "Physics: Define commutator of operators A and B.", back: "[A, B] = AB − BA." },
-      { front: "Physics: What does gauge invariance imply in electromagnetism?", back: "Potentials can transform as Aμ → Aμ + ∂μχ without changing measurable fields." },
-      { front: "Physics: Give the relativistic energy-momentum relation.", back: "E² = (pc)² + (mc²)²." },
-      { front: "Physics: What is Noether's theorem (core statement)?", back: "Every continuous symmetry of the action corresponds to a conserved quantity." },
-      { front: "Physics: Define partition function Z in statistical mechanics.", back: "Z = Σi e^(−βEi), generating thermodynamic observables." },
-      { front: "Physics: What condition defines adiabatic quantum evolution?", back: "Hamiltonian changes slowly enough that a system stays in its instantaneous eigenstate (up to phase)." },
-      { front: "Physics: What is the de Broglie wavelength?", back: "λ = h/p." },
-      { front: "Physics: Distinguish fermions and bosons by spin statistics.", back: "Fermions have half-integer spin and antisymmetric wavefunctions; bosons have integer spin and symmetric wavefunctions." },
-      { front: "Physics: What is the role of Green's functions?", back: "They are impulse responses used to solve linear differential equations with sources." },
-
-      // Advanced Computer Science (13)
-      { front: "CS: What is the amortized time for dynamic array append?", back: "O(1) amortized due to occasional resize costs spread across operations." },
-      { front: "CS: Define CAP theorem in distributed systems.", back: "Under partition, a system can provide at most one of consistency or availability (while tolerating partition)." },
-      { front: "CS: What problem does Raft consensus solve?", back: "Replicated log agreement with leader election and fault tolerance in distributed systems." },
-      { front: "CS: What is the complexity of Dijkstra with binary heap?", back: "O((V + E) log V)." },
-      { front: "CS: Explain ACID transactions briefly.", back: "Atomicity, Consistency, Isolation, Durability for reliable database transactions." },
-      { front: "CS: What is eventual consistency?", back: "Replicas converge to the same value over time without immediate global consistency." },
-      { front: "CS: Define NP-complete.", back: "Problems in NP that are NP-hard; every NP problem reduces to them in polynomial time." },
-      { front: "CS: Why are Bloom filters useful?", back: "They provide memory-efficient probabilistic set membership checks with false positives but no false negatives." },
-      { front: "CS: What does idempotent API operation mean?", back: "Applying it multiple times has the same effect as applying it once." },
-      { front: "CS: What is tail recursion optimization?", back: "Compiler/runtime replaces recursive calls in tail position with iteration to avoid stack growth." },
-      { front: "CS: Core idea of MapReduce?", back: "Map transforms data into key-value pairs; Reduce aggregates values by key in parallel." },
-      { front: "CS: Define vector clock purpose.", back: "Tracks partial ordering and causality of events in distributed systems." },
-      { front: "CS: What is zero-copy I/O?", back: "Data transfer without extra user/kernel buffer copies, improving throughput and CPU efficiency." },
-
-      // Advanced Chemistry (12)
-      { front: "Chemistry: State the Nernst equation.", back: "E = E° − (RT/nF) ln Q." },
-      { front: "Chemistry: What is Gibbs free energy criterion for spontaneity?", back: "ΔG < 0 at constant T and P indicates a spontaneous process." },
-      { front: "Chemistry: Define chemical potential μ.", back: "Partial molar Gibbs energy: μi = (∂G/∂ni)T,P,nj." },
-      { front: "Chemistry: What does Le Châtelier's principle predict?", back: "A system at equilibrium shifts to oppose applied concentration, pressure, or temperature changes." },
-      { front: "Chemistry: What is HOMO-LUMO gap significance?", back: "It approximates excitation energy and influences molecular reactivity and optical properties." },
-      { front: "Chemistry: Define rate law for reaction aA + bB → products.", back: "Rate = k[A]^m[B]^n where m and n are experimentally determined orders." },
-      { front: "Chemistry: What does pKa represent?", back: "−log10(Ka), measuring acid strength; lower pKa means stronger acid." },
-      { front: "Chemistry: Explain entropy at molecular level.", back: "It quantifies multiplicity/dispersion of microstates; higher when energy and matter are more distributed." },
-      { front: "Chemistry: What is Beer-Lambert law?", back: "A = εlc, relating absorbance to concentration and path length." },
-      { front: "Chemistry: Define coordination number in complexes.", back: "Number of ligand donor atoms directly bonded to a central metal ion." },
-      { front: "Chemistry: What is catalytic turnover frequency (TOF)?", back: "Moles of product formed per mole of catalyst per unit time." },
-      { front: "Chemistry: Distinguish kinetic vs thermodynamic control.", back: "Kinetic control favors lower activation barrier products; thermodynamic favors most stable products." },
-
-      // Advanced Biology (12)
-      { front: "Biology: What is central dogma?", back: "Genetic information flows DNA → RNA → Protein (with notable exceptions like reverse transcription)." },
-      { front: "Biology: Define allosteric regulation.", back: "Effector binding at non-active sites changes enzyme conformation and activity." },
-      { front: "Biology: What is Hardy-Weinberg equilibrium condition?", back: "In large random-mating populations with no mutation, migration, selection, or drift, allele frequencies remain constant." },
-      { front: "Biology: Role of ATP synthase in mitochondria?", back: "Uses proton motive force across inner membrane to synthesize ATP from ADP + Pi." },
-      { front: "Biology: What is epigenetics?", back: "Heritable changes in gene expression without DNA sequence change (e.g., methylation, histone modifications)." },
-      { front: "Biology: Define Km in Michaelis-Menten kinetics.", back: "Substrate concentration at which reaction rate is half of Vmax." },
-      { front: "Biology: What does CRISPR-Cas9 do?", back: "Guide RNA directs Cas9 nuclease to target DNA for sequence-specific editing." },
-      { front: "Biology: Difference between innate and adaptive immunity?", back: "Innate is rapid, non-specific; adaptive is specific, slower initially, and has memory." },
-      { front: "Biology: What is a morphogen?", back: "A signaling molecule forming concentration gradients that pattern tissue development." },
-      { front: "Biology: Define linkage disequilibrium.", back: "Non-random association of alleles at different loci in a population." },
-      { front: "Biology: Function of telomerase?", back: "Extends telomeres to maintain chromosome ends, especially in germline/stem/cancer cells." },
-      { front: "Biology: What is oxidative phosphorylation?", back: "Electron transport creates proton gradient used by ATP synthase to generate ATP." }
-    ];
 
     const state = {
       deckName: "",
@@ -326,15 +267,6 @@
 
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        state.deckName = "Advanced STEM Master Deck";
-        state.cards = DEFAULT_FLASHCARDS.map((card) => ({
-          ...card,
-          level: "new",
-          nextReview: null
-        }));
-        return;
-      }
       if (!raw) return;
       try {
         const parsed = JSON.parse(raw);
@@ -343,12 +275,6 @@
         }
       } catch (_) {
         console.warn("Unable to parse flashcard state");
-        state.deckName = "Advanced STEM Master Deck";
-        state.cards = DEFAULT_FLASHCARDS.map((card) => ({
-          ...card,
-          level: "new",
-          nextReview: null
-        }));
       }
     }
 
