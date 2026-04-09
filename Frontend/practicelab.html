@@ -237,6 +237,13 @@
     <div id="testMeta" class="meta"></div>
     <div id="questionsList"></div>
   </div>
+
+  <div class="labs-preview">
+    <h3>Command Learning Labs</h3>
+    <div id="labsMeta" class="meta">Loading labs...</div>
+    <div class="labs-grid" id="labsGrid"></div>
+    <a class="labs-link" href="/practicallab">Open full Practical Labs page →</a>
+  </div>
 </div>
 
 <script>
@@ -387,6 +394,32 @@ function startLab() {
       track: trackSelect.value,
       difficulty: difficultySelect.value,
     });
+}
+
+function loadLabsPreview() {
+  const labsMeta = document.getElementById('labsMeta');
+  const labsGrid = document.getElementById('labsGrid');
+
+  fetch('/api/ptl/labs')
+    .then((res) => res.json())
+    .then((payload) => {
+      const labs = Array.isArray(payload.labs) ? payload.labs : [];
+      labsMeta.textContent = `${labs.length} practical lab(s) available.`;
+      labsGrid.innerHTML = labs.slice(0, 6).map((lab) => `
+        <div class="lab-tile">
+          <h4>${lab.name}</h4>
+          <p>${lab.track} • ${lab.level} • ${lab.taskCount} tasks</p>
+        </div>
+      `).join('');
+    })
+    .catch(() => {
+      labsMeta.textContent = 'Could not load practical labs.';
+      labsGrid.innerHTML = '';
+    });
+}
+
+loadLabsPreview();
+</script>
 
     const response = await fetch(`/api/ptl/machines?${params.toString()}`);
     if (!response.ok) throw new Error('Could not load machines right now.');
