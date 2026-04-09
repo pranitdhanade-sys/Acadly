@@ -7,22 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .roadmap-card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
-    .roadmap-card:hover { transform: translateY(-4px); box-shadow: 0 20px 55px rgba(0,0,0,.35); border-color: rgba(34,211,238,.6); }
-    .status-dot { width: .6rem; height: .6rem; border-radius: 999px; display: inline-block; }
-    .feature-pill { border: 1px solid rgba(148,163,184,.35); background: rgba(15,23,42,.35); }
-    .active-quarter { border-color: rgba(167,139,250,.9) !important; box-shadow: 0 0 0 1px rgba(167,139,250,.6), 0 0 22px rgba(167,139,250,.2); }
-
-    .mindmap-node { border: 1px solid rgba(148,163,184,.25); background: rgba(2,6,23,.6); }
-    .tree-root { position: relative; }
-    .tree-root::before { content: ''; position: absolute; left: 10px; top: 1.1rem; bottom: .4rem; border-left: 2px dashed rgba(34,211,238,.45); }
-    .tree-branch { position: relative; padding-left: 1.25rem; }
-    .tree-branch::before { content: ''; position: absolute; left: .55rem; top: .95rem; width: .7rem; border-top: 2px solid rgba(34,211,238,.45); }
-    .arrow-chip { background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.3); }
-    .hidden-tree { display: none; }
-  </style>
+  <link rel="stylesheet" href="CSS/roadmap.css">
+  
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
   <div class="fixed -top-24 -left-16 h-96 w-96 rounded-full bg-purple-700/20 blur-3xl"></div>

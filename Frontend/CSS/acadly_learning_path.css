@@ -1,0 +1,8 @@
+﻿/* Acadly Learning Path CSS */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.path-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+.path-step { display: flex; align-items: center; margin: 2rem 0; }
+.step-number { width: 50px; height: 50px; background: linear-gradient(135deg, rgb(var(--blue)), rgb(124, 58, 237)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; }
+.step-content { margin-left: 1rem; flex: 1; background: rgba(15, 23, 42, 0.5); padding: 1.5rem; border-radius: 0.75rem; border-left: 2px solid rgb(var(--blue)); }
+

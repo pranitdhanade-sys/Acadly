@@ -1,0 +1,11 @@
+﻿/* Mindmap CSS */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.mind-map-container { display: flex; gap: 1rem; height: 100vh; padding: 1rem; }
+.sidebar { width: 300px; background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; padding: 1rem; overflow-y: auto; }
+.canvas { flex: 1; background: rgba(15, 23, 42, 0.3); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; position: relative; cursor: grab; }
+.canvas.panning { cursor: grabbing; }
+.node { padding: 0.75rem 1rem; background: rgba(30, 41, 59, 0.8); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; cursor: pointer; transition: all 200ms; user-select: none; }
+.node:hover { background: rgba(var(--blue), 0.2); border-color: rgb(var(--blue)); }
+.node.selected { background: rgba(var(--blue), 0.3); border-color: rgb(var(--blue)); box-shadow: 0 0 0 2px rgba(var(--blue), 0.3); }
+

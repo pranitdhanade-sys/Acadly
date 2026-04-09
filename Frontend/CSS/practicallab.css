@@ -1,0 +1,16 @@
+﻿/* Practical Lab CSS */
+:root {
+  --bg: 2 6 23;
+  --text: 226 232 240;
+  --border: 30 41 59;
+  --blue: 34 211 238;
+}
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+h2 { margin-bottom: 1.5rem; }
+label { display: block; margin: 1rem 0 0.5rem; font-weight: 600; }
+select, input { width: 100%; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; color: rgb(var(--text)); }
+.toggle { display: flex; gap: 1rem; margin: 1rem 0; }
+.toggle button { flex: 1; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; color: rgb(var(--text)); cursor: pointer; transition: all 200ms; }
+.toggle button.active { background: rgb(var(--blue)); border-color: rgb(var(--blue)); color: white; }
+

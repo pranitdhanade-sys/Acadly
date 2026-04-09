@@ -1,0 +1,16 @@
+﻿/* Dashboard Live CSS - Real-time stats and live updates */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; --purple: 124 58 237; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; line-height: 1.6; }
+.dashboard-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.live-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgb(239, 68, 68); padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.85rem; color: rgb(239, 68, 68); }
+.live-indicator { width: 8px; height: 8px; background: rgb(239, 68, 68); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.stat-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5)); border: 1px solid rgb(var(--border)); padding: 1.5rem; border-radius: 0.75rem; cursor: pointer; transition: all 300ms; }
+.stat-card:hover { transform: translateY(-4px); border-color: rgb(var(--blue)); box-shadow: 0 12px 32px rgba(var(--blue), 0.15); }
+.stat-label { font-size: 0.85rem; color: rgb(148, 163, 184); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-value { font-size: 2.5rem; font-weight: 700; margin: 0.5rem 0; background: linear-gradient(135deg, rgb(var(--blue)), rgb(var(--purple))); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-change { font-size: 0.85rem; color: rgb(34, 197, 94); }
+.chart-section { background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; }
+.chart-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 1rem; }

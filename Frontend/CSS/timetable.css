@@ -1,0 +1,14 @@
+﻿/* Timetable CSS */
+:root {
+  --bg: 2 6 23;
+  --text: 226 232 240;
+  --border: 30 41 59;
+  --blue: 34 211 238;
+}
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.timetable { margin: 2rem auto; max-width: 1000px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; overflow: hidden; }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgb(var(--border)); }
+th { background: rgba(var(--blue), 0.1); font-weight: 600; color: rgb(var(--blue)); }
+tr:hover { background: rgba(var(--blue), 0.05); }
+

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="CSS/acadly_legal_hub.css">
     <script>
         tailwind.config = {
             theme: {
@@ -25,7 +24,7 @@
                             css: {
                                 color: theme('colors.slate.300'),
                                 h1: { color: theme('colors.white') },
-                                h2: {
+                                h2: { 
                                     color: theme('colors.white'),
                                     borderBottomWidth: '1px',
                                     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
@@ -34,7 +33,7 @@
                                 },
                                 h3: { color: theme('colors.white'), marginTop: '2rem' },
                                 strong: { color: theme('colors.white') },
-                                a: {
+                                a: { 
                                     color: theme('colors.cyan.400'),
                                     textDecoration: 'none',
                                     fontWeight: '500',
@@ -48,117 +47,42 @@
             }
         }
     </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(147, 51, 234, 0.4);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(147, 51, 234, 0.8);
-        }
-
-        .glass {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* Removed tab-content CSS entirely; relying on Tailwind utility classes */
-
-        /* TOC link hover effect */
-        .toc-link {
-            transition: all 0.2s ease;
-            border-left: 2px solid transparent;
-        }
-
-        .toc-link:hover {
-            color: #c084fc;
-            /* purple-400 */
-            border-left-color: #9333ea;
-            /* purple-600 */
-            padding-left: 0.5rem;
-        }
-
-        /* Success Animation */
-        @keyframes fade-in-up {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in-up {
-            animation: fade-in-up 0.6s ease-out forwards;
-        }
-    </style>
+   
 </head>
-
 <body class="bg-slate-950 text-slate-200 min-h-screen relative overflow-x-hidden pt-24 pb-20">
 
     <!-- Background Accents -->
-    <div
-        class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none z-0">
-    </div>
-    <div
-        class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[50%] rounded-full bg-cyan-900/10 blur-[120px] pointer-events-none z-0">
-    </div>
+    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[50%] rounded-full bg-cyan-900/10 blur-[120px] pointer-events-none z-0"></div>
 
     <!-- Header Navigation -->
     <nav class="fixed top-0 w-full glass z-50 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <a href="Homepage.html" class="inline-flex items-center transition hover:opacity-80">
-                <img src="js/public 2.0/image.png" alt="AcadLy Logo" class="h-14 w-auto object-contain drop-shadow-sm">
-            </a>
+            <img src="js/public 2.0/image.png" alt="AcadLy Logo" class="h-14 w-auto object-contain drop-shadow-sm">
         </div>
-        <a href="dashboard_v2.html"
-            class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
+        <a href="#" class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
             <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back to Dashboard
         </a>
     </nav>
 
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-6 relative z-10 w-full">
-
+        
         <!-- Page Title & Navigation Tabs -->
         <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">AcadLy <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Hub</span></h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto">Everything you need to know about our legal policies,
-                your rights, and how you can help us improve.</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">AcadLy <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Hub</span></h1>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto">Everything you need to know about our legal policies, your rights, and how you can help us improve.</p>
         </header>
 
         <!-- Tabs Menu -->
-        <div
-            class="flex flex-col md:flex-row justify-center border-b border-slate-800 mb-12 overflow-x-auto hide-scroll px-4">
-            <button onclick="switchTab('terms')" id="tab-btn-terms"
-                class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-purple-400 border-b-2 border-purple-500 shadow-[0_4px_15px_-5px_rgba(147,51,234,0.5)]">
+        <div class="flex flex-col md:flex-row justify-center border-b border-slate-800 mb-12 overflow-x-auto hide-scroll px-4">
+            <button onclick="switchTab('terms')" id="tab-btn-terms" class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-purple-400 border-b-2 border-purple-500 shadow-[0_4px_15px_-5px_rgba(147,51,234,0.5)]">
                 <i class="fa-solid fa-file-contract mr-2"></i> Terms & Conditions
             </button>
-            <button onclick="switchTab('copyright')" id="tab-btn-copyright"
-                class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
+            <button onclick="switchTab('copyright')" id="tab-btn-copyright" class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
                 <i class="fa-solid fa-copyright mr-2"></i> Copyright Policy
             </button>
-            <button onclick="switchTab('feedback')" id="tab-btn-feedback"
-                class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
+            <button onclick="switchTab('feedback')" id="tab-btn-feedback" class="tab-btn pb-4 px-6 md:px-8 text-lg font-medium whitespace-nowrap transition-all text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
                 <i class="fa-solid fa-comment-dots mr-2"></i> Submit Feedback
             </button>
         </div>
@@ -166,14 +90,11 @@
         <!-- ========================================== -->
         <!-- TAB 1: TERMS & CONDITIONS                  -->
         <!-- ========================================== -->
-        <section id="tab-terms"
-            class="tab-content transition-all duration-500 opacity-100 translate-y-0 grid grid-cols-1 lg:grid-cols-4 gap-12">
+        <section id="tab-terms" class="tab-content transition-all duration-500 opacity-100 translate-y-0 grid grid-cols-1 lg:grid-cols-4 gap-12">
             <!-- Table of Contents (Sticky Sidebar) -->
             <aside class="hidden lg:block lg:col-span-1">
                 <div class="sticky top-28 glass p-6 rounded-2xl">
-                    <h3
-                        class="text-lg font-semibold text-white mb-4 uppercase tracking-wider text-sm border-b border-slate-700 pb-2">
-                        Contents</h3>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider text-sm border-b border-slate-700 pb-2">Contents</h3>
                     <ul class="space-y-3 text-sm text-slate-400">
                         <li><a href="#t-1" class="toc-link block">1. Acceptance of Terms</a></li>
                         <li><a href="#t-2" class="toc-link block">2. User Account</a></li>
@@ -190,68 +111,41 @@
                     <p class="text-slate-400 italic mb-8">Last Updated: March 31, 2026</p>
 
                     <h2 id="t-1">1. Acceptance of Terms</h2>
-
+                    
                     <!-- TL;DR Box -->
-                    <div
-                        class="not-prose bg-cyan-950/20 border-l-4 border-cyan-400 p-6 rounded-r-xl glass my-6 shadow-[0_4px_20px_rgba(34,211,238,0.05)]">
-                        <h4
-                            class="text-cyan-400 font-bold mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
-                            <i class="fa-solid fa-bolt"></i> TL;DR
-                        </h4>
-                        <p class="text-slate-300 text-sm">By using AcadLy, you agree to these rules. If you don't agree,
-                            you can't use our platform.</p>
+                    <div class="not-prose bg-cyan-950/20 border-l-4 border-cyan-400 p-6 rounded-r-xl glass my-6 shadow-[0_4px_20px_rgba(34,211,238,0.05)]">
+                        <h4 class="text-cyan-400 font-bold mb-2 flex items-center gap-2 uppercase tracking-wide text-xs"><i class="fa-solid fa-bolt"></i> TL;DR</h4>
+                        <p class="text-slate-300 text-sm">By using AcadLy, you agree to these rules. If you don't agree, you can't use our platform.</p>
                     </div>
 
-                    <p>Welcome to AcadLy. By accessing or using our websites, software, applications, or interconnected
-                        services (collectively the "Service"), you signify that you have read, understood, and agree to
-                        be bound by these Terms and Conditions ("Terms"). If you are opening an account on behalf of a
-                        company, organization, or other entity, then "you" includes you and that entity.</p>
-                    <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a
-                        revision is material we will try to provide at least 30 days notice prior to any new terms
-                        taking effect.</p>
+                    <p>Welcome to AcadLy. By accessing or using our websites, software, applications, or interconnected services (collectively the "Service"), you signify that you have read, understood, and agree to be bound by these Terms and Conditions ("Terms"). If you are opening an account on behalf of a company, organization, or other entity, then "you" includes you and that entity.</p>
+                    <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days notice prior to any new terms taking effect.</p>
 
                     <h2 id="t-2">2. User Account</h2>
-                    <p>When you create an account with us, you must provide us information that is accurate, complete,
-                        and current at all times. Failure to do so constitutes a breach of the Terms, which may result
-                        in immediate termination of your account on our Service.</p>
-                    <p>You are responsible for safeguarding the password that you use to access the Service and for any
-                        activities or actions under your password, whether your password is with our Service or a
-                        third-party service.</p>
+                    <p>When you create an account with us, you must provide us information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.</p>
+                    <p>You are responsible for safeguarding the password that you use to access the Service and for any activities or actions under your password, whether your password is with our Service or a third-party service.</p>
 
                     <h2 id="t-3">3. User Conduct</h2>
-
+                    
                     <!-- TL;DR Box -->
-                    <div
-                        class="not-prose bg-cyan-950/20 border-l-4 border-cyan-400 p-6 rounded-r-xl glass my-6 shadow-[0_4px_20px_rgba(34,211,238,0.05)]">
-                        <h4
-                            class="text-cyan-400 font-bold mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
-                            <i class="fa-solid fa-bolt"></i> TL;DR
-                        </h4>
-                        <p class="text-slate-300 text-sm">Be respectful. Don't spam, cheat, hack, or harass other
-                            learners. Your content remains yours, but we need functional rights to host it.</p>
+                    <div class="not-prose bg-cyan-950/20 border-l-4 border-cyan-400 p-6 rounded-r-xl glass my-6 shadow-[0_4px_20px_rgba(34,211,238,0.05)]">
+                        <h4 class="text-cyan-400 font-bold mb-2 flex items-center gap-2 uppercase tracking-wide text-xs"><i class="fa-solid fa-bolt"></i> TL;DR</h4>
+                        <p class="text-slate-300 text-sm">Be respectful. Don't spam, cheat, hack, or harass other learners. Your content remains yours, but we need functional rights to host it.</p>
                     </div>
 
                     <p>You agree not to engage in any of the following prohibited activities:</p>
                     <ul>
                         <li>Copying, distributing, or disclosing any part of the Service in any medium.</li>
-                        <li>Using any automated system, including without limitation "robots," "spiders," or "offline
-                            readers," to access the Service.</li>
-                        <li>Attempting to interfere with, compromise the system integrity or security, or decipher any
-                            transmissions to or from the servers running the Service.</li>
-                        <li>Taking any action that imposes, or may impose at our sole discretion an unreasonable or
-                            disproportionately large load on our infrastructure.</li>
+                        <li>Using any automated system, including without limitation "robots," "spiders," or "offline readers," to access the Service.</li>
+                        <li>Attempting to interfere with, compromise the system integrity or security, or decipher any transmissions to or from the servers running the Service.</li>
+                        <li>Taking any action that imposes, or may impose at our sole discretion an unreasonable or disproportionately large load on our infrastructure.</li>
                     </ul>
 
                     <h2 id="t-4">4. Payments & Refunds</h2>
-                    <p>Certain aspects of the Service may be provided for a fee or other charge. If you elect to use
-                        paid aspects of the Service, you agree to the pricing and payment terms currently in effect.
-                        AcadLy may add new services for additional fees and charges, or amend fees and charges for
-                        existing services, at any time in its sole discretion.</p>
+                    <p>Certain aspects of the Service may be provided for a fee or other charge. If you elect to use paid aspects of the Service, you agree to the pricing and payment terms currently in effect. AcadLy may add new services for additional fees and charges, or amend fees and charges for existing services, at any time in its sole discretion.</p>
 
                     <h2 id="t-5">5. Termination</h2>
-                    <p>We may terminate or suspend your account immediately, without prior notice or liability, for any
-                        reason whatsoever, including without limitation if you breach the Terms. Upon termination, your
-                        right to use the Service will immediately cease.</p>
+                    <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Service will immediately cease.</p>
                 </div>
             </div>
         </section>
@@ -260,47 +154,33 @@
         <!-- ========================================== -->
         <!-- TAB 2: COPYRIGHT POLICY                    -->
         <!-- ========================================== -->
-        <section id="tab-copyright"
-            class="tab-content hidden transition-all duration-500 opacity-0 translate-y-4 max-w-3xl mx-auto">
+        <section id="tab-copyright" class="tab-content hidden transition-all duration-500 opacity-0 translate-y-4 max-w-3xl mx-auto">
             <div class="glass p-8 md:p-12 rounded-3xl border-t border-white/10 shadow-2xl">
                 <div class="prose prose-invert max-w-none">
-                    <div
-                        class="flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 border border-slate-700 mb-8 text-2xl text-slate-400 mx-auto">
+                    <div class="flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 border border-slate-700 mb-8 text-2xl text-slate-400 mx-auto">
                         <i class="fa-solid fa-copyright"></i>
                     </div>
                     <h2 class="text-center mt-0 border-none">Intellectual Property & DMCA Notice</h2>
-
-                    <p class="text-lg text-slate-300 text-center mb-10">AcadLy respects the intellectual property rights
-                        of others and expects its users to do the same.</p>
+                    
+                    <p class="text-lg text-slate-300 text-center mb-10">AcadLy respects the intellectual property rights of others and expects its users to do the same.</p>
 
                     <h3>Ownership of Content</h3>
-                    <p>All structured learning modules, interface designs, logos, graphics, structural code, and
-                        original pedagogical pathways provided by AcadLy are the exclusive property of AcadLy Inc. and
-                        are protected by applicable copyright and trademark laws.</p>
-                    <p>User-generated comments, forum posts, and code snippets uploaded as part of solving exercises
-                        remain the property of their respective creators. However, by posting content to AcadLy, users
-                        grant us a non-exclusive, worldwide, royalty-free license to display, reproduce, and distribute
-                        that content strictly for the purposes of operating the platform.</p>
+                    <p>All structured learning modules, interface designs, logos, graphics, structural code, and original pedagogical pathways provided by AcadLy are the exclusive property of AcadLy Inc. and are protected by applicable copyright and trademark laws.</p>
+                    <p>User-generated comments, forum posts, and code snippets uploaded as part of solving exercises remain the property of their respective creators. However, by posting content to AcadLy, users grant us a non-exclusive, worldwide, royalty-free license to display, reproduce, and distribute that content strictly for the purposes of operating the platform.</p>
 
                     <h3>Reporting Copyright Infringement</h3>
-                    <p>If you believe that your work has been copied in a way that constitutes copyright infringement,
-                        please provide our designated Copyright Agent with the following information in accordance with
-                        the Digital Millennium Copyright Act (DMCA):</p>
+                    <p>If you believe that your work has been copied in a way that constitutes copyright infringement, please provide our designated Copyright Agent with the following information in accordance with the Digital Millennium Copyright Act (DMCA):</p>
                     <ol>
-                        <li>An electronic or physical signature of the person authorized to act on behalf of the owner
-                            of the copyright interest.</li>
+                        <li>An electronic or physical signature of the person authorized to act on behalf of the owner of the copyright interest.</li>
                         <li>A description of the copyrighted work that you claim has been infringed.</li>
-                        <li>A description of where the material that you claim is infringing is located on the Service
-                            (e.g., a specific URL).</li>
+                        <li>A description of where the material that you claim is infringing is located on the Service (e.g., a specific URL).</li>
                         <li>Your address, telephone number, and email address.</li>
-                        <li>A statement by you that you have a good faith belief that the disputed use is not authorized
-                            by the copyright owner, its agent, or the law.</li>
+                        <li>A statement by you that you have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law.</li>
                     </ol>
 
                     <div class="mt-10 p-6 bg-purple-900/20 border border-purple-500/30 rounded-xl text-center">
                         <p class="mb-2 text-slate-300">Submit all infringement claims electronically to:</p>
-                        <a href="mailto:copyright@acadly.com"
-                            class="text-xl font-bold text-cyan-400 hover:text-cyan-300 transition-colors drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
+                        <a href="mailto:copyright@acadly.com" class="text-xl font-bold text-cyan-400 hover:text-cyan-300 transition-colors drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
                             copyright@acadly.com
                         </a>
                     </div>
@@ -312,92 +192,66 @@
         <!-- ========================================== -->
         <!-- TAB 3: SUBMIT FEEDBACK                     -->
         <!-- ========================================== -->
-        <section id="tab-feedback"
-            class="tab-content hidden transition-all duration-500 opacity-0 translate-y-4 max-w-2xl mx-auto">
-
+        <section id="tab-feedback" class="tab-content hidden transition-all duration-500 opacity-0 translate-y-4 max-w-2xl mx-auto">
+            
             <!-- Feedback Form -->
-            <div id="feedbackFormCard"
-                class="glass p-8 md:p-10 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border-t border-white/10 relative overflow-hidden transition-all duration-500">
-
+            <div id="feedbackFormCard" class="glass p-8 md:p-10 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border-t border-white/10 relative overflow-hidden transition-all duration-500">
+                
                 <h3 class="text-2xl font-bold text-white mb-2">We'd love to hear from you</h3>
                 <p class="text-slate-400 mb-8">What kind of feedback do you have?</p>
 
                 <!-- Category Pills -->
                 <div class="flex flex-wrap gap-3 mb-10">
-                    <button type="button" onclick="selectCategory(this)"
-                        class="category-pill bg-purple-600 border border-purple-500 text-white shadow-[0_0_15px_rgba(147,51,234,0.5)] px-5 py-2.5 rounded-full text-sm font-medium transition-all">
+                    <button type="button" onclick="selectCategory(this)" class="category-pill bg-purple-600 border border-purple-500 text-white shadow-[0_0_15px_rgba(147,51,234,0.5)] px-5 py-2.5 rounded-full text-sm font-medium transition-all">
                         🐞 Bug Report
                     </button>
-                    <button type="button" onclick="selectCategory(this)"
-                        class="category-pill bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-500 px-5 py-2.5 rounded-full text-sm font-medium transition-all">
+                    <button type="button" onclick="selectCategory(this)" class="category-pill bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-500 px-5 py-2.5 rounded-full text-sm font-medium transition-all">
                         💡 Feature Request
                     </button>
-                    <button type="button" onclick="selectCategory(this)"
-                        class="category-pill bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-500 px-5 py-2.5 rounded-full text-sm font-medium transition-all">
+                    <button type="button" onclick="selectCategory(this)" class="category-pill bg-slate-800 border border-slate-700 text-slate-300 hover:border-slate-500 px-5 py-2.5 rounded-full text-sm font-medium transition-all">
                         💬 General Feedback
                     </button>
                 </div>
 
                 <!-- Rating System -->
                 <div class="mb-10">
-                    <label class="block text-sm font-medium text-slate-300 mb-4">How is your learning
-                        experience?</label>
+                    <label class="block text-sm font-medium text-slate-300 mb-4">How is your learning experience?</label>
                     <div class="flex gap-4 text-3xl" id="starContainer">
-                        <button type="button" onclick="rate(1)" onmouseover="hoverRate(1)" onmouseout="clearHover()"
-                            class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i
-                                class="fa-solid fa-face-angry"></i></button>
-                        <button type="button" onclick="rate(2)" onmouseover="hoverRate(2)" onmouseout="clearHover()"
-                            class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i
-                                class="fa-solid fa-face-frown"></i></button>
-                        <button type="button" onclick="rate(3)" onmouseover="hoverRate(3)" onmouseout="clearHover()"
-                            class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i
-                                class="fa-solid fa-face-meh"></i></button>
-                        <button type="button" onclick="rate(4)" onmouseover="hoverRate(4)" onmouseout="clearHover()"
-                            class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i
-                                class="fa-solid fa-face-smile"></i></button>
-                        <button type="button" onclick="rate(5)" onmouseover="hoverRate(5)" onmouseout="clearHover()"
-                            class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i
-                                class="fa-solid fa-face-grin-stars"></i></button>
+                        <button type="button" onclick="rate(1)" onmouseover="hoverRate(1)" onmouseout="clearHover()" class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i class="fa-solid fa-face-angry"></i></button>
+                        <button type="button" onclick="rate(2)" onmouseover="hoverRate(2)" onmouseout="clearHover()" class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i class="fa-solid fa-face-frown"></i></button>
+                        <button type="button" onclick="rate(3)" onmouseover="hoverRate(3)" onmouseout="clearHover()" class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i class="fa-solid fa-face-meh"></i></button>
+                        <button type="button" onclick="rate(4)" onmouseover="hoverRate(4)" onmouseout="clearHover()" class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i class="fa-solid fa-face-smile"></i></button>
+                        <button type="button" onclick="rate(5)" onmouseover="hoverRate(5)" onmouseout="clearHover()" class="star focus:outline-none text-slate-700 hover:scale-110 transition-transform drop-shadow"><i class="fa-solid fa-face-grin-stars"></i></button>
                     </div>
                 </div>
 
                 <!-- Message Box -->
                 <div class="mb-8">
-                    <label class="block text-sm font-medium text-slate-300 mb-3 hover:cursor-pointer">Tell us more
-                        details</label>
-                    <textarea id="feedbackText" rows="5"
-                        class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl py-4 px-5 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none transition-all shadow-inner"
-                        placeholder="Tell us what's on your mind..."></textarea>
+                    <label class="block text-sm font-medium text-slate-300 mb-3 hover:cursor-pointer">Tell us more details</label>
+                    <textarea id="feedbackText" rows="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-2xl py-4 px-5 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none transition-all shadow-inner" placeholder="Tell us what's on your mind..."></textarea>
                 </div>
 
                 <div class="flex justify-end pt-4 border-t border-white/5">
-                    <button onclick="submitFeedback()"
-                        class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-2">
+                    <button onclick="submitFeedback()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-2">
                         Send Feedback <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Success State (Hidden initially) -->
-            <div id="feedbackSuccess"
-                class="hidden glass p-12 rounded-3xl text-center border-t border-cyan-400/50 shadow-[0_0_50px_rgba(34,211,238,0.15)] flex flex-col items-center justify-center min-h-[500px]">
-                <div
-                    class="w-24 h-24 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-5xl mb-6 shadow-[0_0_30px_rgba(34,211,238,0.4)] animate-bounce relative">
+            <div id="feedbackSuccess" class="hidden glass p-12 rounded-3xl text-center border-t border-cyan-400/50 shadow-[0_0_50px_rgba(34,211,238,0.15)] flex flex-col items-center justify-center min-h-[500px]">
+                <div class="w-24 h-24 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-5xl mb-6 shadow-[0_0_30px_rgba(34,211,238,0.4)] animate-bounce relative">
                     <i class="fa-solid fa-check"></i>
                     <!-- Pulse ring -->
-                    <div
-                        class="absolute inset-0 rounded-full border-2 border-cyan-400 animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]">
-                    </div>
+                    <div class="absolute inset-0 rounded-full border-2 border-cyan-400 animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
                 </div>
                 <h3 class="text-3xl font-bold text-white mb-4">Thank you!</h3>
-                <p class="text-xl text-slate-400 mb-8 max-w-sm mx-auto">Your feedback has been submitted successfully to
-                    the AcadLy team.</p>
-                <button onclick="resetFeedbackForm()"
-                    class="px-6 py-2 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                <p class="text-xl text-slate-400 mb-8 max-w-sm mx-auto">Your feedback has been submitted successfully to the AcadLy team.</p>
+                <button onclick="resetFeedbackForm()" class="px-6 py-2 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
                     Send another message
                 </button>
             </div>
-
+            
         </section>
 
     </main>
@@ -407,11 +261,11 @@
         // --- Tab Switching Logic ---
         function switchTab(tabId) {
             const tabs = ['terms', 'copyright', 'feedback'];
-
+            
             tabs.forEach(id => {
                 const contentEl = document.getElementById('tab-' + id);
                 const btnEl = document.getElementById('tab-btn-' + id);
-
+                
                 if (id === tabId) {
                     // Turn on display first
                     contentEl.classList.remove('hidden');
@@ -444,14 +298,14 @@
 
         // --- Smooth Scrolling for TOC ---
         document.querySelectorAll('.toc-link').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href').substring(1);
                 const targetEl = document.getElementById(targetId);
                 // Adjust for fixed sticky header offset
-                const yOffset = -120;
+                const yOffset = -120; 
                 const y = targetEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
+                window.scrollTo({top: y, behavior: 'smooth'});
             });
         });
 
@@ -489,7 +343,7 @@
                 if (index < val) {
                     star.classList.remove('text-slate-700');
                     star.classList.add('text-cyan-400', 'drop-shadow-[0_0_12px_rgba(34,211,238,0.8)]');
-                    if (isSelection) {
+                    if(isSelection) {
                         star.classList.add('scale-110');
                     }
                 } else {
@@ -506,7 +360,7 @@
 
         function submitFeedback() {
             // Basic validation (simulate checking)
-            if (feedbackText.value.trim() === '' && currentRating === 0) {
+            if(feedbackText.value.trim() === '' && currentRating === 0) {
                 // Shake animation for error logic (optional)
                 formCard.style.transform = "translateX(10px)";
                 setTimeout(() => formCard.style.transform = "translateX(-10px)", 100);
@@ -517,7 +371,7 @@
             // Animate transition
             formCard.style.opacity = '0';
             formCard.style.transform = 'scale(0.95)';
-
+            
             setTimeout(() => {
                 formCard.style.display = 'none';
                 successCard.classList.remove('hidden');
@@ -530,11 +384,11 @@
             feedbackText.value = '';
             currentRating = 0;
             renderStars(0, true);
-
+            
             // Switch view
             successCard.classList.add('hidden');
             successCard.classList.remove('animate-fade-in-up');
-
+            
             formCard.style.display = 'block';
             setTimeout(() => {
                 formCard.style.opacity = '1';
@@ -553,5 +407,4 @@
 
     </script>
 </body>
-
 </html>

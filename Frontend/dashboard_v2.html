@@ -1,1587 +1,1385 @@
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcadLy — User Dashboard</title>
+    <meta name="description" content="AcadLy neon glass dashboard (light/dark + Chart.js)." />
+    <link rel="stylesheet" href="CSS/dashboard_vs.css">
+    <script>
+      // Theme bootstrap (default: dark)
+      (function () {
+        try {
+          const saved = localStorage.getItem("acadly-dashboard-theme");
+          const prefersDark =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const useDark = saved ? saved === "dark" : true || prefersDark;
+          document.documentElement.classList.toggle("dark", useDark);
+        } catch {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AcadLy — User Dashboard</title>
-  <meta name="description" content="AcadLy neon glass dashboard (light/dark + Chart.js)." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <script>
-    // Theme bootstrap (default: dark)
-    (function () {
-      try {
-        const saved = localStorage.getItem("acadly-dashboard-theme");
-        const prefersDark =
-          window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const useDark = saved ? saved === "dark" : true || prefersDark;
-        document.documentElement.classList.toggle("dark", useDark);
-      } catch {
-        document.documentElement.classList.add("dark");
-      }
-    })();
-  </script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ["Inter", "ui-sans-serif", "system-ui"],
-            mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas"],
-          },
-          colors: {
-            brand: {
-              500: "#7C3AED", // purple-600-ish neon
-              600: "#6B4FBB",
-              700: "#5E43B3",
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "ui-sans-serif", "system-ui"],
+              mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas"],
             },
-            electric: {
-              400: "#22D3EE", // cyan-400
-              500: "#06B6D4",
+            colors: {
+              brand: {
+                500: "#7C3AED", // purple-600-ish neon
+                600: "#6B4FBB",
+                700: "#5E43B3",
+              },
+              electric: {
+                400: "#22D3EE", // cyan-400
+                500: "#06B6D4",
+              },
             },
-          },
-          boxShadow: {
-            glass: "0 24px 80px rgba(0,0,0,.45)",
-            neon: "0 0 0 1px rgba(124,58,237,.55), 0 0 26px rgba(124,58,237,.18)",
-            neonBlue: "0 0 0 1px rgba(34,211,238,.50), 0 0 26px rgba(34,211,238,.16)",
+            boxShadow: {
+              glass: "0 24px 80px rgba(0,0,0,.45)",
+              neon: "0 0 0 1px rgba(124,58,237,.55), 0 0 26px rgba(124,58,237,.18)",
+              neonBlue: "0 0 0 1px rgba(34,211,238,.50), 0 0 26px rgba(34,211,238,.16)",
+            },
           },
         },
-      },
-    };
-  </script>
+      };
+    </script>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    referrerpolicy="no-referrer" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-  <style>
-    :root {
-      --bg: 2 6 23;
-      /* slate-950 */
-      --panel: 15 23 42;
-      /* slate-900 */
-      --border: 30 41 59;
-      /* slate-800 */
-      --muted: 148 163 184;
-      /* slate-400 */
-      --text: 226 232 240;
-      /* slate-200 */
-      --brand: 124 58 237;
-      /* purple */
-      --blue: 34 211 238;
-      /* cyan */
-      --danger: 248 113 113;
-      /* red-400 */
-    }
+    
+  </head>
 
-    html:not(.dark) {
-      --bg: 248 250 252;
-      /* slate-50 */
-      --panel: 255 255 255;
-      --border: 226 232 240;
-      /* slate-200 */
-      --muted: 100 116 139;
-      /* slate-500 */
-      --text: 15 23 42;
-      /* slate-900 */
-    }
-
-    body {
-      background: rgb(var(--bg));
-      color: rgb(var(--text));
-    }
-
-    html:not(.dark) body {
-      background-image:
-        radial-gradient(980px 560px at 10% 6%, rgba(var(--blue), 0.14), transparent 58%),
-        radial-gradient(860px 560px at 92% 14%, rgba(14, 165, 233, 0.14), transparent 58%),
-        radial-gradient(900px 560px at 22% 28%, rgba(var(--brand), 0.10), transparent 60%),
-        radial-gradient(760px 540px at 58% 92%, rgba(16, 185, 129, 0.08), transparent 60%);
-      background-attachment: fixed;
-    }
-
-    .glass {
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgb(var(--border));
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    html:not(.dark) .glass {
-      background: rgba(255, 255, 255, 0.78);
-      border-color: rgba(15, 23, 42, 0.08);
-      box-shadow:
-        0 18px 60px rgba(2, 6, 23, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    }
-
-    .neon-text {
-      text-shadow:
-        0 0 14px rgba(var(--brand), 0.28),
-        0 0 30px rgba(var(--brand), 0.14);
-    }
-
-    .card-hover {
-      transition:
-        transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        box-shadow 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        border-color 240ms ease;
-    }
-
-    .card-hover:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(var(--brand), 0.18),
-        0 0 28px rgba(var(--brand), 0.12);
-      border-color: rgba(var(--brand), 0.34);
-    }
-
-    html:not(.dark) .card-hover:hover {
-      box-shadow:
-        0 24px 80px rgba(2, 6, 23, 0.14),
-        0 0 0 1px rgba(var(--brand), 0.18),
-        0 0 22px rgba(var(--brand), 0.10);
-    }
-
-    html:not(.dark) .neon-text {
-      text-shadow:
-        0 0 10px rgba(var(--brand), 0.22),
-        0 0 20px rgba(var(--brand), 0.10);
-    }
-
-    .kpi-in {
-      opacity: 0;
-      transform: translateY(10px);
-      transition:
-        opacity 650ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .kpi-in.is-in {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Light mode "liquid neon" blobs behind cards */
-    .liquid-blob {
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(42px);
-      opacity: 0.55;
-      transform: translate3d(0, 0, 0);
-      animation: blobFloat 12s ease-in-out infinite;
-      mix-blend-mode: multiply;
-    }
-
-    @keyframes blobFloat {
-
-      0%,
-      100% {
-        transform: translate3d(0, 0, 0) scale(1);
-      }
-
-      50% {
-        transform: translate3d(0, -16px, 0) scale(1.06);
-      }
-    }
-
-    html.dark .liquid-blob {
-      display: none;
-    }
-
-    .pulse-dot {
-      position: relative;
-    }
-
-    .pulse-dot::after {
-      content: "";
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: rgb(var(--danger));
-      box-shadow: 0 0 18px rgba(var(--danger), 0.45);
-      animation: ping 1.4s ease-in-out infinite;
-    }
-
-    @keyframes ping {
-      0% {
-        transform: scale(0.9);
-        opacity: 0.9;
-      }
-
-      70% {
-        transform: scale(1.35);
-        opacity: 0.35;
-      }
-
-      100% {
-        transform: scale(0.95);
-        opacity: 0.7;
-      }
-    }
-
-    .tree-children {
-      overflow: hidden;
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-6px);
-      transition:
-        max-height 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        opacity 200ms ease,
-        transform 200ms ease;
-    }
-
-    .tree-children.open {
-      max-height: 420px;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .focus-ring:focus-visible {
-      outline: none;
-      box-shadow:
-        0 0 0 2px rgba(255, 255, 255, 0.14),
-        0 0 0 5px rgba(var(--brand), 0.45);
-    }
-
-    html:not(.dark) .focus-ring:focus-visible {
-      box-shadow:
-        0 0 0 2px rgba(2, 6, 23, 0.08),
-        0 0 0 5px rgba(var(--brand), 0.35);
-    }
-
-    /* Certificate pulse border */
-    .cert-glow {
-      position: relative;
-    }
-
-    .cert-glow::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      border-radius: 18px;
-      background: linear-gradient(90deg, rgba(var(--brand), 0.9), rgba(var(--blue), 0.85), rgba(var(--brand), 0.9));
-      opacity: 0.5;
-      animation: certPulse 2.4s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    @keyframes certPulse {
-
-      0%,
-      100% {
-        opacity: 0.35;
-      }
-
-      50% {
-        opacity: 0.8;
-      }
-    }
-  </style>
-</head>
-
-<body class="relative font-sans antialiased">
-  <!-- Light mode liquid neon background (page-wide) -->
-  <div class="pointer-events-none fixed inset-0" style="z-index: -1" aria-hidden="true">
-    <div class="liquid-blob left-[-160px] top-[-40px] h-[420px] w-[560px]" style="background: rgba(34, 211, 238, 0.50)">
+  <body class="relative font-sans antialiased">
+    <!-- Light mode liquid neon background (page-wide) -->
+    <div
+      class="pointer-events-none fixed inset-0"
+      style="z-index: -1"
+      aria-hidden="true"
+    >
+      <div class="liquid-blob left-[-160px] top-[-40px] h-[420px] w-[560px]" style="background: rgba(34, 211, 238, 0.50)"></div>
+      <div class="liquid-blob right-[-180px] top-[-20px] h-[460px] w-[620px]" style="background: rgba(14, 165, 233, 0.42); animation-delay: -3.2s"></div>
+      <div class="liquid-blob left-[10%] top-[32%] h-[440px] w-[720px]" style="background: rgba(124, 58, 237, 0.20); animation-delay: -6s"></div>
+      <div class="liquid-blob right-[6%] top-[55%] h-[380px] w-[560px]" style="background: rgba(14, 165, 233, 0.18); animation-delay: -8s"></div>
+      <div class="liquid-blob left-[35%] top-[78%] h-[420px] w-[640px]" style="background: rgba(34, 211, 238, 0.14); animation-delay: -10s"></div>
     </div>
-    <div class="liquid-blob right-[-180px] top-[-20px] h-[460px] w-[620px]"
-      style="background: rgba(14, 165, 233, 0.42); animation-delay: -3.2s"></div>
-    <div class="liquid-blob left-[10%] top-[32%] h-[440px] w-[720px]"
-      style="background: rgba(124, 58, 237, 0.20); animation-delay: -6s"></div>
-    <div class="liquid-blob right-[6%] top-[55%] h-[380px] w-[560px]"
-      style="background: rgba(14, 165, 233, 0.18); animation-delay: -8s"></div>
-    <div class="liquid-blob left-[35%] top-[78%] h-[420px] w-[640px]"
-      style="background: rgba(34, 211, 238, 0.14); animation-delay: -10s"></div>
-  </div>
 
-  <!-- Mobile overlay -->
-  <div id="overlay" class="fixed inset-0 z-40 hidden bg-black/50 backdrop-blur-sm md:hidden" aria-hidden="true"></div>
+    <!-- Mobile overlay -->
+    <div id="overlay" class="fixed inset-0 z-40 hidden bg-black/50 backdrop-blur-sm md:hidden" aria-hidden="true"></div>
 
-  <!-- Sidebar (desktop fixed) -->
-  <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-50 hidden w-80 flex-col border-r border-slate-200/70 bg-white/55 backdrop-blur md:flex dark:border-slate-800/70 dark:bg-slate-900/40">
-    <div class="px-6 py-6">
-      <div class="flex items-center gap-3">
-        <img src="js/public 2.0/image.png" alt="AcadLy Logo" class="h-16 w-auto object-contain drop-shadow-sm">
-        <div class="leading-tight mt-1">
-          <div class="text-xs text-slate-600 dark:text-slate-400">User Dashboard</div>
+    <!-- Sidebar (desktop fixed) -->
+    <aside
+      id="sidebar"
+      class="fixed inset-y-0 left-0 z-50 hidden w-80 flex-col border-r border-slate-200/70 bg-white/55 backdrop-blur md:flex dark:border-slate-800/70 dark:bg-slate-900/40"
+    >
+      <div class="px-6 py-6">
+        <div class="flex items-center gap-3">
+          <div class="grid h-11 w-11 place-items-center rounded-2xl bg-white/70 ring-1 ring-slate-200 dark:bg-slate-950/60 dark:ring-slate-800">
+            <span class="text-lg font-bold text-slate-900 dark:text-white">A</span>
+          </div>
+          <div class="leading-tight">
+            <div class="text-base font-semibold text-slate-900 neon-text dark:text-white">AcadLy</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">User Dashboard</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <nav class="flex-1 px-4" aria-label="Sidebar tree">
-      <a href="#"
-        class="mb-2 flex items-center gap-3 rounded-xl bg-slate-950/30 px-3 py-2.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950/35 dark:text-white dark:ring-slate-800 border-l-4 border-brand-500 neon-text"
-        aria-current="page">
-        <i class="fa-solid fa-grid-2 text-brand-500"></i>
-        Dashboard
-      </a>
+      <nav class="flex-1 px-4" aria-label="Sidebar tree">
+        <a
+          href="#"
+          class="mb-2 flex items-center gap-3 rounded-xl bg-slate-950/30 px-3 py-2.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950/35 dark:text-white dark:ring-slate-800 border-l-4 border-brand-500 neon-text"
+          aria-current="page"
+        >
+          <i class="fa-solid fa-grid-2 text-brand-500"></i>
+          Dashboard
+        </a>
 
-      <a href="acadly_learning_path.html"
-        class="mb-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-map-location-dot text-brand-500"></i>
-        Learning Path
-      </a>
-      <a href="roadmap.html"
-        class="mb-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-list-check text-electric-400"></i>
-        Roadmap
-      </a>
+        <!-- Academic (expandable) -->
+        <button
+          type="button"
+          class="focus-ring flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 dark:text-slate-200 dark:hover:bg-slate-950/30"
+          data-tree-toggle="academic"
+          aria-expanded="true"
+          aria-controls="tree-academic"
+        >
+          <span class="flex items-center gap-3">
+            <i class="fa-solid fa-graduation-cap text-electric-400"></i>
+            Academic
+          </span>
+          <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400 transition" data-chevron="academic"></i>
+        </button>
+        <div id="tree-academic" class="tree-children open ml-3 mt-1 space-y-1 border-l border-slate-200 pl-3 dark:border-slate-800">
+          <a href="#modules" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
+            <i class="fa-solid fa-layer-group text-slate-400"></i>
+            My Courses
+          </a>
+          <a href="#badges" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
+            <i class="fa-solid fa-shapes text-slate-400"></i>
+            Special Badges
+          </a>
+          <a href="#achievements" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
+            <i class="fa-solid fa-trophy text-slate-400"></i>
+            Achievements
+          </a>
+        </div>
 
-      <a href="mind-map.html"
-        class="mb-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-diagram-project text-electric-400"></i>
-        Mind Maps
-      </a>
+        <a href="videoplayer-live.html" class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
+          <i class="fa-solid fa-wand-magic-sparkles text-brand-500"></i>
+          Video Hub
+        </a>
 
-      <!-- Academic (expandable) -->
-      <button type="button"
-        class="focus-ring flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 dark:text-slate-200 dark:hover:bg-slate-950/30"
-        data-tree-toggle="academic" aria-expanded="true" aria-controls="tree-academic">
-        <span class="flex items-center gap-3">
-          <i class="fa-solid fa-graduation-cap text-electric-400"></i>
-          Academic
-        </span>
-        <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400 transition"
-          data-chevron="academic"></i>
-      </button>
-      <div id="tree-academic"
-        class="tree-children open ml-3 mt-1 space-y-1 border-l border-slate-200 pl-3 dark:border-slate-800">
-        <a href="#modules"
-          class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
-          <i class="fa-solid fa-layer-group text-slate-400"></i>
+        <!-- Users (expandable) -->
+        <button
+          type="button"
+          class="focus-ring mt-2 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 dark:text-slate-200 dark:hover:bg-slate-950/30"
+          data-tree-toggle="users"
+          aria-expanded="false"
+          aria-controls="tree-users"
+        >
+          <span class="flex items-center gap-3">
+            <i class="fa-solid fa-users text-electric-400"></i>
+            Users
+          </span>
+          <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400 transition" data-chevron="users"></i>
+        </button>
+        <div id="tree-users" class="tree-children ml-3 mt-1 space-y-1 border-l border-slate-200 pl-3 dark:border-slate-800">
+          <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
+            <i class="fa-solid fa-chalkboard-user text-slate-400"></i>
+            Instructors
+          </a>
+          <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
+            <i class="fa-solid fa-people-group text-slate-400"></i>
+            Peer Groups
+          </a>
+        </div>
+
+        <a href="#" class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
+          <i class="fa-solid fa-gear text-slate-400"></i>
+          Settings
+        </a>
+      </nav>
+
+      <!-- Bottom banner -->
+      <div class="px-5 pb-6">
+        <div class="card-hover glass rounded-2xl p-4 shadow-glass">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Need support?</div>
+              <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                Get the AcadLy Study Pack
+              </div>
+              <div class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                Templates, streak tips, and AI prompts.
+              </div>
+            </div>
+            <div class="grid h-10 w-10 place-items-center rounded-2xl bg-brand-500/15 ring-1 ring-brand-500/25">
+              <i class="fa-solid fa-life-ring text-brand-500"></i>
+            </div>
+          </div>
+          <a
+            href="#"
+            class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-600 hover:shadow-neon focus-ring"
+          >
+            Open Support
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile sidebar drawer -->
+    <aside
+      id="sidebarMobile"
+      class="fixed inset-y-0 left-0 z-50 hidden w-[86%] max-w-sm flex-col border-r border-slate-200 bg-white/80 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-900/55"
+      aria-hidden="true"
+    >
+      <div class="flex items-center justify-between px-5 py-5">
+        <div class="flex items-center gap-3">
+          <div class="grid h-11 w-11 place-items-center rounded-2xl bg-white/70 ring-1 ring-slate-200 dark:bg-slate-950/60 dark:ring-slate-800">
+            <span class="text-lg font-bold text-slate-900 dark:text-white">A</span>
+          </div>
+          <div class="leading-tight">
+            <div class="text-base font-semibold text-slate-900 neon-text dark:text-white">AcadLy</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">User Dashboard</div>
+          </div>
+        </div>
+        <button id="closeMobile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass text-slate-200" type="button" aria-label="Close menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="px-4 pb-6 text-sm text-slate-600 dark:text-slate-300">
+        <div class="rounded-2xl bg-slate-950/5 p-3 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+          Use the desktop sidebar for the full tree. This drawer mirrors key links.
+        </div>
+      </div>
+      <nav class="flex-1 px-4" aria-label="Mobile">
+        <a href="#" class="flex items-center gap-3 rounded-xl bg-slate-950/5 px-3 py-2.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 border-l-4 border-brand-500 neon-text dark:bg-slate-950/35 dark:text-white dark:ring-slate-800">
+          <i class="fa-solid fa-grid-2 text-brand-500"></i>
+          Dashboard
+        </a>
+        <a href="#modules" class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-layer-group text-slate-500 dark:text-slate-400"></i>
           My Courses
         </a>
-        <a href="#badges"
-          class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
-          <i class="fa-solid fa-shapes text-slate-400"></i>
+        <a href="#badges" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-shapes text-slate-500 dark:text-slate-400"></i>
           Special Badges
         </a>
-        <a href="#achievements"
-          class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
-          <i class="fa-solid fa-trophy text-slate-400"></i>
+        <a href="#achievements" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-trophy text-slate-500 dark:text-slate-400"></i>
           Achievements
         </a>
-      </div>
-
-      <a href="ai-assistant.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-wand-magic-sparkles text-brand-500"></i>
-        AI Chatbot
-      </a>
-
-      <a href="timetable.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-calendar-days text-electric-400"></i>
-        Timetable
-      </a>
-
-      <a href="flashcards.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-layer-group text-brand-500"></i>
-        Flashcards Hub
-      <a href="flashcardupload.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-layer-group text-brand-500"></i>
-        Flashcard Upload
-      <a href="flashcards.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-layer-group text-brand-500"></i>
-        Flashcards
-      </a>
-
-      <a href="acadly_legal_hub.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-scale-balanced text-slate-400"></i>
-        Legal &amp; Hub
-      </a>
-
-      <!-- Users (expandable) -->
-      <button type="button"
-        class="focus-ring mt-2 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 dark:text-slate-200 dark:hover:bg-slate-950/30"
-        data-tree-toggle="users" aria-expanded="false" aria-controls="tree-users">
-        <span class="flex items-center gap-3">
-          <i class="fa-solid fa-users text-electric-400"></i>
-          Users
-        </span>
-        <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400 transition"
-          data-chevron="users"></i>
-      </button>
-      <div id="tree-users"
-        class="tree-children ml-3 mt-1 space-y-1 border-l border-slate-200 pl-3 dark:border-slate-800">
-        <a href="#" title="Coming Soon"
-          class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
-          <i class="fa-solid fa-chalkboard-user text-slate-400"></i>
-          Instructors
+        <a href="videoplayer-live.html" class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-wand-magic-sparkles text-brand-500"></i>
+          Video Hub
         </a>
-        <a href="#" title="Coming Soon"
-          class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-950/30 dark:hover:text-white">
-          <i class="fa-solid fa-people-group text-slate-400"></i>
-          Peer Groups
+        <a href="ai-assistant.html" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-robot text-electric-400"></i>
+          AI Chatbot
         </a>
-      </div>
-
-      <a href="#" title="Coming Soon"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-gear text-slate-400"></i>
-        Settings
-      </a>
-    </nav>
-
-    <!-- Bottom banner -->
-    <div class="px-5 pb-6">
-      <div class="card-hover glass rounded-2xl p-4 shadow-glass">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Need support?</div>
-            <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
-              Get the AcadLy Study Pack
-            </div>
-            <div class="mt-1 text-xs text-slate-600 dark:text-slate-300">
-              Templates, streak tips, and AI prompts.
-            </div>
-          </div>
-          <div class="grid h-10 w-10 place-items-center rounded-2xl bg-brand-500/15 ring-1 ring-brand-500/25">
-            <i class="fa-solid fa-life-ring text-brand-500"></i>
-          </div>
-        </div>
-        <a href="acadly_legal_hub.html?tab=feedback"
-          class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-600 hover:shadow-neon focus-ring">
-          Open Support
-          <i class="fa-solid fa-arrow-right text-xs"></i>
+        <a href="#" class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
+          <i class="fa-solid fa-gear text-slate-500 dark:text-slate-400"></i>
+          Settings
         </a>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Mobile sidebar drawer -->
-  <aside id="sidebarMobile"
-    class="fixed inset-y-0 left-0 z-50 hidden w-[86%] max-w-sm flex-col border-r border-slate-200 bg-white/80 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-900/55"
-    aria-hidden="true">
-    <div class="flex items-center justify-between px-5 py-5">
-      <div class="flex items-center gap-3">
-        <img src="js/public 2.0/image.png" alt="AcadLy Logo" class="h-16 w-auto object-contain drop-shadow-sm">
-        <div class="leading-tight mt-1">
-          <div class="text-xs text-slate-600 dark:text-slate-400">User Dashboard</div>
-        </div>
-      </div>
-      <button id="closeMobile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass text-slate-200"
-        type="button" aria-label="Close menu">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-    <div class="px-4 pb-6 text-sm text-slate-600 dark:text-slate-300">
-      <div class="rounded-2xl bg-slate-950/5 p-3 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-        Use the desktop sidebar for the full tree. This drawer mirrors key links.
-      </div>
-    </div>
-    <nav class="flex-1 px-4" aria-label="Mobile">
-      <a href="#"
-        class="flex items-center gap-3 rounded-xl bg-slate-950/5 px-3 py-2.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 border-l-4 border-brand-500 neon-text dark:bg-slate-950/35 dark:text-white dark:ring-slate-800">
-        <i class="fa-solid fa-grid-2 text-brand-500"></i>
-        Dashboard
-      </a>
-      <a href="acadly_learning_path.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-map-location-dot text-brand-500"></i>
-        Learning Path
-      </a>
-      <a href="mind-map.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-diagram-project text-electric-400"></i>
-        Mind Maps
-      <a href="roadmap.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-950/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-950/30 dark:hover:text-white">
-        <i class="fa-solid fa-list-check text-electric-400"></i>
-        Roadmap
-      </a>
-      <a href="#modules"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-layer-group text-slate-500 dark:text-slate-400"></i>
-        My Courses
-      </a>
-      <a href="#badges"
-        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-shapes text-slate-500 dark:text-slate-400"></i>
-        Special Badges
-      </a>
-      <a href="#achievements"
-        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-trophy text-slate-500 dark:text-slate-400"></i>
-        Achievements
-      </a>
-      <a href="ai-assistant.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-wand-magic-sparkles text-brand-500"></i>
-        AI Chatbot
-      </a>
-      <a href="timetable.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-calendar-days text-electric-400"></i>
-        Timetable
-      </a>
-      <a href="flashcardupload.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-layer-group text-brand-500"></i>
-        Flashcard Upload
-      <a href="flashcards.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-layer-group text-brand-500"></i>
-        Flashcards
-      </a>
-      <a href="acadly_legal_hub.html"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-scale-balanced text-slate-500 dark:text-slate-400"></i>
-        Legal &amp; Hub
-      </a>
-      <a href="#" title="Coming Soon"
-        class="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-950/5 dark:text-slate-300 dark:hover:bg-slate-950/30">
-        <i class="fa-solid fa-gear text-slate-500 dark:text-slate-400"></i>
-        Settings
-      </a>
-    </nav>
-    <div class="px-5 pb-6">
-      <a href="Homepage.html"
-        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:shadow-neonBlue dark:bg-slate-950/35 dark:text-slate-200 dark:ring-1 dark:ring-slate-800">
-        <i class="fa-solid fa-right-from-bracket"></i> Log Out
-      </a>
-    </div>
-  </aside>
-
-  <!-- Main area -->
-  <div class="min-h-dvh md:pl-80">
-    <!-- Top header -->
-    <header
-      class="sticky top-0 z-30 border-b border-slate-200/70 bg-[rgb(var(--bg))]/70 backdrop-blur dark:border-slate-800/70">
-      <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6">
-        <button id="openMobile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass md:hidden"
-          type="button" aria-label="Open menu">
-          <i class="fa-solid fa-bars"></i>
+      </nav>
+      <div class="px-5 pb-6">
+        <button id="logoutBtn" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:shadow-neonBlue dark:bg-slate-950/35 dark:text-slate-200 dark:ring-1 dark:ring-slate-800">
+          <i class="fa-solid fa-right-from-bracket"></i> Log Out
         </button>
+      </div>
+    </aside>
 
-        <div class="relative flex-1">
-          <i
-            class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"></i>
-          <input
-            class="w-full rounded-2xl bg-white/70 px-11 py-3 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-900/50 dark:text-white dark:ring-slate-800"
-            placeholder="Search courses, modules, peers..." type="search" />
-        </div>
-
-        <button id="notifBtn"
-          class="focus-ring pulse-dot card-hover grid h-11 w-11 place-items-center rounded-2xl glass" type="button"
-          aria-label="Notifications">
-          <i class="fa-regular fa-bell"></i>
-        </button>
-
-        <button id="themeBtn" class="focus-ring card-hover grid h-11 w-11 place-items-center rounded-2xl glass"
-          type="button" aria-label="Toggle theme">
-          <i id="themeIcon" class="fa-solid fa-moon"></i>
-        </button>
-
-        <div class="relative">
-          <button id="userBtn" class="focus-ring card-hover flex items-center gap-3 rounded-2xl glass px-3 py-2"
-            type="button" aria-haspopup="menu" aria-expanded="false">
-            <div
-              class="grid h-9 w-9 place-items-center overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
-              <div class="h-full w-full bg-gradient-to-br from-brand-600/70 to-electric-400/30"></div>
-            </div>
-            <div class="hidden text-left leading-tight sm:block">
-              <div id="userNameHeader" class="text-sm font-semibold text-slate-900 dark:text-white">Fletcher</div>
-              <div id="userRoleHeader" class="text-xs text-slate-600 dark:text-slate-400">Student</div>
-            </div>
-            <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400"></i>
+    <!-- Main area -->
+    <div class="min-h-dvh md:pl-80">
+      <!-- Top header -->
+      <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-[rgb(var(--bg))]/70 backdrop-blur dark:border-slate-800/70">
+        <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6">
+          <button id="openMobile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass md:hidden" type="button" aria-label="Open menu">
+            <i class="fa-solid fa-bars"></i>
           </button>
 
-          <!-- Dropdown -->
-          <div id="userMenu"
-            class="absolute right-0 mt-2 hidden w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/75"
-            role="menu">
-            <button id="viewProfileBtn"
-              class="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-900/5 dark:text-slate-200 dark:hover:bg-white/5"
-              role="menuitem" type="button">
-              <i class="fa-regular fa-user text-brand-500"></i>
-              View Profile
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400"></i>
+            <input
+              class="w-full rounded-2xl bg-white/70 px-11 py-3 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-900/50 dark:text-white dark:ring-slate-800"
+              placeholder="Search courses, modules, peers..."
+              type="search"
+            />
+          </div>
+
+          <button id="notifBtn" class="focus-ring pulse-dot card-hover grid h-11 w-11 place-items-center rounded-2xl glass" type="button" aria-label="Notifications">
+            <i class="fa-regular fa-bell"></i>
+          </button>
+
+          <button id="themeBtn" class="focus-ring card-hover grid h-11 w-11 place-items-center rounded-2xl glass" type="button" aria-label="Toggle theme">
+            <i id="themeIcon" class="fa-solid fa-moon"></i>
+          </button>
+
+          <div class="relative">
+            <button
+              id="userBtn"
+              class="focus-ring card-hover flex items-center gap-3 rounded-2xl glass px-3 py-2"
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded="false"
+            >
+              <div class="grid h-9 w-9 place-items-center overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
+                <div class="h-full w-full bg-gradient-to-br from-brand-600/70 to-electric-400/30"></div>
+              </div>
+              <div class="hidden text-left leading-tight sm:block">
+                <div id="headerUserName" class="text-sm font-semibold text-slate-900 dark:text-white">—</div>
+                <div class="text-xs text-slate-600 dark:text-slate-400">
+                  <span id="headerUserRole" class="capitalize">Student</span>
+                  <span id="headerUserDept" class="text-slate-500 dark:text-slate-500"></span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-down text-xs text-slate-500 dark:text-slate-400"></i>
             </button>
-            <a href="Homepage.html"
-              class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-900/5 dark:text-slate-200 dark:hover:bg-white/5"
-              role="menuitem">
-              <i class="fa-solid fa-right-from-bracket text-slate-400"></i>
-              Log Out
-            </a>
+
+            <!-- Dropdown -->
+            <div
+              id="userMenu"
+              class="absolute right-0 mt-2 hidden w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/75"
+              role="menu"
+            >
+              <button
+                id="viewProfileBtn"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-900/5 dark:text-slate-200 dark:hover:bg-white/5"
+                role="menuitem"
+                type="button"
+              >
+                <i class="fa-regular fa-user text-brand-500"></i>
+                View Profile
+              </button>
+              <a
+                href="index.html"
+                class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-900/5 dark:text-slate-200 dark:hover:bg-white/5"
+                role="menuitem"
+              >
+                <i class="fa-solid fa-right-from-bracket text-slate-400"></i>
+                Log Out
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <main class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <div id="dataSyncStatus" class="mb-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs text-cyan-700 dark:text-cyan-200">Loading dashboard data...</div>
-      <!-- Row 1: KPI cards (4) -->
-      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 0ms">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Active Courses</div>
-              <div id="kpiActiveCourses" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">8</div>
-              <div id="kpiCoursesNote" class="mt-1 text-xs text-slate-600 dark:text-slate-300">+2 this month</div>
-            </div>
-            <div
-              class="grid h-12 w-12 place-items-center rounded-2xl bg-cyan-500/10 ring-1 ring-cyan-500/25 shadow-neonBlue">
-              <i class="fa-solid fa-book-open text-electric-400"></i>
-            </div>
-          </div>
-          <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-            <div class="h-full w-[72%] rounded-full bg-gradient-to-r from-electric-400 to-brand-500"></div>
-          </div>
-        </article>
+      <main class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div
+          id="dashboardLoadBanner"
+          class="mb-6 hidden rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-100"
+          role="status"
+        ></div>
+        <div id="dashboardLoading" class="mb-6 hidden text-center text-sm text-slate-500 dark:text-slate-400">
+          <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Syncing dashboard from MySQL…
+        </div>
+        <p id="dbSyncMeta" class="mb-4 hidden text-xs text-slate-500 dark:text-slate-400"></p>
 
-        <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 90ms">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Certificates Earned</div>
-              <div id="kpiCertificates" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">3</div>
-              <div id="kpiCertNote" class="mt-1 text-xs text-slate-600 dark:text-slate-300">Verifiable IDs</div>
-            </div>
-            <div
-              class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 ring-1 ring-brand-500/25 shadow-neon">
-              <i class="fa-solid fa-certificate text-brand-500"></i>
-            </div>
-          </div>
-          <div class="mt-4 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-            <span class="h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_18px_rgba(124,58,237,.45)]"></span>
-            Latest: <span id="kpiLatestCert">Frontend Foundations</span>
-          </div>
-        </article>
-
-        <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 180ms">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Learning Hours</div>
-              <div id="kpiLearningHours" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">42.5</div>
-              <div id="kpiHoursNote" class="mt-1 text-xs text-slate-600 dark:text-slate-300">Last 7 days: 12.3h</div>
-            </div>
-            <div
-              class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/25 shadow-[0_0_0_1px_rgba(245,158,11,.35),0_0_26px_rgba(245,158,11,.12)]">
-              <i class="fa-solid fa-hourglass-half text-amber-300"></i>
-            </div>
-          </div>
-          <div class="mt-4 text-xs text-slate-600 dark:text-slate-300">
-            Peak day: <span id="kpiPeakDay" class="font-semibold text-slate-900 dark:text-white">Sunday</span>
-          </div>
-        </article>
-
-        <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 270ms">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Peer Connections</div>
-              <div id="kpiPeerConnections" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">27</div>
-              <div id="kpiPeerNote" class="mt-1 text-xs text-slate-600 dark:text-slate-300">+5 new</div>
-            </div>
-            <div
-              class="grid h-12 w-12 place-items-center rounded-2xl bg-rose-500/10 ring-1 ring-rose-500/25 shadow-[0_0_0_1px_rgba(244,63,94,.35),0_0_26px_rgba(244,63,94,.12)]">
-              <i class="fa-solid fa-user-group text-rose-300"></i>
-            </div>
-          </div>
-          <div class="mt-4 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-            <span class="h-2 w-2 rounded-full bg-rose-400"></span>
-            <span id="kpiStudyGroups">2 study groups active</span>
-          </div>
-        </article>
-      </section>
-
-      <!-- Row 2: 3 cards -->
-      <section class="mt-6 grid gap-6 lg:grid-cols-12">
-        <!-- Left: My Study Modules -->
-        <section id="modules" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-5">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-slate-900 dark:text-white">My Study Modules</h2>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Top courses and current progress</p>
-            </div>
-            <span
-              class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:text-slate-200 dark:ring-slate-800">
-              <i class="fa-solid fa-layer-group text-electric-400"></i>
-              <span id="modulesCount">6 courses</span>
-            </span>
-          </div>
-
-          <div id="modulesList" class="mt-5 space-y-3">
-            <article
-              class="card-hover rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="flex items-center gap-3">
-                <div class="h-12 w-12 overflow-hidden rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 shrink-0">
-                  <img src="modules images/SysyemD.png" alt="System Design" class="h-full w-full object-cover">
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">System Design</div>
-                  <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Scalable pattern architectures</div>
-                </div>
-                <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">65%</div>
+        <!-- Row 1: KPI cards (4) -->
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 0ms">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Active Courses</div>
+                <div id="kpiActiveCourses" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">—</div>
+                <div id="kpiCoursesDelta" class="mt-1 text-xs text-slate-600 dark:text-slate-300">—</div>
               </div>
-              <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-                <div
-                  class="h-full w-[65%] rounded-full bg-gradient-to-r from-emerald-500 to-electric-400 shadow-[0_0_18px_rgba(34,211,238,.10)]">
-                </div>
-              </div>
-            </article>
-
-            <article
-              class="card-hover rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="flex items-center gap-3">
-                <div class="h-12 w-12 overflow-hidden rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 shrink-0">
-                  <img src="modules images/DSA.png" alt="Data Structures & Algorithms"
-                    class="h-full w-full object-cover">
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">Data Structures &
-                    Algorithms</div>
-                  <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Graphs, Trees + DP</div>
-                </div>
-                <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">100%</div>
-              </div>
-              <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-                <div class="h-full w-full rounded-full bg-gradient-to-r from-purple-400 to-electric-400"></div>
-              </div>
-            </article>
-
-            <article
-              class="card-hover rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="flex items-center gap-3">
-                <div class="h-12 w-12 overflow-hidden rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 shrink-0">
-                  <img src="modules images/python.png" alt="Python Programming" class="h-full w-full object-cover">
-                </div>
-                <div class="min-w-0 flex-1">
-                  <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">Python Programming</div>
-                  <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Advanced Decorators</div>
-                </div>
-                <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">38%</div>
-              </div>
-              <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-                <div class="h-full w-[38%] rounded-full bg-gradient-to-r from-amber-500 to-electric-400"></div>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <!-- Center: Achievements & Certified Showcase -->
-        <section id="achievements" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-4">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-slate-900 dark:text-white">Achievements & Certified</h2>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Glassy certificates with verifiable IDs</p>
-            </div>
-            <i class="fa-solid fa-shield-halved text-electric-400 drop-shadow-[0_0_18px_rgba(34,211,238,.20)]"></i>
-          </div>
-
-          <div id="certificatesList" class="mt-5 space-y-4">
-            <div class="cert-glow rounded-2xl">
-              <div
-                class="relative z-10 overflow-hidden rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:ring-slate-800">
-                <div
-                  class="aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-slate-900/10 to-slate-950/40 ring-1 ring-slate-200 dark:from-slate-900/60 dark:to-slate-950/85 dark:ring-slate-800">
-                  <div class="flex h-full items-center justify-center text-center">
-                    <div class="px-4">
-                      <div class="text-xs text-slate-500 dark:text-slate-400">Certificate</div>
-                      <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Frontend Foundations</div>
-                      <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">Issued: 2026-03-12</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-3 text-xs text-slate-600 dark:text-slate-300">
-                  <span class="text-slate-500 dark:text-slate-400">Verifiable ID:</span>
-                  <span class="font-semibold text-slate-900 dark:text-white">acadly_12345</span>
-                </div>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-cyan-500/10 ring-1 ring-cyan-500/25 shadow-neonBlue">
+                <i class="fa-solid fa-book-open text-electric-400"></i>
               </div>
             </div>
-
-            <div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-xs text-slate-500 dark:text-slate-400">Verified</div>
-                  <div class="text-sm font-semibold text-slate-900 dark:text-white">JavaScript Specialist</div>
-                </div>
-                <i class="fa-solid fa-award text-brand-500 drop-shadow-[0_0_18px_rgba(124,58,237,.22)]"></i>
-              </div>
-              <div class="mt-3 text-xs text-slate-600 dark:text-slate-300">
-                Verifiable ID: <span class="font-semibold text-slate-900 dark:text-white">acadly_88420</span>
-              </div>
+            <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
+              <div id="kpiCourseBar" class="h-full w-0 rounded-full bg-gradient-to-r from-electric-400 to-brand-500" style="width: 72%"></div>
             </div>
-          </div>
-        </section>
+          </article>
 
-        <!-- Right: Gamification Hub -->
-        <section class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-3">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-slate-900 dark:text-white">Gamification Hub</h2>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Streaks + badge rack</p>
-            </div>
-            <i class="fa-solid fa-bolt text-brand-500 drop-shadow-[0_0_18px_rgba(124,58,237,.22)]"></i>
-          </div>
-
-          <div class="mt-6 grid place-items-center">
-            <div
-              class="relative grid h-44 w-44 place-items-center rounded-full bg-slate-950/5 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="absolute inset-3 rounded-full ring-1 ring-brand-500/25 shadow-neon"></div>
-              <div class="absolute inset-8 rounded-full ring-1 ring-electric-400/20 shadow-neonBlue"></div>
-              <div class="text-center">
-                <div class="grid place-items-center">
-                  <i class="fa-solid fa-fire text-2xl text-orange-400 drop-shadow-[0_0_22px_rgba(251,146,60,.35)]"></i>
-                </div>
-                <div class="mt-2 text-xs text-slate-600 dark:text-slate-400">Study Streak</div>
-                <div id="streakDays" class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">15</div>
-                <div class="text-xs text-slate-600 dark:text-slate-400">days</div>
+          <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 90ms">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Certificates Earned</div>
+                <div id="kpiCertificates" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">—</div>
+                <div id="kpiCertSub" class="mt-1 text-xs text-slate-600 dark:text-slate-300">—</div>
+              </div>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 ring-1 ring-brand-500/25 shadow-neon">
+                <i class="fa-solid fa-certificate text-brand-500"></i>
               </div>
             </div>
-          </div>
-
-          <div class="mt-6">
-            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Badge rack</div>
-            <div id="badgeRack" class="mt-3 flex flex-wrap gap-2">
-              <span
-                class="rounded-xl border border-brand-500/40 bg-brand-500/10 px-3 py-2 text-xs font-semibold text-brand-500 shadow-neon">JS
-                Master</span>
-              <span
-                class="rounded-xl border border-electric-400/40 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-electric-400 shadow-neonBlue">AI
-                Beginner</span>
-              <span
-                class="rounded-xl border border-slate-300 bg-slate-950/5 px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700/70 dark:bg-slate-950/35 dark:text-slate-400">Locked</span>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <!-- Row 3: Analytics + Sandbox -->
-      <section class="mt-6 grid gap-6 lg:grid-cols-12">
-        <section class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-8">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-slate-900 dark:text-white">My Progress Analytics</h2>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Charts styled for neon glass dark mode</p>
-            </div>
-            <span
-              class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:text-slate-200 dark:ring-slate-800">
+            <div class="mt-4 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
               <span class="h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_18px_rgba(124,58,237,.45)]"></span>
-              Live
-            </span>
-          </div>
+              <span>Latest: <span id="kpiLatestCert" class="font-semibold text-slate-900 dark:text-white">—</span></span>
+            </div>
+          </article>
 
-          <div class="mt-5 grid gap-4 xl:grid-cols-2">
-            <div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Study Hours Over Time</div>
-              <div class="h-56">
-                <canvas id="lineChart"></canvas>
+          <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 180ms">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Learning Hours</div>
+                <div id="kpiLearnHours" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">—</div>
+                <div id="kpiHoursWeek" class="mt-1 text-xs text-slate-600 dark:text-slate-300">—</div>
+              </div>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/25 shadow-[0_0_0_1px_rgba(245,158,11,.35),0_0_26px_rgba(245,158,11,.12)]">
+                <i class="fa-solid fa-hourglass-half text-amber-300"></i>
               </div>
             </div>
-            <div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-              <div class="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Overall Module Completion %
+            <div class="mt-4 text-xs text-slate-600 dark:text-slate-300">
+              Peak day: <span id="kpiPeakDay" class="font-semibold text-slate-900 dark:text-white">—</span>
+            </div>
+          </article>
+
+          <article class="kpi-in card-hover glass rounded-3xl p-5 shadow-glass" data-kpi style="transition-delay: 270ms">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Peer Connections</div>
+                <div id="kpiPeers" class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">—</div>
+                <div id="kpiPeersDelta" class="mt-1 text-xs text-slate-600 dark:text-slate-300">—</div>
               </div>
-              <div class="mx-auto h-56 max-w-[340px]">
-                <canvas id="donutChart"></canvas>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-rose-500/10 ring-1 ring-rose-500/25 shadow-[0_0_0_1px_rgba(244,63,94,.35),0_0_26px_rgba(244,63,94,.12)]">
+                <i class="fa-solid fa-user-group text-rose-300"></i>
               </div>
             </div>
-          </div>
+            <div id="kpiPeersFooter" class="mt-4 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <span class="h-2 w-2 rounded-full bg-rose-400"></span>
+              <span>—</span>
+            </div>
+          </article>
         </section>
 
-        <section id="badges" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-4">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-slate-900 dark:text-white">Special Badges</h2>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Limited drops, milestones, and rare unlocks</p>
-            </div>
-            <i class="fa-solid fa-shapes text-electric-400 drop-shadow-[0_0_18px_rgba(34,211,238,.18)]"></i>
-          </div>
-
-          <div
-            class="mt-5 rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+        <!-- Row 2: 3 cards -->
+        <section class="mt-6 grid gap-6 lg:grid-cols-12">
+          <!-- Left: My Study Modules -->
+          <section id="modules" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-5">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Next rare unlock</div>
-                <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Neon Night Owl</div>
-                <div class="mt-1 text-xs text-slate-600 dark:text-slate-300">
-                  Complete <span class="font-semibold text-slate-900 dark:text-white">3</span> late-night sessions this
-                  week.
-                </div>
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">My Study Modules</h2>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Top courses and current progress</p>
               </div>
-              <span
-                class="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-500 ring-1 ring-brand-500/20 shadow-neon">
-                <i class="fa-solid fa-star"></i>
-                Rare
+              <span id="modulesCountPill" class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:text-slate-200 dark:ring-slate-800">
+                <i class="fa-solid fa-layer-group text-electric-400"></i>
+                <span id="modulesCountText">— courses</span>
               </span>
             </div>
 
-            <div class="mt-4">
-              <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
-                <span>Progress</span>
-                <span class="font-semibold text-slate-900 dark:text-white">2 / 3</span>
+            <div id="modulesList" class="mt-5 space-y-3"></div>
+          </section>
+
+          <!-- Center: Achievements & Certified Showcase -->
+          <section id="achievements" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-4">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Achievements & Certified</h2>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Glassy certificates with verifiable IDs</p>
               </div>
-              <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-                <div
-                  class="h-full w-[66%] rounded-full bg-gradient-to-r from-electric-400 to-brand-500 shadow-[0_0_18px_rgba(124,58,237,.14)]">
+              <i class="fa-solid fa-shield-halved text-electric-400 drop-shadow-[0_0_18px_rgba(34,211,238,.20)]"></i>
+            </div>
+
+            <div id="certificatesMount" class="mt-5 space-y-4"></div>
+          </section>
+
+          <!-- Right: Gamification Hub -->
+          <section class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-3">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Gamification Hub</h2>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Streaks + badge rack</p>
+              </div>
+              <i class="fa-solid fa-bolt text-brand-500 drop-shadow-[0_0_18px_rgba(124,58,237,.22)]"></i>
+            </div>
+
+            <div class="mt-6 grid place-items-center">
+              <div class="relative grid h-44 w-44 place-items-center rounded-full bg-slate-950/5 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+                <div class="absolute inset-3 rounded-full ring-1 ring-brand-500/25 shadow-neon"></div>
+                <div class="absolute inset-8 rounded-full ring-1 ring-electric-400/20 shadow-neonBlue"></div>
+                <div class="text-center">
+                  <div class="grid place-items-center">
+                    <i class="fa-solid fa-fire text-2xl text-orange-400 drop-shadow-[0_0_22px_rgba(251,146,60,.35)]"></i>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-600 dark:text-slate-400">Study Streak</div>
+                  <div id="gamificationStreak" class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">—</div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400">days</div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="mt-5">
-            <div class="flex items-center justify-between">
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Badge gallery</div>
-              <button type="button"
-                class="focus-ring inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:shadow-neon dark:bg-white dark:text-slate-900">
-                <i class="fa-solid fa-sparkles"></i>
-                Explore
+            <div class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
+              Total XP <span id="gamificationXp" class="font-semibold text-slate-900 dark:text-white">—</span>
+            </div>
+
+            <div class="mt-6">
+              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Badge rack</div>
+              <div id="gamificationTags" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Row 3: Analytics + Sandbox -->
+        <section class="mt-6 grid gap-6 lg:grid-cols-12">
+          <section class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-8">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">My Progress Analytics</h2>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Charts styled for neon glass dark mode</p>
+              </div>
+              <span class="inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:text-slate-200 dark:ring-slate-800">
+                <span class="h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_18px_rgba(124,58,237,.45)]"></span>
+                Live
+              </span>
+            </div>
+
+            <div class="mt-5 grid gap-4 xl:grid-cols-2">
+              <div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+                <div class="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Study Hours Over Time</div>
+                <div class="h-56">
+                  <canvas id="lineChart"></canvas>
+                </div>
+              </div>
+              <div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+                <div class="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Overall Module Completion %</div>
+                <div class="mx-auto h-56 max-w-[340px]">
+                  <canvas id="donutChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="badges" class="card-hover glass rounded-3xl p-6 shadow-glass lg:col-span-4">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">Special Badges</h2>
+                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Limited drops, milestones, and rare unlocks</p>
+              </div>
+              <i class="fa-solid fa-shapes text-electric-400 drop-shadow-[0_0_18px_rgba(34,211,238,.18)]"></i>
+            </div>
+
+            <div id="badgeQuestBox" class="mt-5 rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800"></div>
+
+            <div class="mt-5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Badge gallery</div>
+                <div class="flex items-center gap-2">
+                  <button
+                    id="btnRefreshDashboard"
+                    type="button"
+                    class="focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/60 px-3 py-2 text-xs font-semibold text-slate-800 transition hover:shadow-neon dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200"
+                    title="Reload from database"
+                  >
+                    <i class="fa-solid fa-rotate"></i>
+                    Refresh
+                  </button>
+                  <button
+                    type="button"
+                    class="focus-ring inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:shadow-neon dark:bg-white dark:text-slate-900"
+                  >
+                    <i class="fa-solid fa-sparkles"></i>
+                    Explore
+                  </button>
+                </div>
+              </div>
+
+              <div id="badgeGalleryGrid" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Hidden/extra section anchor -->
+        <section id="ai" class="mt-6 hidden"></section>
+      </main>
+    </div>
+
+    <!-- Profile modal -->
+    <div id="profileModal" class="fixed inset-0 z-[60] hidden">
+      <div id="profileBackdrop" class="absolute inset-0 bg-black/55 backdrop-blur-sm"></div>
+      <div class="relative mx-auto flex min-h-dvh max-w-3xl items-center justify-center px-4 py-10">
+        <div class="card-hover glass w-full rounded-3xl p-6 shadow-glass">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="h-14 w-14 overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
+                <div class="h-full w-full bg-gradient-to-br from-brand-600/70 to-electric-400/25"></div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">Profile</div>
+                <div id="profileModalName" class="text-lg font-semibold text-slate-900 dark:text-white">—</div>
+                <div id="profileModalEmail" class="text-sm text-slate-600 dark:text-slate-300">—</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="profileEditBtn"
+                type="button"
+                class="focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white/60 px-3 py-2 text-sm font-semibold text-slate-800 transition hover:shadow-neon dark:border-slate-700/80 dark:bg-transparent dark:text-slate-200"
+              >
+                <i class="fa-regular fa-pen-to-square"></i>
+                <span id="profileEditBtnLabel">Edit Profile</span>
+              </button>
+              <button id="closeProfile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass" type="button" aria-label="Close profile">
+                <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
+          </div>
 
-            <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <div
-                class="card-hover rounded-2xl bg-white/60 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="grid h-11 w-11 place-items-center rounded-2xl bg-brand-500/10 ring-1 ring-brand-500/25 shadow-neon">
-                      <i class="fa-solid fa-moon text-brand-500"></i>
-                    </div>
-                    <div>
-                      <div class="text-sm font-semibold text-slate-900 dark:text-white">Neon Night Owl</div>
-                      <div class="text-xs text-slate-600 dark:text-slate-400">Weekly drop</div>
-                    </div>
-                  </div>
-                  <span
-                    class="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-600 ring-1 ring-amber-500/20 dark:text-amber-300">
-                    In progress
-                  </span>
-                </div>
+          <div class="mt-6 grid gap-4">
+            <div id="profileView" class="grid gap-3">
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-400">Full Name</div>
+                <div class="col-span-2 font-semibold text-slate-900 dark:text-white" data-field="name">—</div>
               </div>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-400">Email</div>
+                <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="email">—</div>
+              </div>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-400">Department</div>
+                <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="department">—</div>
+              </div>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-400">DOB</div>
+                <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="dob">—</div>
+              </div>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-400">Education</div>
+                <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="education">—</div>
+              </div>
+            </div>
 
-              <div
-                class="card-hover rounded-2xl bg-white/60 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="grid h-11 w-11 place-items-center rounded-2xl bg-cyan-500/10 ring-1 ring-cyan-500/25 shadow-neonBlue">
-                      <i class="fa-solid fa-bolt text-electric-400"></i>
-                    </div>
-                    <div>
-                      <div class="text-sm font-semibold text-slate-900 dark:text-white">Flow State</div>
-                      <div class="text-xs text-slate-600 dark:text-slate-400">2h focus session</div>
-                    </div>
-                  </div>
-                  <span
-                    class="rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-600 ring-1 ring-emerald-500/20 dark:text-emerald-300">
-                    Earned
-                  </span>
-                </div>
-              </div>
-
-              <div
-                class="card-hover rounded-2xl bg-white/60 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="grid h-11 w-11 place-items-center rounded-2xl bg-rose-500/10 ring-1 ring-rose-500/25 shadow-[0_0_0_1px_rgba(244,63,94,.22),0_0_22px_rgba(244,63,94,.10)]">
-                      <i class="fa-solid fa-heart text-rose-400"></i>
-                    </div>
-                    <div>
-                      <div class="text-sm font-semibold text-slate-900 dark:text-white">Peer Spark</div>
-                      <div class="text-xs text-slate-600 dark:text-slate-400">Help 5 peers</div>
-                    </div>
-                  </div>
-                  <span
-                    class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:text-slate-400 dark:ring-slate-800">
-                    Locked
-                  </span>
-                </div>
-              </div>
-
-              <div
-                class="card-hover rounded-2xl bg-white/60 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="grid h-11 w-11 place-items-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/25 shadow-[0_0_0_1px_rgba(245,158,11,.22),0_0_22px_rgba(245,158,11,.10)]">
-                      <i class="fa-solid fa-crown text-amber-300"></i>
-                    </div>
-                    <div>
-                      <div class="text-sm font-semibold text-slate-900 dark:text-white">Streak Crown</div>
-                      <div class="text-xs text-slate-600 dark:text-slate-400">30-day streak</div>
-                    </div>
-                  </div>
-                  <span
-                    class="rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:text-slate-400 dark:ring-slate-800">
-                    Locked
-                  </span>
-                </div>
-              </div>
+            <div id="profileEdit" class="hidden grid gap-3">
+              <label class="grid grid-cols-3 items-center gap-3 text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Full Name</span>
+                <input
+                  class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
+                  type="text"
+                  name="name"
+                  value=""
+                />
+              </label>
+              <label class="grid grid-cols-3 items-center gap-3 text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Email</span>
+                <input
+                  class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
+                  type="email"
+                  name="email"
+                  value=""
+                />
+              </label>
+              <label class="grid grid-cols-3 items-center gap-3 text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Department</span>
+                <input
+                  class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
+                  type="text"
+                  name="department"
+                  value=""
+                />
+              </label>
+              <label class="grid grid-cols-3 items-center gap-3 text-sm">
+                <span class="text-slate-600 dark:text-slate-400">DOB</span>
+                <input
+                  class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
+                  type="date"
+                  name="dob"
+                  value=""
+                />
+              </label>
+              <label class="grid grid-cols-3 items-center gap-3 text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Education</span>
+                <select
+                  class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
+                  name="education"
+                >
+                  <option selected>Undergraduate</option>
+                  <option>Graduate</option>
+                  <option>High School</option>
+                  <option>Self-paced</option>
+                </select>
+              </label>
             </div>
           </div>
-        </section>
-      </section>
 
-      <!-- Hidden/extra section anchor -->
-      <section id="ai" class="mt-6 hidden"></section>
-    </main>
-  </div>
-
-  <!-- Profile modal -->
-  <div id="profileModal" class="fixed inset-0 z-[60] hidden">
-    <div id="profileBackdrop" class="absolute inset-0 bg-black/55 backdrop-blur-sm"></div>
-    <div class="relative mx-auto flex min-h-dvh max-w-3xl items-center justify-center px-4 py-10">
-      <div class="card-hover glass w-full rounded-3xl p-6 shadow-glass">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <div class="h-14 w-14 overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
-              <div class="h-full w-full bg-gradient-to-br from-brand-600/70 to-electric-400/25"></div>
+          <div class="mt-6 flex items-center justify-between">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+              Saves to MySQL via API — refresh the page or click Refresh to verify.
             </div>
-            <div>
-              <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">Profile</div>
-              <div id="profileNameHeading" class="text-lg font-semibold text-slate-900 dark:text-white">Fletcher Reed</div>
-              <div id="profileEmailHeading" class="text-sm text-slate-600 dark:text-slate-300">fletcher@acadly.com</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="profileEditBtn" type="button"
-              class="focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white/60 px-3 py-2 text-sm font-semibold text-slate-800 transition hover:shadow-neon dark:border-slate-700/80 dark:bg-transparent dark:text-slate-200">
-              <i class="fa-regular fa-pen-to-square"></i>
-              <span id="profileEditBtnLabel">Edit Profile</span>
-            </button>
-            <button id="closeProfile" class="focus-ring grid h-11 w-11 place-items-center rounded-2xl glass"
-              type="button" aria-label="Close profile">
-              <i class="fa-solid fa-xmark"></i>
+            <button id="closeProfile2" class="focus-ring rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:shadow-neon dark:bg-white dark:text-slate-900" type="button">
+              Done
             </button>
           </div>
-        </div>
-
-        <div class="mt-6 grid gap-4">
-          <div id="profileView" class="grid gap-3">
-            <div class="grid grid-cols-3 gap-3 text-sm">
-              <div class="text-slate-600 dark:text-slate-400">Full Name</div>
-              <div class="col-span-2 font-semibold text-slate-900 dark:text-white" data-field="name">Fletcher Reed</div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 text-sm">
-              <div class="text-slate-600 dark:text-slate-400">Email</div>
-              <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="email">fletcher@acadly.com</div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 text-sm">
-              <div class="text-slate-600 dark:text-slate-400">DOB</div>
-              <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="dob">2003-10-12</div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 text-sm">
-              <div class="text-slate-600 dark:text-slate-400">Education</div>
-              <div class="col-span-2 text-slate-700 dark:text-slate-200" data-field="education">Undergraduate</div>
-            </div>
-          </div>
-
-          <div id="profileEdit" class="hidden grid gap-3">
-            <label class="grid grid-cols-3 items-center gap-3 text-sm">
-              <span class="text-slate-600 dark:text-slate-400">Full Name</span>
-              <input
-                class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
-                type="text" name="name" value="Fletcher Reed" />
-            </label>
-            <label class="grid grid-cols-3 items-center gap-3 text-sm">
-              <span class="text-slate-600 dark:text-slate-400">Email</span>
-              <input
-                class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
-                type="email" name="email" value="fletcher@acadly.com" />
-            </label>
-            <label class="grid grid-cols-3 items-center gap-3 text-sm">
-              <span class="text-slate-600 dark:text-slate-400">DOB</span>
-              <input
-                class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
-                type="date" name="dob" value="2003-10-12" />
-            </label>
-            <label class="grid grid-cols-3 items-center gap-3 text-sm">
-              <span class="text-slate-600 dark:text-slate-400">Education</span>
-              <select
-                class="col-span-2 rounded-xl bg-white/70 px-4 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 outline-none transition focus:ring-2 focus:ring-brand-500/60 dark:bg-slate-950/40 dark:text-white dark:ring-slate-800"
-                name="education">
-                <option selected>Undergraduate</option>
-                <option>Graduate</option>
-                <option>High School</option>
-                <option>Self-paced</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="mt-6 flex items-center justify-between">
-          <div class="text-xs text-slate-500 dark:text-slate-400">
-            Tip: Edit mode swaps text → inputs, then saves back.
-          </div>
-          <button id="closeProfile2"
-            class="focus-ring rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:shadow-neon dark:bg-white dark:text-slate-900"
-            type="button">
-            Done
-          </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const $ = (sel, root = document) => root.querySelector(sel);
-    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    <script>
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-    // KPI fade-in
-    requestAnimationFrame(() => {
-      $$("[data-kpi]").forEach((el) => el.classList.add("is-in"));
-    });
+      // KPI fade-in
+      requestAnimationFrame(() => {
+        $$("[data-kpi]").forEach((el) => el.classList.add("is-in"));
+      });
 
-    // Sidebar tree toggles
-    function setTreeOpen(id, open) {
-      const children = $("#tree-" + id);
-      const btn = document.querySelector('[data-tree-toggle="' + id + '"]');
-      const chev = document.querySelector('[data-chevron="' + id + '"]');
-      if (!children || !btn) return;
-      children.classList.toggle("open", open);
-      btn.setAttribute("aria-expanded", String(open));
-      if (chev) chev.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
-    }
-    document.addEventListener("click", (e) => {
-      const t = e.target.closest("[data-tree-toggle]");
-      if (!t) return;
-      const id = t.getAttribute("data-tree-toggle");
-      const isOpen = $("#tree-" + id)?.classList.contains("open");
-      setTreeOpen(id, !isOpen);
-    });
+      // Sidebar tree toggles
+      function setTreeOpen(id, open) {
+        const children = $("#tree-" + id);
+        const btn = document.querySelector('[data-tree-toggle="' + id + '"]');
+        const chev = document.querySelector('[data-chevron="' + id + '"]');
+        if (!children || !btn) return;
+        children.classList.toggle("open", open);
+        btn.setAttribute("aria-expanded", String(open));
+        if (chev) chev.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+      }
+      document.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-tree-toggle]");
+        if (!t) return;
+        const id = t.getAttribute("data-tree-toggle");
+        const isOpen = $("#tree-" + id)?.classList.contains("open");
+        setTreeOpen(id, !isOpen);
+      });
 
-    // Mobile menu
-    const overlay = $("#overlay");
-    const sidebarMobile = $("#sidebarMobile");
-    function setMobileOpen(open) {
-      if (!overlay || !sidebarMobile) return;
-      overlay.classList.toggle("hidden", !open);
-      sidebarMobile.classList.toggle("hidden", !open);
-      sidebarMobile.setAttribute("aria-hidden", String(!open));
-    }
-    $("#openMobile")?.addEventListener("click", () => setMobileOpen(true));
-    $("#closeMobile")?.addEventListener("click", () => setMobileOpen(false));
-    overlay?.addEventListener("click", () => setMobileOpen(false));
-    $$("#sidebarMobile a").forEach((a) => a.addEventListener("click", () => setMobileOpen(false)));
+      // Mobile menu
+      const overlay = $("#overlay");
+      const sidebarMobile = $("#sidebarMobile");
+      function setMobileOpen(open) {
+        if (!overlay || !sidebarMobile) return;
+        overlay.classList.toggle("hidden", !open);
+        sidebarMobile.classList.toggle("hidden", !open);
+        sidebarMobile.setAttribute("aria-hidden", String(!open));
+      }
+      $("#openMobile")?.addEventListener("click", () => setMobileOpen(true));
+      $("#closeMobile")?.addEventListener("click", () => setMobileOpen(false));
+      overlay?.addEventListener("click", () => setMobileOpen(false));
+      $$("#sidebarMobile a").forEach((a) => a.addEventListener("click", () => setMobileOpen(false)));
 
-    // Theme toggle
-    const themeIcon = $("#themeIcon");
-    function syncThemeIcon() {
-      const isDark = document.documentElement.classList.contains("dark");
-      if (!themeIcon) return;
-      themeIcon.className = isDark ? "fa-solid fa-moon" : "fa-solid fa-sun";
-    }
-    $("#themeBtn")?.addEventListener("click", () => {
-      const root = document.documentElement;
-      const nextIsDark = !root.classList.contains("dark");
-      root.classList.toggle("dark", nextIsDark);
-      try {
-        localStorage.setItem("acadly-dashboard-theme", nextIsDark ? "dark" : "light");
-      } catch { }
+      // Theme toggle
+      const themeIcon = $("#themeIcon");
+      function syncThemeIcon() {
+        const isDark = document.documentElement.classList.contains("dark");
+        if (!themeIcon) return;
+        themeIcon.className = isDark ? "fa-solid fa-moon" : "fa-solid fa-sun";
+      }
+      $("#themeBtn")?.addEventListener("click", () => {
+        const root = document.documentElement;
+        const nextIsDark = !root.classList.contains("dark");
+        root.classList.toggle("dark", nextIsDark);
+        try {
+          localStorage.setItem("acadly-dashboard-theme", nextIsDark ? "dark" : "light");
+        } catch {}
+        syncThemeIcon();
+        updateChartsForTheme();
+      });
       syncThemeIcon();
-      updateChartsForTheme();
-    });
-    syncThemeIcon();
 
-    // User dropdown
-    const userBtn = $("#userBtn");
-    const userMenu = $("#userMenu");
-    function setUserMenuOpen(open) {
-      if (!userBtn || !userMenu) return;
-      userMenu.classList.toggle("hidden", !open);
-      userBtn.setAttribute("aria-expanded", String(open));
-    }
-    userBtn?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      setUserMenuOpen(userMenu?.classList.contains("hidden"));
-    });
-    document.addEventListener("click", (e) => {
-      if (!userMenu || userMenu.classList.contains("hidden")) return;
-      if (e.target.closest("#userMenu") || e.target.closest("#userBtn")) return;
-      setUserMenuOpen(false);
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") setUserMenuOpen(false);
-    });
-
-    // Profile modal + edit/save
-    const profileModal = $("#profileModal");
-    const profileBackdrop = $("#profileBackdrop");
-    const viewProfileBtn = $("#viewProfileBtn");
-    const closeProfileBtns = [$("#closeProfile"), $("#closeProfile2")].filter(Boolean);
-
-    const profileEditBtn = $("#profileEditBtn");
-    const profileEditBtnLabel = $("#profileEditBtnLabel");
-    const profileView = $("#profileView");
-    const profileEdit = $("#profileEdit");
-    let profileEditing = false;
-
-    function setProfileEditing(next) {
-      profileEditing = next;
-      profileView?.classList.toggle("hidden", profileEditing);
-      profileEdit?.classList.toggle("hidden", !profileEditing);
-      if (profileEditBtnLabel) profileEditBtnLabel.textContent = profileEditing ? "Save Changes" : "Edit Profile";
-      const icon = profileEditBtn?.querySelector("i");
-      if (icon) icon.className = profileEditing ? "fa-solid fa-check" : "fa-regular fa-pen-to-square";
-    }
-
-    function collectProfilePayload() {
-      if (!profileEdit) return null;
-      const map = {};
-      profileEdit.querySelectorAll("input, select").forEach((el) => {
-        if (!el.name) return;
-        map[el.name] = el.value;
+      // User dropdown
+      const userBtn = $("#userBtn");
+      const userMenu = $("#userMenu");
+      function setUserMenuOpen(open) {
+        if (!userBtn || !userMenu) return;
+        userMenu.classList.toggle("hidden", !open);
+        userBtn.setAttribute("aria-expanded", String(open));
+      }
+      userBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setUserMenuOpen(userMenu?.classList.contains("hidden"));
       });
-      return {
-        name: map.name,
-        email: map.email,
-        date_of_birth: map.dob,
-        education_level: map.education,
-      };
-    }
+      document.addEventListener("click", (e) => {
+        if (!userMenu || userMenu.classList.contains("hidden")) return;
+        if (e.target.closest("#userMenu") || e.target.closest("#userBtn")) return;
+        setUserMenuOpen(false);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setUserMenuOpen(false);
+      });
 
-    function applyProfileToUi(payload) {
-      if (!payload || !profileView) return;
-      const name = payload.name || "—";
-      const email = payload.email || "—";
-      profileView.querySelector('[data-field="name"]').textContent = name;
-      profileView.querySelector('[data-field="email"]').textContent = email;
-      profileView.querySelector('[data-field="dob"]').textContent = payload.date_of_birth || "—";
-      profileView.querySelector('[data-field="education"]').textContent = payload.education_level || "—";
-      const nameHeading = $("#profileNameHeading");
-      const emailHeading = $("#profileEmailHeading");
-      if (nameHeading) nameHeading.textContent = name;
-      if (emailHeading) emailHeading.textContent = email;
-      const headerName = $("#userNameHeader");
-      if (headerName) headerName.textContent = name.split(" ")[0] || name;
-      if (profileEdit) {
-        const fields = {
-          name,
-          email,
-          dob: payload.date_of_birth || "",
-          education: payload.education_level || "",
+      // ---------- MySQL-backed dashboard ----------
+      let lineChart, donutChart;
+      let lastDashboardData = null;
+
+      function getDashboardUserId() {
+        try {
+          const raw = localStorage.getItem("acadly-user");
+          if (raw) {
+            const u = JSON.parse(raw);
+            if (u && (u.id != null || u.user_id != null)) return String(u.id ?? u.user_id);
+          }
+        } catch (_) {}
+        return localStorage.getItem("acadly-dashboard-user-id") || "2";
+      }
+
+      const MODULE_GRADS = [
+        "from-brand-600/60 to-electric-400/20",
+        "from-electric-400/25 to-emerald-400/10",
+        "from-amber-400/20 to-brand-600/25",
+      ];
+      const BADGE_ICONS = { moon: "fa-moon", bolt: "fa-bolt", heart: "fa-heart", crown: "fa-crown" };
+
+      function statusPill(status) {
+        if (status === "earned")
+          return "rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-600 ring-1 ring-emerald-500/20 dark:text-emerald-300";
+        if (status === "in_progress")
+          return "rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-600 ring-1 ring-amber-500/20 dark:text-amber-300";
+        return "rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:text-slate-400 dark:ring-slate-800";
+      }
+      function statusLabel(status) {
+        if (status === "earned") return "Earned";
+        if (status === "in_progress") return "In progress";
+        return "Locked";
+      }
+      function iconWrapClass(hint, status) {
+        const base = "grid h-11 w-11 place-items-center rounded-2xl ring-1 ";
+        if (hint === "bolt") return base + "bg-cyan-500/10 ring-cyan-500/25 shadow-neonBlue";
+        if (hint === "heart")
+          return base + "bg-rose-500/10 ring-rose-500/25 shadow-[0_0_0_1px_rgba(244,63,94,.22),0_0_22px_rgba(244,63,94,.10)]";
+        if (hint === "crown")
+          return base + "bg-amber-500/10 ring-amber-500/25 shadow-[0_0_0_1px_rgba(245,158,11,.22),0_0_22px_rgba(245,158,11,.10)]";
+        return base + "bg-brand-500/10 ring-brand-500/25 shadow-neon";
+      }
+
+      function renderModules(mods) {
+        const box = $("#modulesList");
+        if (!box) return;
+        if (!mods || !mods.length) {
+          box.innerHTML = '<p class="text-xs text-slate-500">No modules in database.</p>';
+          return;
+        }
+        box.innerHTML = mods
+          .map((m, i) => {
+            const pct = Math.min(100, Math.max(0, Number(m.progress_pct) || 0));
+            const grad = MODULE_GRADS[i % MODULE_GRADS.length];
+            const w = pct >= 100 ? "w-full" : "";
+            const widthStyle = pct >= 100 ? "" : `style="width:${pct}%"`;
+            return `<article class="card-hover rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="h-12 w-12 overflow-hidden rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800">
+                  <div class="h-full w-full bg-gradient-to-br ${grad}"></div>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(m.title)}</div>
+                  <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">${escapeHtml(m.subtitle || "")}</div>
+                </div>
+                <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">${pct}%</div>
+              </div>
+              <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
+                <div class="h-full ${w} rounded-full bg-gradient-to-r from-brand-500 to-electric-400 shadow-[0_0_18px_rgba(34,211,238,.10)]" ${widthStyle}></div>
+              </div>
+            </article>`;
+          })
+          .join("");
+      }
+
+      function renderCertificates(rows) {
+        const mount = $("#certificatesMount");
+        if (!mount) return;
+        const hero = (rows || []).find((r) => r.kind === "hero");
+        const sec = (rows || []).find((r) => r.kind === "secondary");
+        const parts = [];
+        if (hero) {
+          const issued = hero.issued_date ? String(hero.issued_date).slice(0, 10) : "—";
+          parts.push(`<div class="cert-glow rounded-2xl">
+            <div class="relative z-10 overflow-hidden rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:ring-slate-800">
+              <div class="aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-slate-900/10 to-slate-950/40 ring-1 ring-slate-200 dark:from-slate-900/60 dark:to-slate-950/85 dark:ring-slate-800">
+                <div class="flex h-full items-center justify-center text-center">
+                  <div class="px-4">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(hero.subtitle_line || "Certificate")}</div>
+                    <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(hero.title)}</div>
+                    <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">Issued: ${escapeHtml(issued)}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 text-xs text-slate-600 dark:text-slate-300">
+                <span class="text-slate-500 dark:text-slate-400">Verifiable ID:</span>
+                <span class="font-semibold text-slate-900 dark:text-white">${escapeHtml(hero.verifiable_id || "—")}</span>
+              </div>
+            </div>
+          </div>`);
+        }
+        if (sec) {
+          parts.push(`<div class="rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(sec.subtitle_line || "Verified")}</div>
+                <div class="text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(sec.title)}</div>
+              </div>
+              <i class="fa-solid fa-award text-brand-500 drop-shadow-[0_0_18px_rgba(124,58,237,.22)]"></i>
+            </div>
+            <div class="mt-3 text-xs text-slate-600 dark:text-slate-300">
+              Verifiable ID: <span class="font-semibold text-slate-900 dark:text-white">${escapeHtml(sec.verifiable_id || "—")}</span>
+            </div>
+          </div>`);
+        }
+        mount.innerHTML =
+          parts.join("") || '<p class="text-xs text-slate-500">No certificates in database.</p>';
+      }
+
+      function renderBadgeQuest(q) {
+        const box = $("#badgeQuestBox");
+        if (!box) return;
+        if (!q) {
+          box.innerHTML =
+            '<p class="text-xs text-slate-500">No active badge quest in database.</p>';
+          return;
+        }
+        const total = Math.max(1, Number(q.progress_total) || 1);
+        const cur = Math.min(total, Math.max(0, Number(q.progress_current) || 0));
+        const pct = Math.round((cur / total) * 100);
+        box.innerHTML = `<div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">Next rare unlock</div>
+              <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(q.title)}</div>
+              <div class="mt-1 text-xs text-slate-600 dark:text-slate-300">${escapeHtml(q.description)}</div>
+            </div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-500 ring-1 ring-brand-500/20 shadow-neon">
+              <i class="fa-solid fa-star"></i> Rare
+            </span>
+          </div>
+          <div class="mt-4">
+            <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+              <span>Progress</span>
+              <span class="font-semibold text-slate-900 dark:text-white">${cur} / ${total}</span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
+              <div class="h-full rounded-full bg-gradient-to-r from-electric-400 to-brand-500 shadow-[0_0_18px_rgba(124,58,237,.14)]" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+      }
+
+      function renderBadgeGallery(badges) {
+        const grid = $("#badgeGalleryGrid");
+        if (!grid) return;
+        if (!badges || !badges.length) {
+          grid.innerHTML = "";
+          return;
+        }
+        grid.innerHTML = badges
+          .map((b) => {
+            const ic = BADGE_ICONS[b.icon_hint] || "fa-star";
+            return `<div class="card-hover rounded-2xl bg-white/60 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="${iconWrapClass(b.icon_hint, b.status)}">
+                    <i class="fa-solid ${ic} ${b.icon_hint === "bolt" ? "text-electric-400" : b.icon_hint === "heart" ? "text-rose-400" : b.icon_hint === "crown" ? "text-amber-300" : "text-brand-500"}"></i>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold text-slate-900 dark:text-white">${escapeHtml(b.name)}</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(b.subtitle || "")}</div>
+                  </div>
+                </div>
+                <span class="${statusPill(b.status)}">${statusLabel(b.status)}</span>
+              </div>
+            </div>`;
+          })
+          .join("");
+      }
+
+      function renderGamificationTags(tags) {
+        const el = $("#gamificationTags");
+        if (!el) return;
+        const cls = {
+          brand: "rounded-xl border border-brand-500/40 bg-brand-500/10 px-3 py-2 text-xs font-semibold text-brand-500 shadow-neon",
+          cyan: "rounded-xl border border-electric-400/40 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-electric-400 shadow-neonBlue",
+          muted:
+            "rounded-xl border border-slate-300 bg-slate-950/5 px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700/70 dark:bg-slate-950/35 dark:text-slate-400",
         };
-        profileEdit.querySelectorAll("input, select").forEach((el) => {
-          if (fields[el.name] !== undefined) el.value = fields[el.name];
-        });
+        el.innerHTML = (tags || [])
+          .map((t) => `<span class="${cls[t.variant] || cls.brand}">${escapeHtml(t.label)}</span>`)
+          .join("");
       }
-    }
 
-    profileEditBtn?.addEventListener("click", async () => {
-      if (!profileEditing) return setProfileEditing(true);
-      const payload = collectProfilePayload();
-      if (!payload) return;
-      applyProfileToUi(payload);
-      setProfileEditing(false);
-
-      const userId = getDashboardUserId();
-      try {
-        const response = await window.AcadlyAuth.authFetch(`/api/dashboard/profile/${userId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error(`Profile update failed (${response.status})`);
-      } catch (err) {
-        setSyncStatus(`Profile saved locally only (${err.message}).`, false);
+      function escapeHtml(s) {
+        if (s == null) return "";
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
       }
-    });
 
-    function openProfile() {
-      if (!profileModal) return;
-      profileModal.classList.remove("hidden");
-      setUserMenuOpen(false);
-      setProfileEditing(false);
-    }
-    function closeProfile() {
-      profileModal?.classList.add("hidden");
-      setProfileEditing(false);
-    }
-    viewProfileBtn?.addEventListener("click", openProfile);
-    profileBackdrop?.addEventListener("click", closeProfile);
-    closeProfileBtns.forEach((b) => b.addEventListener("click", closeProfile));
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeProfile();
-    });
+      function applyDashboardPayload(data) {
+        lastDashboardData = data;
+        const u = data.user || {};
+        const p = data.profile || {};
+        const k = data.kpi || {};
 
-    // Chart.js init (theme-aware)
-    let lineChart, donutChart;
+        $("#headerUserName").textContent = u.name || "Student";
+        $("#headerUserRole").textContent = (u.role || "student").replace("_", " ");
+        const dept = p.department ? ` · ${p.department}` : "";
+        $("#headerUserDept").textContent = dept;
 
-    function chartColors() {
-      const isDark = document.documentElement.classList.contains("dark");
-      return {
-        grid: isDark ? "rgba(148,163,184,.12)" : "rgba(15,23,42,.10)",
-        ticks: isDark ? "rgba(226,232,240,.72)" : "rgba(15,23,42,.62)",
-        tooltipBg: isDark ? "rgba(15,23,42,.92)" : "rgba(255,255,255,.95)",
-        tooltipBorder: isDark ? "rgba(124,58,237,.35)" : "rgba(124,58,237,.28)",
-        title: isDark ? "rgba(255,255,255,.92)" : "rgba(15,23,42,.92)",
-        body: isDark ? "rgba(226,232,240,.86)" : "rgba(15,23,42,.78)",
-        brand: "rgba(124,58,237,1)",
-        brandSoft: "rgba(124,58,237,.32)",
-        electric: "rgba(34,211,238,1)",
-        canvasBorder: isDark ? "rgba(2,6,23,.65)" : "rgba(248,250,252,.95)",
+        $("#kpiActiveCourses").textContent = k.active_courses != null ? String(k.active_courses) : "—";
+        $("#kpiCoursesDelta").textContent = k.courses_delta_note || "—";
+        const bar = $("#kpiCourseBar");
+        if (bar) bar.style.width = `${Math.min(100, Math.max(0, Number(k.course_coverage_pct) || 0))}%`;
+        $("#kpiCertificates").textContent = k.certificates_count != null ? String(k.certificates_count) : "—";
+        $("#kpiCertSub").textContent = k.cert_subnote || "—";
+        $("#kpiLatestCert").textContent = k.latest_cert_name || "—";
+        $("#kpiLearnHours").textContent = k.learning_hours != null ? String(k.learning_hours) : "—";
+        $("#kpiHoursWeek").textContent = k.hours_week_note || "—";
+        $("#kpiPeakDay").textContent = k.peak_study_day || "—";
+        $("#kpiPeers").textContent = k.peer_connections != null ? String(k.peer_connections) : "—";
+        $("#kpiPeersDelta").textContent = k.peer_delta_note || "—";
+        const pf = $("#kpiPeersFooter");
+        if (pf) {
+          const note = k.peer_footer_note || "—";
+          pf.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-400"></span><span>${escapeHtml(note)}</span>`;
+        }
+        $("#modulesCountText").textContent =
+          (k.modules_header_count != null ? String(k.modules_header_count) : "0") + " courses";
+
+        $("#gamificationStreak").textContent =
+          k.streak_days != null ? String(k.streak_days) : String(p.streak_days ?? "—");
+        $("#gamificationXp").textContent =
+          p.xp_total != null ? Number(p.xp_total).toLocaleString() : "—";
+
+        renderModules(data.modules);
+        renderCertificates(data.certificates);
+        renderBadgeQuest(data.badgeQuest);
+        renderBadgeGallery(data.badgeGallery);
+        renderGamificationTags(data.gamificationTags);
+
+        syncProfileModalFields();
+        updateChartsFromApi(data.chart);
+
+        const meta = $("#dbSyncMeta");
+        if (meta && u.id) {
+          meta.classList.remove("hidden");
+          meta.innerHTML =
+            "Live data from MySQL · user <strong>#" +
+            escapeHtml(String(u.id)) +
+            "</strong> (" +
+            escapeHtml(u.email || "") +
+            "). Edit tables in Workbench and click <strong>Refresh</strong> — or set <code class=\"rounded bg-slate-900/10 px-1 dark:bg-white/10\">localStorage.acadly-dashboard-user-id</code> for another id.";
+        }
+      }
+
+      function syncProfileModalFields() {
+        if (!lastDashboardData) return;
+        const u = lastDashboardData.user;
+        const p = lastDashboardData.profile || {};
+        const dob = u.date_of_birth ? String(u.date_of_birth).slice(0, 10) : "";
+        $("#profileModalName").textContent = u.name || "—";
+        $("#profileModalEmail").textContent = u.email || "—";
+        const pv = $("#profileView");
+        if (pv) {
+          const set = (field, val) => {
+            const n = pv.querySelector(`[data-field="${field}"]`);
+            if (n) n.textContent = val || "—";
+          };
+          set("name", u.name);
+          set("email", u.email);
+          set("department", p.department);
+          set("dob", dob);
+          set("education", u.education_level);
+        }
+        const pe = $("#profileEdit");
+        if (pe) {
+          const inp = (name) => pe.querySelector(`[name="${name}"]`);
+          const n = inp("name");
+          if (n) n.value = u.name || "";
+          const em = inp("email");
+          if (em) em.value = u.email || "";
+          const dep = inp("department");
+          if (dep) dep.value = p.department || "";
+          const d = inp("dob");
+          if (d) d.value = dob;
+          const ed = inp("education");
+          if (ed) ed.value = u.education_level || "";
+        }
+      }
+
+      async function loadDashboard(showLoading) {
+        const banner = $("#dashboardLoadBanner");
+        const loading = $("#dashboardLoading");
+        const uid = getDashboardUserId();
+        if (showLoading !== false && loading) loading.classList.remove("hidden");
+        if (banner) {
+          banner.classList.add("hidden");
+          banner.textContent = "";
+        }
+        try {
+          const res = await fetch(`/api/dashboard/summary/${uid}`);
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(body.detail || body.error || res.statusText);
+          }
+          applyDashboardPayload(body);
+        } catch (e) {
+          console.error(e);
+          $("#dbSyncMeta")?.classList.add("hidden");
+          if (banner) {
+            banner.classList.remove("hidden");
+            banner.innerHTML =
+              '<strong>Dashboard data unavailable.</strong> Start MySQL, run <code class="rounded bg-black/10 px-1">node Backend/setup-db.js</code>, then refresh. ' +
+              "<br/><span class='text-xs opacity-90'>Using user id <strong>" +
+              escapeHtml(uid) +
+              "</strong> from localStorage (<code>acadly-user</code> or <code>acadly-dashboard-user-id</code>).</span>";
+          }
+        } finally {
+          if (loading) loading.classList.add("hidden");
+        }
+      }
+
+      $("#btnRefreshDashboard")?.addEventListener("click", () => loadDashboard(true));
+
+      // Profile modal + edit/save (persists to MySQL)
+      const profileModal = $("#profileModal");
+      const profileBackdrop = $("#profileBackdrop");
+      const viewProfileBtn = $("#viewProfileBtn");
+      const closeProfileBtns = [$("#closeProfile"), $("#closeProfile2")].filter(Boolean);
+
+      const profileEditBtn = $("#profileEditBtn");
+      const profileEditBtnLabel = $("#profileEditBtnLabel");
+      const profileView = $("#profileView");
+      const profileEdit = $("#profileEdit");
+      let profileEditing = false;
+
+      function setProfileEditing(next) {
+        profileEditing = next;
+        profileView?.classList.toggle("hidden", profileEditing);
+        profileEdit?.classList.toggle("hidden", !profileEditing);
+        if (profileEditBtnLabel) profileEditBtnLabel.textContent = profileEditing ? "Save Changes" : "Edit Profile";
+        const icon = profileEditBtn?.querySelector("i");
+        if (icon) icon.className = profileEditing ? "fa-solid fa-check" : "fa-regular fa-pen-to-square";
+      }
+
+      function readProfileForm() {
+        const map = {};
+        profileEdit?.querySelectorAll("input, select").forEach((el) => {
+          if (el.name) map[el.name] = el.value;
+        });
+        return map;
+      }
+
+      function applyProfileViewFromForm(map) {
+        if (!profileView) return;
+        const set = (field, val) => {
+          const n = profileView.querySelector(`[data-field="${field}"]`);
+          if (n) n.textContent = val || "—";
+        };
+        set("name", map.name);
+        set("email", map.email);
+        set("department", map.department);
+        set("dob", map.dob);
+        set("education", map.education);
+      }
+
+      profileEditBtn?.addEventListener("click", async () => {
+        if (!profileEditing) {
+          syncProfileModalFields();
+          return setProfileEditing(true);
+        }
+        const map = readProfileForm();
+        const uid = getDashboardUserId();
+        try {
+          const res = await fetch(`/api/dashboard/profile/${uid}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: map.name,
+              email: map.email,
+              date_of_birth: map.dob || null,
+              education_level: map.education,
+              department: map.department,
+            }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body.error || body.detail || res.statusText);
+          applyProfileViewFromForm(map);
+          $("#profileModalName").textContent = map.name || "—";
+          $("#profileModalEmail").textContent = map.email || "—";
+          await loadDashboard(false);
+        } catch (err) {
+          alert("Could not save profile: " + err.message);
+          return;
+        }
+        setProfileEditing(false);
+      });
+
+      function openProfile() {
+        if (!profileModal) return;
+        syncProfileModalFields();
+        profileModal.classList.remove("hidden");
+        setUserMenuOpen(false);
+        setProfileEditing(false);
+      }
+      function closeProfile() {
+        profileModal?.classList.add("hidden");
+        setProfileEditing(false);
+      }
+      viewProfileBtn?.addEventListener("click", openProfile);
+      profileBackdrop?.addEventListener("click", closeProfile);
+      closeProfileBtns.forEach((b) => b.addEventListener("click", closeProfile));
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeProfile();
+      });
+
+      // Chart.js (theme-aware) — data from MySQL
+
+      function chartColors() {
+        const isDark = document.documentElement.classList.contains("dark");
+        return {
+          grid: isDark ? "rgba(148,163,184,.12)" : "rgba(15,23,42,.10)",
+          ticks: isDark ? "rgba(226,232,240,.72)" : "rgba(15,23,42,.62)",
+          tooltipBg: isDark ? "rgba(15,23,42,.92)" : "rgba(255,255,255,.95)",
+          tooltipBorder: isDark ? "rgba(124,58,237,.35)" : "rgba(124,58,237,.28)",
+          title: isDark ? "rgba(255,255,255,.92)" : "rgba(15,23,42,.92)",
+          body: isDark ? "rgba(226,232,240,.86)" : "rgba(15,23,42,.78)",
+          brand: "rgba(124,58,237,1)",
+          brandSoft: "rgba(124,58,237,.32)",
+          electric: "rgba(34,211,238,1)",
+          canvasBorder: isDark ? "rgba(2,6,23,.65)" : "rgba(248,250,252,.95)",
+        };
+      }
+
+      const neonLineGlow = {
+        id: "neonLineGlow",
+        beforeDatasetsDraw(chart) {
+          if (chart.config.type !== "line") return;
+          const { ctx } = chart;
+          ctx.save();
+          ctx.shadowColor = "rgba(124,58,237,.55)";
+          ctx.shadowBlur = 14;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        },
+        afterDatasetsDraw(chart) {
+          if (chart.config.type !== "line") return;
+          chart.ctx.restore();
+        },
       };
-    }
+      Chart.register(neonLineGlow);
 
-    const neonLineGlow = {
-      id: "neonLineGlow",
-      beforeDatasetsDraw(chart) {
-        if (chart.config.type !== "line") return;
-        const { ctx } = chart;
-        ctx.save();
-        ctx.shadowColor = "rgba(124,58,237,.55)";
-        ctx.shadowBlur = 14;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-      },
-      afterDatasetsDraw(chart) {
-        if (chart.config.type !== "line") return;
-        chart.ctx.restore();
-      },
-    };
-    Chart.register(neonLineGlow);
+      function destroyCharts() {
+        if (lineChart) {
+          lineChart.destroy();
+          lineChart = null;
+        }
+        if (donutChart) {
+          donutChart.destroy();
+          donutChart = null;
+        }
+      }
 
-    function getDashboardUserId() {
-      const params = new URLSearchParams(window.location.search);
-      const fromQuery = Number(params.get("userId"));
-      if (Number.isFinite(fromQuery) && fromQuery > 0) return fromQuery;
-      const fromStorage = Number(localStorage.getItem("acadly-user-id"));
-      return Number.isFinite(fromStorage) && fromStorage > 0 ? fromStorage : 1;
-    }
+      function initCharts(lineData, donutA, donutB) {
+        const lineEl = document.getElementById("lineChart");
+        const donutEl = document.getElementById("donutChart");
+        if (!lineEl || !donutEl) return;
+        destroyCharts();
+        const c = chartColors();
+        const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-    function setSyncStatus(message, ok = true) {
-      const el = $("#dataSyncStatus");
-      if (!el) return;
-      el.textContent = message;
-      el.className = `mb-4 rounded-2xl border px-4 py-2 text-xs ${ok
-        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
-        : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200"}`;
-    }
-
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el && value != null && value !== "") el.textContent = value;
-    }
-
-    function renderModules(modules) {
-      const wrap = $("#modulesList");
-      if (!wrap || !Array.isArray(modules)) return;
-      wrap.innerHTML = modules.map((m) => {
-        const p = Number(m.progress_pct || 0);
-        const safe = Math.max(0, Math.min(100, p));
-        return `<article class="card-hover rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/35 dark:ring-slate-800">
-          <div class="flex items-center gap-3">
-            <div class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/10 ring-1 ring-brand-500/25 text-brand-500">
-              <i class="fa-solid fa-book"></i>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">${m.title || "Untitled module"}</div>
-              <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">${m.subtitle || "Curriculum module"}</div>
-            </div>
-            <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">${safe}%</div>
-          </div>
-          <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200/70 dark:bg-slate-950/50">
-            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-electric-400" style="width:${safe}%"></div>
-          </div>
-        </article>`;
-      }).join("");
-    }
-
-    function renderCertificates(rows) {
-      const wrap = $("#certificatesList");
-      if (!wrap || !Array.isArray(rows)) return;
-      wrap.innerHTML = rows.slice(0, 2).map((c, idx) => `
-        <div class="${idx === 0 ? "cert-glow" : ""} rounded-2xl">
-          <div class="relative z-10 overflow-hidden rounded-2xl bg-slate-950/5 p-4 ring-1 ring-slate-200 dark:bg-slate-950/40 dark:ring-slate-800">
-            <div class="text-sm font-semibold text-slate-900 dark:text-white">${c.title || "Certificate"}</div>
-            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">${c.subtitle_line || "Verified achievement"}</div>
-            <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">Issued: ${c.issued_date || "—"}</div>
-            <div class="mt-2 text-xs text-slate-600 dark:text-slate-300">Verifiable ID: <span class="font-semibold text-slate-900 dark:text-white">${c.verifiable_id || "—"}</span></div>
-          </div>
-        </div>`).join("");
-    }
-
-    async function loadDashboardData() {
-      const userId = getDashboardUserId();
-      try {
-        const response = await window.AcadlyAuth.authFetch(`/api/dashboard/summary/${userId}`);
-        if (!response.ok) throw new Error(`Dashboard API unavailable (${response.status})`);
-        const data = await response.json();
-        const kpi = data.kpi || {};
-
-        setText("userNameHeader", (data.user?.name || "Fletcher").split(" ")[0]);
-        setText("userRoleHeader", data.user?.role || "Student");
-        applyProfileToUi({
-          name: data.user?.name,
-          email: data.user?.email,
-          date_of_birth: data.user?.date_of_birth,
-          education_level: data.user?.education_level,
+        lineChart = new Chart(lineEl, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Study hours",
+                data: lineData,
+                borderColor: c.brand,
+                backgroundColor: c.brandSoft,
+                tension: 0.42,
+                fill: true,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                pointBackgroundColor: "rgba(34,211,238,.95)",
+                pointBorderColor: c.canvasBorder,
+                pointBorderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: c.tooltipBg,
+                borderColor: c.tooltipBorder,
+                borderWidth: 1,
+                titleColor: c.title,
+                bodyColor: c.body,
+                displayColors: false,
+              },
+            },
+            scales: {
+              x: { grid: { color: c.grid }, ticks: { color: c.ticks } },
+              y: { grid: { color: c.grid }, ticks: { color: c.ticks }, suggestedMin: 0 },
+            },
+          },
         });
 
-        setText("kpiActiveCourses", kpi.active_courses ?? "8");
-        setText("kpiCoursesNote", kpi.courses_delta_note ?? "+2 this month");
-        setText("kpiCertificates", kpi.certificates_count ?? "3");
-        setText("kpiCertNote", kpi.cert_subnote ?? "Verifiable IDs");
-        setText("kpiLatestCert", kpi.latest_cert_name ?? "Frontend Foundations");
-        setText("kpiLearningHours", kpi.learning_hours ?? "42.5");
-        setText("kpiHoursNote", kpi.hours_week_note ?? "Last 7 days: 12.3h");
-        setText("kpiPeakDay", kpi.peak_study_day ?? "Sunday");
-        setText("kpiPeerConnections", kpi.peer_connections ?? "27");
-        setText("kpiPeerNote", kpi.peer_note ?? "+5 new");
-        setText("kpiStudyGroups", kpi.study_group_note ?? "2 study groups active");
-        setText("modulesCount", `${(data.modules || []).length} courses`);
-        setText("streakDays", kpi.study_streak_days ?? data.profile?.streak_days ?? 15);
-
-        const badgeRack = $("#badgeRack");
-        if (badgeRack && Array.isArray(data.gamificationTags) && data.gamificationTags.length) {
-          badgeRack.innerHTML = data.gamificationTags.map((tag) => `<span class="rounded-xl border border-brand-500/40 bg-brand-500/10 px-3 py-2 text-xs font-semibold text-brand-500 shadow-neon">${tag.label}</span>`).join("");
-        }
-
-        renderModules(data.modules || []);
-        renderCertificates(data.certificates || []);
-
-        if (lineChart && Array.isArray(data.chart?.hoursByDay)) {
-          lineChart.data.datasets[0].data = data.chart.hoursByDay;
-          lineChart.update();
-        }
-        if (donutChart && data.chart?.completion) {
-          donutChart.data.datasets[0].data = [data.chart.completion.completed_pct || 0, data.chart.completion.in_progress_pct || 0];
-          donutChart.update();
-        }
-
-        setSyncStatus(`Connected: /api/dashboard/summary/${userId} loaded successfully.`);
-      } catch (err) {
-        setSyncStatus(`Could not load live database data (${err.message}). Showing fallback demo content.`, false);
+        donutChart = new Chart(donutEl, {
+          type: "doughnut",
+          data: {
+            labels: ["Completed", "In Progress"],
+            datasets: [
+              {
+                data: [donutA, donutB],
+                backgroundColor: [c.brand, c.electric],
+                borderColor: c.canvasBorder,
+                borderWidth: 3,
+                hoverOffset: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "70%",
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: c.ticks, boxWidth: 10, boxHeight: 10, padding: 14 },
+              },
+              tooltip: {
+                backgroundColor: c.tooltipBg,
+                borderColor: "rgba(34,211,238,.35)",
+                borderWidth: 1,
+                titleColor: c.title,
+                bodyColor: c.body,
+              },
+            },
+          },
+        });
       }
-    }
 
-    function initCharts() {
-      const lineEl = document.getElementById("lineChart");
-      const donutEl = document.getElementById("donutChart");
-      if (!lineEl || !donutEl) return;
-      const c = chartColors();
+      function updateChartsFromApi(chartPayload) {
+        const defHours = [1.2, 2.1, 2.6, 3.1, 2.4, 3.6, 4.2];
+        const hours = (chartPayload && chartPayload.hoursByDay) || defHours;
+        const comp = chartPayload?.completion || {};
+        let a = Number(comp.completed_pct);
+        let b = Number(comp.in_progress_pct);
+        if (!Number.isFinite(a)) a = 72;
+        if (!Number.isFinite(b)) b = 28;
+        if (a + b === 0) {
+          a = 72;
+          b = 28;
+        }
+        initCharts(hours, a, b);
+      }
 
-      lineChart = new Chart(lineEl, {
-        type: "line",
-        data: {
-          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-          datasets: [
-            {
-              label: "Study hours",
-              data: [1.2, 2.1, 2.6, 3.1, 2.4, 3.6, 4.2],
-              borderColor: c.brand,
-              backgroundColor: c.brandSoft,
-              tension: 0.42,
-              fill: true,
-              pointRadius: 3,
-              pointHoverRadius: 5,
-              pointBackgroundColor: "rgba(34,211,238,.95)",
-              pointBorderColor: c.canvasBorder,
-              pointBorderWidth: 2,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: c.tooltipBg,
-              borderColor: c.tooltipBorder,
-              borderWidth: 1,
-              titleColor: c.title,
-              bodyColor: c.body,
-              displayColors: false,
-            },
-          },
-          scales: {
-            x: { grid: { color: c.grid }, ticks: { color: c.ticks } },
-            y: { grid: { color: c.grid }, ticks: { color: c.ticks }, suggestedMin: 0 },
-          },
-        },
-      });
+      function updateChartsForTheme() {
+        if (!lineChart || !donutChart) return;
+        const c = chartColors();
 
-      donutChart = new Chart(donutEl, {
-        type: "doughnut",
-        data: {
-          labels: ["Completed", "In Progress"],
-          datasets: [
-            {
-              data: [72, 28],
-              backgroundColor: [c.brand, c.electric],
-              borderColor: c.canvasBorder,
-              borderWidth: 3,
-              hoverOffset: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "70%",
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: c.ticks, boxWidth: 10, boxHeight: 10, padding: 14 },
-            },
-            tooltip: {
-              backgroundColor: c.tooltipBg,
-              borderColor: "rgba(34,211,238,.35)",
-              borderWidth: 1,
-              titleColor: c.title,
-              bodyColor: c.body,
-            },
-          },
-        },
-      });
-    }
+        // Line
+        lineChart.data.datasets[0].borderColor = c.brand;
+        lineChart.data.datasets[0].backgroundColor = c.brandSoft;
+        lineChart.data.datasets[0].pointBorderColor = c.canvasBorder;
+        lineChart.options.scales.x.grid.color = c.grid;
+        lineChart.options.scales.y.grid.color = c.grid;
+        lineChart.options.scales.x.ticks.color = c.ticks;
+        lineChart.options.scales.y.ticks.color = c.ticks;
+        lineChart.options.plugins.tooltip.backgroundColor = c.tooltipBg;
+        lineChart.options.plugins.tooltip.borderColor = c.tooltipBorder;
+        lineChart.options.plugins.tooltip.titleColor = c.title;
+        lineChart.options.plugins.tooltip.bodyColor = c.body;
+        lineChart.update();
 
-    function updateChartsForTheme() {
-      if (!lineChart || !donutChart) return;
-      const c = chartColors();
+        // Donut
+        donutChart.data.datasets[0].backgroundColor = [c.brand, c.electric];
+        donutChart.data.datasets[0].borderColor = c.canvasBorder;
+        donutChart.options.plugins.legend.labels.color = c.ticks;
+        donutChart.options.plugins.tooltip.backgroundColor = c.tooltipBg;
+        donutChart.options.plugins.tooltip.titleColor = c.title;
+        donutChart.options.plugins.tooltip.bodyColor = c.body;
+        donutChart.update();
+      }
 
-      // Line
-      lineChart.data.datasets[0].borderColor = c.brand;
-      lineChart.data.datasets[0].backgroundColor = c.brandSoft;
-      lineChart.data.datasets[0].pointBorderColor = c.canvasBorder;
-      lineChart.options.scales.x.grid.color = c.grid;
-      lineChart.options.scales.y.grid.color = c.grid;
-      lineChart.options.scales.x.ticks.color = c.ticks;
-      lineChart.options.scales.y.ticks.color = c.ticks;
-      lineChart.options.plugins.tooltip.backgroundColor = c.tooltipBg;
-      lineChart.options.plugins.tooltip.borderColor = c.tooltipBorder;
-      lineChart.options.plugins.tooltip.titleColor = c.title;
-      lineChart.options.plugins.tooltip.bodyColor = c.body;
-      lineChart.update();
+      updateChartsFromApi(null);
+      loadDashboard(true);
 
-      // Donut
-      donutChart.data.datasets[0].backgroundColor = [c.brand, c.electric];
-      donutChart.data.datasets[0].borderColor = c.canvasBorder;
-      donutChart.options.plugins.legend.labels.color = c.ticks;
-      donutChart.options.plugins.tooltip.backgroundColor = c.tooltipBg;
-      donutChart.options.plugins.tooltip.titleColor = c.title;
-      donutChart.options.plugins.tooltip.bodyColor = c.body;
-      donutChart.update();
-    }
+      // Logout handler
+      const logoutBtn = $("#logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          // Clear authentication data
+          localStorage.removeItem("acadly-authenticated");
+          localStorage.removeItem("acadly-user");
+          localStorage.removeItem("acadly-auth-theme");
+          localStorage.removeItem("acadly-dashboard-theme");
+          
+          // Redirect to home page
+          window.location.href = "index.html";
+        });
+      }
 
-    if (window.AcadlyAuth?.requireAuth("Login.html")) {
-      initCharts();
-      loadDashboardData();
-    }
-
-    // (Practice Sandbox removed) Badges section is display-focused
-  </script>
-</body>
-
+      // (Practice Sandbox removed) Badges section is display-focused
+    </script>
+  </body>
 </html>

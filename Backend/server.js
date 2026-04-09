@@ -10,6 +10,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,12 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// TLS Configuration (optional)
+const shouldForceHttps = process.env.FORCE_HTTPS === "true";
+const tlsKeyPath = process.env.TLS_KEY_PATH || null;
+const tlsCertPath = process.env.TLS_CERT_PATH || null;
+const tlsCaPath = process.env.TLS_CA_PATH || null;
+
 // -------------------- MIDDLEWARE -------------------- //
 if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
@@ -27,7 +34,7 @@ if (process.env.TRUST_PROXY === "true") {
 
 app.use(
   helmet({
-    hsts: isProduction
+    hsts: IS_PRODUCTION
       ? {
           maxAge: 31536000,
           includeSubDomains: true,
@@ -225,9 +232,14 @@ app.get("/library", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "library.html"));
 });
 
-// Video player page
+// Video player page (live version with auto-resume)
 app.get("/videoplayer", (req, res) => {
-  res.sendFile(path.join(FRONTEND_PATH, "videoplayer.html"));
+  res.sendFile(path.join(FRONTEND_PATH, "videoplayer-live.html"));
+});
+
+// Video player live page
+app.get("/videoplayer-live", (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, "videoplayer-live.html"));
 });
 
 // PDF upload page
@@ -239,12 +251,6 @@ app.get("/upload", (req, res) => {
 app.get("/video-upload", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "video-upload.html"));
 });
-
-// PDF library page
-app.get("/library", (req, res) => {
-  res.sendFile(path.join(FRONTEND_PATH, "library.html"));
-});
-
 
 // 3D lab page
 app.get("/3d-lab", (req, res) => {

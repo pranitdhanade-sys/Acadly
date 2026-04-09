@@ -1,0 +1,15 @@
+﻿/* Homepage CSS - Landing page styling */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; --purple: 124 58 237; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; line-height: 1.6; }
+.hero { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 3rem; text-align: center; }
+.hero-title { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, rgb(var(--blue)), rgb(var(--purple))); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-subtitle { font-size: 1.25rem; color: rgb(148, 163, 184); margin-bottom: 2rem; }
+.cta-button { display: inline-block; padding: 1rem 2.5rem; background: linear-gradient(135deg, rgb(var(--blue)), rgb(var(--purple))); color: white; border: none; border-radius: 0.5rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 300ms; }
+.cta-button:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(var(--blue), 0.4); }
+.features { max-width: 1200px; margin: 3rem auto; padding: 0 2rem; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+.feature-card { background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); padding: 2rem; border-radius: 0.75rem; text-align: center; transition: all 300ms; }
+.feature-card:hover { transform: translateY(-4px); border-color: rgb(var(--blue)); box-shadow: 0 12px 32px rgba(var(--blue), 0.15); }
+.feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.feature-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
+.feature-desc { font-size: 0.95rem; color: rgb(148, 163, 184); }

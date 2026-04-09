@@ -1,0 +1,12 @@
+﻿/* Videoplayer Live CSS */
+:root {
+  --bg: 2 6 23;
+  --text: 226 232 240;
+  --border: 30 41 59;
+  --blue: 34 211 238;
+}
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.glass { background: rgba(15, 23, 42, 0.85); border: 1px solid rgb(var(--border)); backdrop-filter: blur(18px); }
+.xp-notification { position: fixed; top: 2rem; right: 2rem; background: linear-gradient(135deg, rgb(var(--blue)), rgb(124, 58, 237)); padding: 1rem 2rem; border-radius: 0.75rem; color: white; font-weight: 600; animation: slideIn 300ms ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+

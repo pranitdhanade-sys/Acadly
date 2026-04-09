@@ -4,155 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Write Blog | Acadly</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --brand: #22d3ee;
-      --border: #334155;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(circle at top, #1e293b, var(--bg));
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
-    }
-
-    h1 { margin: 0 0 10px; }
-
-    .links { display: flex; gap: 10px; margin-bottom: 16px; }
-
-    .btn {
-      padding: 9px 12px;
-      border-radius: 8px;
-      border: none;
-      text-decoration: none;
-      font-weight: bold;
-      cursor: pointer;
-      background: #0284c7;
-      color: #fff;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 14px;
-    }
-
-    @media (max-width: 960px) {
-      .layout { grid-template-columns: 1fr; }
-    }
-
-    .panel {
-      background: color-mix(in srgb, var(--card) 90%, black);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      margin: 9px 0 5px;
-      color: #cbd5e1;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #0b1220;
-      color: var(--text);
-      padding: 10px;
-      font: inherit;
-    }
-
-    textarea { min-height: 280px; resize: vertical; }
-
-    .small { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .tab {
-      border: 1px solid var(--border);
-      background: #0b1220;
-      color: #dbeafe;
-      border-radius: 999px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    .tab.active { border-color: var(--brand); color: #fff; }
-
-    .editor {
-      min-height: 280px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      background: #0b1220;
-      color: var(--text);
-    }
-
-    #richEditor[contenteditable="true"]:empty:before {
-      content: attr(data-placeholder);
-      color: #64748b;
-    }
-
-    #preview {
-      margin-top: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      min-height: 120px;
-      background: #020617;
-    }
-
-    #preview pre {
-      background: #0b1220;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: auto;
-      padding: 10px;
-    }
-
-    .tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-    .tools button { background: #2563eb; }
-
-    #metadataPreview {
-      white-space: pre-wrap;
-      background: #020617;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      color: #cbd5e1;
-      margin-top: 10px;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="CSS/blog-editor.css">
+  
 </head>
 <body>
   <main class="container">
     <h1>Write a Blog</h1>
     <div class="links">
-      <a class="btn" href="/blogs.html">Open Blog Page</a>
-      <a class="btn" href="/Homepage.html">Home</a>
+      <a class="btn" href="blogs.html">Open Blog Page</a>
+      <a class="btn" href="Homepage.html">Home</a>
     </div>
 
     <section class="layout">
@@ -208,6 +69,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-  <script src="/js/blog-editor.js"></script>
+  <script src="js/blog-editor.js"></script>
 </body>
 </html>

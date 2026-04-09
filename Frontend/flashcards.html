@@ -36,68 +36,13 @@
           boxShadow: {
             glow: "0 0 0 1px rgba(124,58,237,.4), 0 0 30px rgba(124,58,237,.2)",
             panel: "0 20px 60px rgba(0, 0, 0, 0.35)"
-            brand: { 500: "#7C3AED" },
-            electric: { 400: "#22D3EE" }
           }
         }
       }
     };
   </script>
-
-  <style>
-    body {
-      background:
-        radial-gradient(1000px 600px at 8% 8%, rgba(124, 58, 237, 0.18), transparent 60%),
-        radial-gradient(800px 520px at 96% 14%, rgba(34, 211, 238, 0.14), transparent 62%),
-        radial-gradient(900px 620px at 70% 98%, rgba(14, 165, 233, 0.12), transparent 62%),
-      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.2), transparent 45%),
-        radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.16), transparent 48%),
-        rgb(2 6 23);
-    }
-
-    html:not(.dark) body {
-      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 45%),
-        radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.08), transparent 48%),
-        rgb(248 250 252);
-    }
-
-    .glass {
-      background: rgba(15, 23, 42, 0.62);
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-
-    html:not(.dark) .glass {
-      background: rgba(255, 255, 255, 0.85);
-      border-color: rgba(15, 23, 42, 0.1);
-    }
-
-    .flashcard {
-      transform-style: preserve-3d;
-      transition: transform 500ms ease;
-    }
-
-    .flashcard.is-flipped {
-      transform: rotateY(180deg);
-    }
-
-    .flash-face {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    .flash-back {
-      transform: rotateY(180deg);
-    }
-
-    .pill {
-      border: 1px solid rgba(148, 163, 184, 0.35);
-    }
-  </style>
+  <link rel="stylesheet" href="CSS/flashcards.css">
+  
 </head>
 
 <body class="font-sans text-slate-100 dark:text-slate-100">
