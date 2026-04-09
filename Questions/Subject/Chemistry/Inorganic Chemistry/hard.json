@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Which process converts ore to metal using heat in absence of air?",
+      "options": [
+        "Calcination",
+        "Roasting",
+        "Electrolysis",
+        "Hydration"
+      ],
+      "answer": "Calcination"
+    },
+    {
+      "question": "The formula of potassium permanganate is:",
+      "options": [
+        "KMnO4",
+        "K2MnO4",
+        "MnO2",
+        "KOH"
+      ],
+      "answer": "KMnO4"
+    },
+    {
+      "question": "Coordination number of central atom in [Cu(NH3)4]2+ is:",
+      "options": [
+        "4",
+        "2",
+        "6",
+        "1"
+      ],
+      "answer": "4"
+    }
+  ]
+}

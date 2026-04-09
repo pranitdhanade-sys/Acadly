@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "What is the chemical symbol of sodium?",
+      "options": [
+        "Na",
+        "S",
+        "So",
+        "N"
+      ],
+      "answer": "Na"
+    },
+    {
+      "question": "Which gas is commonly known as laughing gas?",
+      "options": [
+        "Nitrous oxide",
+        "Carbon dioxide",
+        "Methane",
+        "Hydrogen"
+      ],
+      "answer": "Nitrous oxide"
+    },
+    {
+      "question": "pH value less than 7 indicates:",
+      "options": [
+        "Acidic solution",
+        "Basic solution",
+        "Neutral solution",
+        "Salt solution"
+      ],
+      "answer": "Acidic solution"
+    }
+  ]
+}
