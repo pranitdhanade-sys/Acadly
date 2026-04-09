@@ -334,7 +334,27 @@
       statAccuracy: document.getElementById("statAccuracy"),
       recentCards: document.getElementById("recentCards"),
       resetProgress: document.getElementById("resetProgress"),
-      themeToggle: document.getElementById("themeToggle")
+      themeToggle: document.getElementById("themeToggle"),
+      deckName: document.getElementById("deckName"),
+      cardFront: document.getElementById("cardFront"),
+      cardBack: document.getElementById("cardBack"),
+      addCardBtn: document.getElementById("addCardBtn"),
+      clearDeckBtn: document.getElementById("clearDeckBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      importInput: document.getElementById("importInput"),
+      searchInput: document.getElementById("searchInput"),
+      shuffleBtn: document.getElementById("shuffleBtn"),
+      quizModeBtn: document.getElementById("quizModeBtn"),
+      cardFrontPreview: document.getElementById("cardFrontPreview"),
+      cardBackPreview: document.getElementById("cardBackPreview"),
+      cardList: document.getElementById("cardList"),
+      flipBtn: document.getElementById("flipBtn"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      knownBtn: document.getElementById("knownBtn"),
+      statCards: document.getElementById("statCards"),
+      statStreak: document.getElementById("statStreak"),
+      srsResult: document.getElementById("srsResult")
     };
 
     function safeParse(raw) {
@@ -417,31 +437,6 @@
       quizMode: false
     };
 
-    const els = {
-      deckName: document.getElementById("deckName"),
-      cardFront: document.getElementById("cardFront"),
-      cardBack: document.getElementById("cardBack"),
-      addCardBtn: document.getElementById("addCardBtn"),
-      clearDeckBtn: document.getElementById("clearDeckBtn"),
-      exportBtn: document.getElementById("exportBtn"),
-      importInput: document.getElementById("importInput"),
-      searchInput: document.getElementById("searchInput"),
-      shuffleBtn: document.getElementById("shuffleBtn"),
-      quizModeBtn: document.getElementById("quizModeBtn"),
-      cardFrontPreview: document.getElementById("cardFrontPreview"),
-      cardBackPreview: document.getElementById("cardBackPreview"),
-      cardList: document.getElementById("cardList"),
-      flipBtn: document.getElementById("flipBtn"),
-      prevBtn: document.getElementById("prevBtn"),
-      nextBtn: document.getElementById("nextBtn"),
-      knownBtn: document.getElementById("knownBtn"),
-      statCards: document.getElementById("statCards"),
-      statMastered: document.getElementById("statMastered"),
-      statAccuracy: document.getElementById("statAccuracy"),
-      statStreak: document.getElementById("statStreak"),
-      srsResult: document.getElementById("srsResult"),
-      themeToggle: document.getElementById("themeToggle")
-    };
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
