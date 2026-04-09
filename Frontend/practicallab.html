@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Practical Learning Labs</title>
+<style>
+:root{--bg:#030712;--card:#111827;--line:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--accent:#4f46e5;--ok:#22c55e}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at 10% 0%,#111827,var(--bg) 45%);color:var(--text)}
+.wrap{max-width:1160px;margin:0 auto;padding:24px 16px 48px}.hero{border:1px solid var(--line);border-radius:16px;padding:20px;background:linear-gradient(140deg,rgba(79,70,229,.25),rgba(17,24,39,.85));margin-bottom:16px}
+.toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}.toolbar input,.toolbar select{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}.card{border:1px solid var(--line);border-radius:12px;background:rgba(17,24,39,.85);padding:14px}.pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:.78rem;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.panel{margin-top:20px;border:1px solid var(--line);background:var(--card);padding:16px;border-radius:12px}.task{border:1px solid var(--line);padding:10px;border-radius:10px;margin-bottom:10px}
+input.command{width:100%;margin-top:8px;border:1px solid var(--line);background:#0b1220;color:var(--text);padding:8px;border-radius:8px}button{border:none;border-radius:8px;padding:8px 10px;background:var(--accent);color:#fff;cursor:pointer}.ok{color:var(--ok)}.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <h1>Practical Learning Labs</h1>
+    <p class="muted">Not CTF. These are hands-on command labs (TryHackMe-style tasks) to practice real DevOps/Infra/Robotics commands.</p>
+  </section>
+
+  <section class="toolbar">
+    <input id="search" placeholder="Search lab" />
+    <select id="track"><option value="all">All Tracks</option><option>Docker</option><option>Kubernetes</option><option>Terraform</option><option>ANSYS</option><option>Database</option><option>ROS2</option></select>
+    <select id="level"><option value="all">All Levels</option><option>beginner</option><option>intermediate</option><option>advanced</option></select>
+    <button id="refresh" type="button">Refresh</button>
+  </section>
+
+  <section id="grid" class="grid"></section>
+  <section id="panel" class="panel" hidden></section>
+</main>
+
+<script>
+const grid=document.getElementById('grid');
+const panel=document.getElementById('panel');
+const searchInput=document.getElementById('search');
+const trackSelect=document.getElementById('track');
+const levelSelect=document.getElementById('level');
+const refreshButton=document.getElementById('refresh');
+let activeSession=null;
+
+async function loadLabs(){
+  const params=new URLSearchParams({search:searchInput.value.trim(),track:trackSelect.value,level:levelSelect.value});
+  const res=await fetch(`/api/ptl/labs?${params.toString()}`);
+  const payload=await res.json();
+  if(!res.ok) throw new Error(payload.error||'Unable to load labs.');
+  if(!payload.labs.length){grid.innerHTML='<p class="muted">No labs found.</p>'; return;}
+  grid.innerHTML=payload.labs.map((lab)=>`<article class="card"><span class="pill">${lab.track}</span><h3>${lab.name}</h3><p class="muted">${lab.description}</p><div class="meta"><span class="pill">${lab.level}</span><span class="pill">${lab.duration}</span><span class="pill">${lab.taskCount} tasks</span></div><button onclick="startLab('${lab.id}')">Start Lab</button></article>`).join('');
+}
+
+async function startLab(labId){
+  const res=await fetch('/api/ptl/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({labId})});
+  const payload=await res.json();
+  if(!res.ok){alert(payload.error||'Failed to start lab');return;}
+  activeSession=payload.sessionId;
+  panel.hidden=false;
+  panel.innerHTML=`<h2>${payload.lab.name}</h2><p class="muted">Session: ${payload.sessionId} • ${payload.lab.duration}</p>${payload.lab.tasks.map((t)=>`<div class="task"><strong>${t.title}</strong><p class="muted">${t.instruction}</p><p class="muted">Hint: ${t.hint}</p><input class="command" id="cmd-${t.id}" placeholder="Type command you used" /><button onclick="completeTask('${t.id}')">Submit Command</button><div id="result-${t.id}" class="muted"></div></div>`).join('')}<div id="overall" class="muted">Progress: 0/${payload.lab.tasks.length}</div>`;
+}
+
+async function completeTask(taskId){
+  if(!activeSession) return;
+  const command=document.getElementById(`cmd-${taskId}`).value;
+  const result=document.getElementById(`result-${taskId}`);
+  const overall=document.getElementById('overall');
+  const res=await fetch('/api/ptl/complete-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:activeSession,taskId,command})});
+  const payload=await res.json();
+  if(!res.ok){result.textContent=payload.error||'Could not validate task.';return;}
+  result.textContent=payload.message;
+  result.className=payload.success?'ok':'muted';
+  overall.textContent=`Progress: ${payload.progress}${payload.labCompleted?' • Lab completed 🎉':''}`;
+}
+
+refreshButton.addEventListener('click',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
+searchInput.addEventListener('input',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
+trackSelect.addEventListener('change',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
+levelSelect.addEventListener('change',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
+loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`);
+window.startLab=startLab;window.completeTask=completeTask;
+</script>
+</body>
+</html>
