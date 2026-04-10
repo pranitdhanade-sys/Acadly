@@ -148,9 +148,9 @@ const videoRoutes = require("./routes/videos");
 app.use("/api/videos", videoRoutes);
 console.log("✅ Video routes mounted at /api/videos");
 
-// PDF library routes (MongoDB metadata + /Frontend/pdfs files)
+// PDF library routes (MongoDB + GridFS-backed uploads from /upload page)
 try {
-  const pdfLibraryRoutes = require("./routes/pdf-library");
+  const pdfLibraryRoutes = require("./routes/pdfs");
   app.use("/api/pdfs", pdfLibraryRoutes);
   console.log("✅ PDF library routes mounted at /api/pdfs");
 } catch (err) {
