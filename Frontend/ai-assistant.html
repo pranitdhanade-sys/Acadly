@@ -1,41 +1,38 @@
 <!doctype html>
 <html lang="en" data-accent-theme="purple">
-  <script>
-    (function () {
-      try {
-        const key = "acadly-ai-theme";
-        const saved = localStorage.getItem(key);
-        const prefersDark =
-          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const useDark =
-          saved === "light" ? false : saved === "dark" ? true : prefersDark;
-        document.documentElement.classList.toggle("dark", useDark);
-    } catch { }
-    })();
-  </script>
-  <script>
-    // Access gate: only allow after login/sign-up
-    (function () {
-      try {
-        const authed =
-          localStorage.getItem("acadly-authenticated") === "true" ||
-          !!localStorage.getItem("acadly-user");
-
-        if (!authed) {
-          const next = "ai-assistant.html"; // resolved from Login.html
-          window.location.replace(
-            "Login.html?next=" + encodeURIComponent(next)
-          );
-        }
-      } catch {}
-    })();
-  </script>
-  <link rel="stylesheet" href="CSS/ai-assistant.css">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AcadLy AI Assistant</title>
     <meta name="description" content="AcadLy AI Assistant - Educational neon glass chat UI" />
+    <link rel="stylesheet" href="CSS/ai-assistant.css" />
+    <script>
+      (function () {
+        try {
+          const key = "acadly-ai-theme";
+          const saved = localStorage.getItem(key);
+          const prefersDark =
+            window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const useDark = saved === "light" ? false : saved === "dark" ? true : prefersDark;
+          document.documentElement.classList.toggle("dark", useDark);
+        } catch {}
+      })();
+    </script>
+    <script>
+      // Access gate: only allow after login/sign-up
+      (function () {
+        try {
+          const authed =
+            localStorage.getItem("acadly-authenticated") === "true" ||
+            !!localStorage.getItem("acadly-user");
+
+          if (!authed) {
+            const next = "ai-assistant.html";
+            window.location.replace("Login.html?next=" + encodeURIComponent(next));
+          }
+        } catch {}
+      })();
+    </script>
 
     <!-- Tailwind (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -993,4 +990,3 @@ function nextStep(value) {
     </script>
   </body>
 </html>
-

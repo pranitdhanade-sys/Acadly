@@ -1,12 +1,32 @@
 ﻿/* AI Assistant CSS */
-:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
-body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
-.chatbox { max-width: 600px; margin: 0 auto; height: 80vh; display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.5); border-radius: 1rem; border: 1px solid rgb(var(--border)); padding: 1rem; }
+.chatbox {
+  width: min(100%, 600px);
+  margin: 0 auto;
+  height: min(80vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 1rem;
+  border: 1px solid rgb(30 41 59);
+  padding: 1rem;
+}
 .messages { flex: 1; overflow-y: auto; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem; }
 .message { padding: 1rem; border-radius: 0.75rem; max-width: 80%; }
-.message.user { align-self: flex-end; background: rgba(var(--blue), 0.2); border: 1px solid rgb(var(--blue)); }
-.message.bot { align-self: flex-start; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); }
+.message.user { align-self: flex-end; background: rgba(34, 211, 238, 0.2); border: 1px solid rgb(34, 211, 238); }
+.message.bot { align-self: flex-start; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(30 41 59); }
 .input-area { display: flex; gap: 0.75rem; }
-input { flex: 1; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; color: rgb(var(--text)); }
-button { padding: 0.75rem 1.5rem; background: rgb(var(--blue)); color: white; border: none; border-radius: 0.5rem; cursor: pointer; }
+.chatbox input { flex: 1; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; color: rgb(226 232 240); }
+.chatbox button { padding: 0.75rem 1.5rem; background: rgb(34, 211, 238); color: white; border: none; border-radius: 0.5rem; cursor: pointer; }
 
+@media (max-width: 768px) {
+  .chatbox {
+    height: calc(100dvh - 140px);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .message {
+    max-width: 92%;
+    padding: 0.75rem;
+  }
+}
