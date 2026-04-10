@@ -125,6 +125,21 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/refresh", async (req, res) => {
+  try {
+    await ensureMongo();
+    const docs = await PdfDocument.find({ isActive: true }).sort({ uploadedAt: -1 }).exec();
+    res.json({
+      message: "PDF library refreshed from MongoDB",
+      count: docs.length,
+      pdfs: docs.map(toLibraryItem),
+    });
+  } catch (err) {
+    console.error("POST /api/pdfs/refresh:", err.message);
+    res.status(503).json({ error: "PDF library unavailable", detail: err.message });
+  }
+});
+
 router.post("/upload", upload.single("pdf"), async (req, res) => {
   try {
     await ensureMongo();

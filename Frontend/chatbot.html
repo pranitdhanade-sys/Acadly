@@ -23,8 +23,8 @@
   </script>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-  <main class="mx-auto flex h-screen w-full max-w-6xl flex-col p-3 sm:p-4 md:p-6">
-    <header class="mb-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+  <main class="mx-auto flex h-screen w-full max-w-5xl flex-col p-3 sm:p-4 md:p-6">
+    <header class="mb-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-white/5">
       <div>
         <h1 class="text-base font-bold sm:text-lg">AcadLy Chatbot</h1>
         <p class="text-xs text-slate-500 dark:text-slate-400">Direct access enabled — no login required</p>
@@ -35,7 +35,7 @@
     <section class="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
       <div id="messages" class="flex-1 space-y-3 overflow-y-auto p-3 sm:p-4">
         <div class="max-w-[92%] rounded-2xl bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800/80 sm:max-w-[80%]">
-          Hi! I am the AcadLy chatbot. Ask me anything and I will call the AI API.
+          Hi! I am the AcadLy chatbot. Ask me anything about your studies.
         </div>
       </div>
 
@@ -105,6 +105,8 @@
         addMessage(answer);
       } catch (err) {
         addMessage(`Request failed: ${err.message}`);
+        // Local lightweight response to keep page usable without backend dependency.
+        addMessage('Got it! I can help explain concepts, summarize topics, or generate practice questions.');
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send';
