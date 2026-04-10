@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcadLy - Learning Path</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/auth.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#030712}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,.4),transparent),radial-gradient(1.5px 1.5px at 50% 60%,rgba(255,255,255,.3),transparent),radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 90% 70%,rgba(255,255,255,.3),transparent),radial-gradient(1px 1px at 35% 90%,rgba(255,255,255,.35),transparent);pointer-events:none;z-index:0;animation:twinkle 6s ease-in-out infinite alternate}
+    @keyframes twinkle{0%{opacity:.5}100%{opacity:1}}
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:rgba(15,23,42,.4);border-radius:4px}
+    ::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#9333ea,#22d3ee);border-radius:4px}
+    .glass{background:rgba(10,15,35,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09)}
+    .view-window{position:absolute;inset:0;width:100%;height:100%;transition:transform .75s cubic-bezier(.65,0,.35,1),opacity .55s ease}
+    .view-a-active{transform:translateX(0);opacity:1}
+    .view-a-hidden{transform:translateX(-100%);opacity:0;pointer-events:none}
+    .view-b-active{transform:translateX(0);opacity:1}
+    .view-b-hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+    .module-card{position:relative;overflow:hidden;transition:all .45s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,.08)}
+    .module-card::after{content:'';position:absolute;top:-50%;left:-75%;width:50%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);transform:skewX(-20deg);transition:left .7s ease}
+    .module-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 50px -10px rgba(147,51,234,.5)}
+    .module-card:hover::after{left:125%}
+    .module-card>*{position:relative;z-index:1}
+    @keyframes card-rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    .card-enter{opacity:0;animation:card-rise .55s ease-out forwards}
+    .node-btn{position:relative;z-index:10;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease}
+    .node-btn:not(:disabled):hover{transform:scale(1.18)!important}
+    .node-btn::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.25);opacity:0;transform:scale(0);transition:transform .35s ease,opacity .35s ease}
+    .node-btn:active::after{transform:scale(1.8);opacity:1;transition:none}
+    .node-completed{background:linear-gradient(135deg,#0c2a2f,#0f172a);border-color:#22d3ee;color:#22d3ee;box-shadow:0 0 0 2px rgba(34,211,238,.2),0 0 22px rgba(34,211,238,.55),inset 0 0 10px rgba(34,211,238,.12)}
+    .node-active{background:linear-gradient(135deg,#1a0a2e,#0f172a);border-color:#9333ea;color:#c084fc;box-shadow:0 0 0 2px rgba(147,51,234,.25),0 0 22px rgba(147,51,234,.55),inset 0 0 10px rgba(147,51,234,.12);animation:pulse-purple 2s infinite}
+    .node-locked{background:#0d1117;border-color:#1e2736;color:#2d3d55;cursor:not-allowed;filter:grayscale(.6)}
+    .node-checkpoint{background:linear-gradient(135deg,#1c1205,#0f172a);border-color:#f59e0b;color:#fbbf24;box-shadow:0 0 0 2px rgba(245,158,11,.2),0 0 24px rgba(245,158,11,.6),inset 0 0 10px rgba(245,158,11,.12);animation:float 3s ease-in-out infinite}
+    .node-boss{background:linear-gradient(135deg,#021820,#0f172a);border-color:#22d3ee;color:#67e8f9;box-shadow:0 0 0 4px rgba(34,211,238,.15),0 0 40px rgba(34,211,238,.8),inset 0 0 20px rgba(34,211,238,.2);animation:boss-pulse 2.5s ease-in-out infinite}
+    @keyframes boss-pulse{0%,100%{box-shadow:0 0 0 4px rgba(34,211,238,.15),0 0 40px rgba(34,211,238,.8),inset 0 0 20px rgba(34,211,238,.2)}50%{box-shadow:0 0 0 8px rgba(34,211,238,.08),0 0 60px rgba(34,211,238,1),inset 0 0 30px rgba(34,211,238,.35)}}
+    @keyframes unlock-bounce{0%{transform:scale(1)}25%{transform:scale(1.4) rotate(-4deg)}55%{transform:scale(.92)}80%{transform:scale(1.07)}100%{transform:scale(1)}}
+    .unlock-anim{animation:unlock-bounce .65s cubic-bezier(.34,1.56,.64,1)!important}
+    @keyframes pulse-purple{0%{box-shadow:0 0 0 2px rgba(147,51,234,.25),0 0 22px rgba(147,51,234,.55)}60%{box-shadow:0 0 0 14px rgba(147,51,234,0),0 0 30px rgba(147,51,234,.1)}100%{box-shadow:0 0 0 2px rgba(147,51,234,.25),0 0 22px rgba(147,51,234,.55)}}
+    @keyframes float{0%,100%{transform:translateY(0) rotate(45deg)}50%{transform:translateY(-12px) rotate(45deg)}}
+    .node-btn span{background:rgba(5,8,20,.85);padding:2px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.07);backdrop-filter:blur(8px)}
+    #contentPanelOverlay{transition:background .35s}
+    #contentPanelOverlay.panel-hidden{background:transparent!important}
+    #contentPanel{background:linear-gradient(180deg,rgba(8,12,28,.97) 0%,rgba(3,5,15,.99) 100%);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-bottom:none;position:relative}
+    #contentPanel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#9333ea,#22d3ee,#f59e0b,#22d3ee,#9333ea);background-size:400% 100%;animation:gradient-shift 4s linear infinite}
+    @keyframes gradient-shift{0%{background-position:0% 0%}100%{background-position:400% 0%}}
+    .panel-hidden{transform:translateY(100%);opacity:0;pointer-events:none}
+    .panel-visible{transform:translateY(0);opacity:1;pointer-events:auto}
+    #curvePath{stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(147,51,234,.6))}
+    #viewB>.flex-1{-webkit-mask:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%);mask:linear-gradient(to right,transparent 0%,black 6%,black 94%,transparent 100%)}
+    .lesson-fade{animation:lesson-in .4s cubic-bezier(.16,1,.3,1)}
+    @keyframes lesson-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+    .progress-bar-fill{transition:width .7s cubic-bezier(.2,.8,.2,1);background:linear-gradient(90deg,#9333ea,#22d3ee,#9333ea);background-size:200% 100%;animation:bar-shimmer 2.5s linear infinite}
+    @keyframes bar-shimmer{0%{background-position:100% 0%}100%{background-position:-100% 0%}}
+    .video-wrap{background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 0 40px rgba(147,51,234,.1)}
+    .video-wrap video{width:100%;max-height:380px;display:block}
+    .video-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(30,12,60,.9),rgba(3,5,15,.99));height:280px;gap:16px}
+    .quiz-opt{transition:all .22s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,.07);background:rgba(10,15,35,.5);cursor:pointer;border-radius:14px}
+    .quiz-opt:hover:not(.selected):not(.correct):not(.wrong){border-color:rgba(147,51,234,.6);background:rgba(147,51,234,.1);transform:translateX(6px)}
+    .quiz-opt.selected{border-color:#9333ea;background:rgba(147,51,234,.2);box-shadow:0 0 20px rgba(147,51,234,.2);transform:translateX(6px)}
+    .quiz-opt.correct{border-color:#22d3ee;background:rgba(34,211,238,.15);box-shadow:0 0 20px rgba(34,211,238,.3)}
+    .quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,.1);animation:shake .45s ease}
+    #markCompleteBtn{background:linear-gradient(135deg,#9333ea,#2563eb,#22d3ee);background-size:200% 200%;animation:gradient-shift 4s linear infinite;border:none;transition:box-shadow .2s,transform .2s}
+    #markCompleteBtn:hover:not(:disabled){box-shadow:0 0 30px rgba(147,51,234,.6);transform:translateY(-2px) scale(1.03)}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+    .shake{animation:shake .5s ease}
+    .confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;animation:confetti-fall 2s ease-in forwards}
+    @keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.4);opacity:0}}
+    #viewB nav{background:rgba(3,5,15,.88);border-bottom:1px solid rgba(255,255,255,.06)}
+    #xpBadge{background:linear-gradient(135deg,rgba(147,51,234,.15),rgba(34,211,238,.1));border:1px solid rgba(147,51,234,.3);transition:all .3s}
+    /* ═══════════════════════════════════════
+       LIGHT THEME — comprehensive overrides
+       ═══════════════════════════════════════ */
+    body.light-theme { background:#f1f5f9; color:#0f172a; }
+    body.light-theme::before { display:none; }
+
+    /* Glass panels go white */
+    body.light-theme .glass { background:rgba(255,255,255,.88)!important; border-color:rgba(0,0,0,.09)!important; }
+
+    /* All generic text colors */
+    body.light-theme { color:#1e293b; }
+    body.light-theme h1,body.light-theme h2,body.light-theme h3 { color:#0f172a!important; }
+    body.light-theme p,body.light-theme li,body.light-theme span,body.light-theme label { color:#334155; }
+    body.light-theme .text-white { color:#0f172a!important; }
+    body.light-theme .text-slate-200 { color:#1e293b!important; }
+    body.light-theme .text-slate-300 { color:#334155!important; }
+    body.light-theme .text-slate-400 { color:#64748b!important; }
+    body.light-theme .text-slate-500 { color:#64748b!important; }
+
+    /* Module grid heading gradient stays readable */
+    body.light-theme #viewA h1 { background:linear-gradient(135deg,#7c3aed,#0891b2)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important; }
+
+    /* Module cards */
+    body.light-theme .module-card { background:rgba(255,255,255,.85)!important; box-shadow:0 4px 24px rgba(0,0,0,.08)!important; }
+    body.light-theme .module-card h3 { color:#0f172a!important; }
+    body.light-theme .module-card p { color:#475569!important; }
+    body.light-theme .module-card .text-xs { color:#64748b!important; }
+
+    /* View B navbar */
+    body.light-theme #viewB nav { background:rgba(255,255,255,.92)!important; border-bottom:1px solid rgba(0,0,0,.08)!important; }
+    body.light-theme #courseTitle { color:#7c3aed!important; }
+    body.light-theme #xpBadge { background:#f5f3ff!important; border-color:#c4b5fd!important; color:#5b21b6!important; }
+    body.light-theme #xpCount, body.light-theme #progressLabel { color:#5b21b6!important; }
+
+    /* Scroll track no mask */
+    body.light-theme #viewB>.flex-1 { -webkit-mask:none!important; mask:none!important; }
+
+    /* Node path SVG */
+    body.light-theme #pathSvg #gradStop2 { stop-color:#e2e8f0!important; }
+
+    /* Node label spans */
+    body.light-theme .node-btn span { background:rgba(255,255,255,.85)!important; border-color:rgba(0,0,0,.1)!important; color:#1e293b!important; }
+
+    /* Locked nodes */
+    body.light-theme .node-locked { background:#e2e8f0!important; border-color:#cbd5e1!important; color:#94a3b8!important; filter:none!important; }
+
+    /* Active / completed / checkpoint / boss nodes stay vibrant but legible */
+    body.light-theme .node-active { color:#7c3aed!important; }
+    body.light-theme .node-completed { color:#0891b2!important; }
+    body.light-theme .node-checkpoint { color:#d97706!important; }
+    body.light-theme .node-boss { color:#0891b2!important; }
+
+    /* Content panel */
+    body.light-theme #contentPanel { background:rgba(250,252,255,.98)!important; border-color:rgba(0,0,0,.08)!important; }
+    body.light-theme #contentPanelOverlay { background:rgba(0,0,0,.35)!important; }
+    body.light-theme #panelTitle { color:#0f172a!important; }
+    body.light-theme #panelSubtitle { color:#64748b!important; }
+    body.light-theme #panelBadge { background:#f1f5f9!important; border-color:#cbd5e1!important; color:#334155!important; }
+
+    /* Panel body text */
+    body.light-theme #panelBody h2 { color:#0f172a!important; }
+    body.light-theme #panelBody p,body.light-theme #panelBody li,body.light-theme #panelBody span:not(.cp-badge):not(.boss-badge) { color:#334155!important; }
+    body.light-theme #panelBody article strong { color:#1e293b!important; }
+    body.light-theme #panelBody ul { background:#f8fafc!important; border-color:#e2e8f0!important; }
+
+    /* Video placeholder */
+    body.light-theme .video-placeholder { background:linear-gradient(135deg,#f1f5f9,#e0e7ff)!important; }
+    body.light-theme .video-placeholder div { color:#334155!important; }
+    body.light-theme .video-wrap { border-color:#e2e8f0!important; }
+    body.light-theme .video-wrap .bg-slate-900\/60 { background:#f8fafc!important; color:#64748b!important; }
+    body.light-theme .video-wrap code { color:#7c3aed!important; }
+
+    /* Quiz / checkpoint options */
+    body.light-theme .quiz-opt { background:rgba(248,250,252,.9)!important; border-color:#e2e8f0!important; color:#1e293b!important; }
+    body.light-theme .quiz-opt:hover:not(.selected):not(.correct):not(.wrong) { background:#ede9fe!important; border-color:#a78bfa!important; color:#1e293b!important; }
+    body.light-theme .quiz-opt.selected { background:#ede9fe!important; border-color:#7c3aed!important; color:#1e293b!important; }
+    body.light-theme .quiz-opt.correct { background:#ecfdf5!important; border-color:#10b981!important; color:#064e3b!important; }
+    body.light-theme .quiz-opt.wrong { background:#fef2f2!important; border-color:#ef4444!important; color:#7f1d1d!important; }
+    body.light-theme .cp-badge,body.light-theme .boss-badge { background:#e2e8f0!important; color:#334155!important; }
+    body.light-theme .quiz-opt.selected .cp-badge,body.light-theme .quiz-opt.selected .boss-badge { background:#7c3aed!important; color:#fff!important; }
+
+    /* Checkpoint question card */
+    body.light-theme .bg-slate-900\/60 { background:#f8fafc!important; }
+    body.light-theme .border-white\/10 { border-color:#e2e8f0!important; }
+    body.light-theme #cpFeedback.text-emerald-400 { color:#059669!important; }
+    body.light-theme #cpFeedback.text-red-400 { color:#dc2626!important; }
+
+    /* Boss / checkpoint panel icons area */
+    body.light-theme .bg-amber-500\/20 { background:#fef3c7!important; }
+    body.light-theme .border-amber-500\/40 { border-color:#f59e0b!important; }
+    body.light-theme .text-amber-400 { color:#d97706!important; }
+
+    /* Completed lesson banner */
+    body.light-theme .bg-emerald-900\/20 { background:#ecfdf5!important; }
+    body.light-theme .border-emerald-500\/30 { border-color:#6ee7b7!important; }
+    body.light-theme .text-emerald-400 { color:#059669!important; }
+
+    /* Submit buttons in light */
+    body.light-theme #cpSubmit:disabled { background:#e2e8f0!important; color:#94a3b8!important; }
+    body.light-theme #bossSubmit:disabled { background:#e2e8f0!important; color:#94a3b8!important; }
+
+    /* Certificate modal */
+    body.light-theme #certModal { background:rgba(15,23,42,.7)!important; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 overflow-x-hidden md:overflow-hidden min-h-screen w-screen relative">
+
+  <!-- BG accents -->
+  <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none z-0"></div>
+  <div class="fixed bottom-[-20%] right-[-10%] w-[40%] h-[50%] rounded-full bg-cyan-900/20 blur-[120px] pointer-events-none z-0"></div>
+
+  <!-- VIEW A: MODULE GRID -->
+  <main id="viewA" class="view-window view-a-active flex flex-col pt-16 px-8 md:px-20 z-10 overflow-auto">
+    <header class="mb-10 max-w-6xl mx-auto w-full flex flex-wrap justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 inline-block mb-3">Explore Modules</h1>
+        <p class="text-slate-400 text-lg">Select a subject to begin your learning journey.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="dashboard_v2.html" class="flex items-center gap-2 px-4 py-2 rounded-full glass text-slate-300 hover:text-white hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-all text-sm font-medium">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a href="ai-assistant.html" class="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-all text-sm font-medium">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Assistant
+        </a>
+        <button onclick="toggleTheme()" class="theme-btn w-11 h-11 rounded-full glass flex items-center justify-center text-xl text-yellow-400 hover:scale-110 transition-transform">
+          <i class="fa-solid fa-sun theme-icon"></i>
+        </button>
+      </div>
+    </header>
+    <section class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 pb-20" id="moduleGrid"></section>
+  </main>
+  <!-- VIEW_A_PLACEHOLDER -->
+
+  <!-- VIEW B: LEARNING PATH -->
+  <main id="viewB" class="view-window view-b-hidden flex flex-col z-10 h-full">
+    <nav class="glass px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+      <div class="flex items-center gap-4">
+        <button onclick="navigateToViewA()" class="text-slate-400 hover:text-white flex items-center gap-2 transition-colors text-sm">
+          <i class="fa-solid fa-arrow-left"></i> <span>All Modules</span>
+        </button>
+        <div class="h-5 w-px bg-slate-700"></div>
+        <h2 id="courseTitle" class="text-lg font-semibold text-purple-400"></h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- XP Badge -->
+        <div id="xpBadge" class="text-sm text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+          <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> <span id="xpCount">0</span> XP
+        </div>
+        <!-- Progress -->
+        <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400">
+          <span id="progressLabel">0 / 10 done</span>
+          <div class="w-28 h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full progress-bar-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <button onclick="toggleTheme()" class="theme-btn w-9 h-9 rounded-full glass flex items-center justify-center text-yellow-400 hover:scale-110 transition-transform">
+          <i class="fa-solid fa-sun theme-icon"></i>
+        </button>
+      </div>
+    </nav>
+    <div class="flex-1 w-full overflow-x-auto overflow-y-hidden relative flex items-center">
+      <div class="min-w-max px-16 flex items-center gap-20 relative h-full" id="nodePath">
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" id="pathSvg">
+          <defs>
+            <linearGradient id="pathGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop id="gradStop1" offset="10%" stop-color="#22d3ee"></stop>
+              <stop id="gradStop2" offset="10%" stop-color="#334155"></stop>
+            </linearGradient>
+            <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path id="curvePath" fill="none" stroke="url(#pathGradient)" stroke-width="5" filter="url(#glowFilter)"></path>
+        </svg>
+        <!-- Nodes injected by JS -->
+      </div>
+    </div>
+  </main>
+  <!-- VIEW_B_PLACEHOLDER -->
+
+  <!-- CONTENT PANEL -->
+  <div id="contentPanelOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 panel-hidden" onclick="closePanel(event)">
+    <div id="contentPanel" class="absolute bottom-0 left-0 w-full h-[88vh] glass rounded-t-3xl border-b-0 shadow-[0_-10px_40px_rgba(0,0,0,.5)] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center px-8 py-4 border-b border-white/10 shrink-0">
+        <div class="flex items-center gap-4">
+          <div id="panelBadge" class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center font-bold text-sm"></div>
+          <div>
+            <div id="panelTitle" class="text-xl font-semibold text-white"></div>
+            <div id="panelSubtitle" class="text-xs text-slate-400 mt-0.5"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="markCompleteBtn" onclick="markComplete()" class="hidden items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-sm font-semibold hover:shadow-[0_0_20px_rgba(147,51,234,.4)] transition-all">
+            <i class="fa-solid fa-check"></i> Mark Complete
+          </button>
+          <button onclick="closePanel()" class="text-slate-400 hover:text-white p-2 text-xl transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div id="panelBody" class="flex-1 overflow-y-auto w-full p-6 md:p-10"></div>
+    </div>
+  </div>
+  <!-- PANEL_PLACEHOLDER -->
+
+  <!-- ── CERTIFICATE MODAL ───────────────────────────────── -->
+  <div id="certModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden" style="background:rgba(0,0,0,.85);backdrop-filter:blur(12px)">
+    <div id="certCard" style="
+      position:relative;max-width:780px;width:100%;border-radius:24px;
+      background:linear-gradient(160deg,#0d0f1c 0%,#0a0c1a 50%,#0d1020 100%);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 0 80px rgba(147,51,234,.25),0 0 40px rgba(34,211,238,.12);
+      overflow:hidden;animation:cert-rise .7s cubic-bezier(.16,1,.3,1);
+    ">
+      <!-- Animated top border -->
+      <div style="height:3px;background:linear-gradient(90deg,#9333ea,#22d3ee,#f59e0b,#22d3ee,#9333ea);background-size:300% 100%;animation:gradient-shift 3s linear infinite"></div>
+      <!-- Corner ornaments -->
+      <div style="position:absolute;top:16px;left:16px;width:40px;height:40px;border-top:2px solid rgba(147,51,234,.5);border-left:2px solid rgba(147,51,234,.5);border-radius:4px 0 0 0"></div>
+      <div style="position:absolute;top:16px;right:16px;width:40px;height:40px;border-top:2px solid rgba(34,211,238,.5);border-right:2px solid rgba(34,211,238,.5);border-radius:0 4px 0 0"></div>
+      <div style="position:absolute;bottom:16px;left:16px;width:40px;height:40px;border-bottom:2px solid rgba(34,211,238,.5);border-left:2px solid rgba(34,211,238,.5);border-radius:0 0 0 4px"></div>
+      <div style="position:absolute;bottom:16px;right:16px;width:40px;height:40px;border-bottom:2px solid rgba(147,51,234,.5);border-right:2px solid rgba(147,51,234,.5);border-radius:0 0 4px 0"></div>
+      <div id="certInner" style="padding:48px 60px;text-align:center">
+        <!-- AcadLy badge -->
+        <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(147,51,234,.12);border:1px solid rgba(147,51,234,.3);border-radius:999px;padding:6px 18px;margin-bottom:28px">
+          <i class="fa-solid fa-graduation-cap" style="color:#c084fc;font-size:14px"></i>
+          <span style="font-size:13px;font-weight:600;color:#c084fc;letter-spacing:.08em">ACADLY LEARNING PLATFORM</span>
+        </div>
+        <!-- Title -->
+        <div style="font-size:13px;letter-spacing:.18em;color:#94a3b8;text-transform:uppercase;margin-bottom:12px">Certificate of Completion</div>
+        <h1 style="font-size:42px;font-weight:800;background:linear-gradient(135deg,#fff,#e2e8f0);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 8px">This certifies that</h1>
+        <!-- Student name -->
+        <div id="certName" style="font-size:34px;font-weight:700;font-style:italic;background:linear-gradient(135deg,#c084fc,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;margin:16px 0">Student</div>
+        <p style="color:#94a3b8;font-size:15px;margin-bottom:8px">has successfully completed all lessons and evaluations of</p>
+        <!-- Module name -->
+        <div id="certModule" style="font-size:26px;font-weight:700;color:#fff;margin:12px 0 6px"></div>
+        <p style="color:#64748b;font-size:13px;margin-bottom:32px">with a passing score on the Final Evaluation</p>
+        <!-- Gold seal -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:32px">
+          <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(245,158,11,.4))"></div>
+          <div style="width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.3),rgba(234,88,12,.1));border:2px solid rgba(245,158,11,.6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(245,158,11,.4),inset 0 0 14px rgba(245,158,11,.15)">
+            <i class="fa-solid fa-medal" style="font-size:28px;color:#fbbf24"></i>
+          </div>
+          <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(245,158,11,.4))"></div>
+        </div>
+        <!-- Date + signature row -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap">
+          <div style="text-align:left">
+            <div style="color:#64748b;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Issued on</div>
+            <div id="certDate" style="color:#e2e8f0;font-size:14px;font-weight:600"></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:22px;font-style:italic;background:linear-gradient(135deg,#9333ea,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700">AcadLy</div>
+            <div style="height:1px;background:linear-gradient(90deg,rgba(147,51,234,.4),rgba(34,211,238,.4));margin:4px 0"></div>
+            <div style="color:#64748b;font-size:10px;letter-spacing:.1em;text-transform:uppercase">Platform Director</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:#64748b;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Certificate ID</div>
+            <div id="certId" style="color:#6366f1;font-size:12px;font-family:monospace"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Animated bottom border -->
+      <div style="height:3px;background:linear-gradient(90deg,#22d3ee,#9333ea,#f59e0b,#9333ea,#22d3ee);background-size:300% 100%;animation:gradient-shift 3s linear infinite reverse"></div>
+    </div>
+    <!-- Action buttons outside card -->
+    <div style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:101">
+      <button onclick="downloadCert()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:999px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#9333ea,#22d3ee);color:#fff;border:none;cursor:pointer;box-shadow:0 0 24px rgba(147,51,234,.4);transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 36px rgba(147,51,234,.6)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 24px rgba(147,51,234,.4)'">
+        <i class="fa-solid fa-download"></i> Download Certificate
+      </button>
+      <button onclick="closeCert()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:999px;font-size:14px;font-weight:700;background:rgba(255,255,255,.06);color:#e2e8f0;border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <i class="fa-solid fa-arrow-left"></i> Back to Modules
+      </button>
+    </div>
+  </div>
+  <style>
+    @keyframes cert-rise{from{opacity:0;transform:scale(.88) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    #certModal.cert-visible{display:flex!important}
+  </style>
+
+  <script>
+  // ─────────────────────────────────────────────────────────
+  // MODULE DATA — edit videoPath to point to your video files
+  // e.g. "videos/system-design/intro.mp4" or an absolute path
+  // ─────────────────────────────────────────────────────────
+  const MODULES = [
+    { id:'sys', title:'System Design', color:'emerald', icon:'🏗️', desc:'Scalable architectures & distributed systems',
+      question:'What pattern ensures reliability during rapid traffic spikes with eventual consistency?',
+      answers:['Two-Phase Commit','Event-Driven Architecture (Kafka/RabbitMQ)','Monolithic + vertical scaling','Direct DB in client'],
+      correct:1,
+      lessons:[
+        {id:1,title:'Introduction & Concepts',  videoPath:'videos/system-design/01-intro.mp4'},
+        {id:2,title:'Core Methodologies',        videoPath:'videos/system-design/02-core.mp4'},
+        {id:3,title:'Practical Application I',   videoPath:'videos/system-design/03-practical1.mp4'},
+        {id:4,title:'Advanced Theories',         videoPath:'videos/system-design/04-advanced.mp4'},
+        {id:5,title:'AI Checkpoint',             type:'checkpoint'},
+        {id:6,title:'Practical Application II',  videoPath:'videos/system-design/06-practical2.mp4'},
+        {id:7,title:'Case Study',                videoPath:'videos/system-design/07-case.mp4'},
+        {id:8,title:'Deep Dive',                 videoPath:'videos/system-design/08-deepdive.mp4'},
+        {id:9,title:'Synthesis',                 videoPath:'videos/system-design/09-synthesis.mp4'},
+        {id:10,title:'Final Mock Test',          type:'boss'},
+      ]
+    },
+    { id:'dsa', title:'DSA', color:'purple', icon:'🌳', desc:'Data structures, algorithms & graph theory',
+      question:'What data structure gives O(log n) search with ordered keys?',
+      answers:['Hash Table','Linked List','Binary Search Tree','Stack'],
+      correct:2,
+      lessons:[
+        {id:1,title:'Arrays & Strings',    videoPath:'videos/dsa/01-arrays.mp4'},
+        {id:2,title:'Linked Lists',        videoPath:'videos/dsa/02-linked.mp4'},
+        {id:3,title:'Stacks & Queues',     videoPath:'videos/dsa/03-stacks.mp4'},
+        {id:4,title:'Trees & BST',         videoPath:'videos/dsa/04-trees.mp4'},
+        {id:5,title:'AI Checkpoint',       type:'checkpoint'},
+        {id:6,title:'Graphs',              videoPath:'videos/dsa/06-graphs.mp4'},
+        {id:7,title:'Dynamic Programming', videoPath:'videos/dsa/07-dp.mp4'},
+        {id:8,title:'Sorting Algorithms',  videoPath:'videos/dsa/08-sorting.mp4'},
+        {id:9,title:'Advanced Patterns',   videoPath:'videos/dsa/09-advanced.mp4'},
+        {id:10,title:'Final Mock Test',    type:'boss'},
+      ]
+    },
+    { id:'py', title:'Python Programming', color:'amber', icon:'🐍', desc:'From basic syntax to advanced decorators',
+      question:'Which Python feature allows you to wrap a function with extra behavior without modifying it?',
+      answers:['Lambda','Decorator','Generator','Context Manager'],
+      correct:1,
+      lessons:[
+        {id:1,title:'Basics & Syntax',    videoPath:'videos/python/01-basics.mp4'},
+        {id:2,title:'Functions',          videoPath:'videos/python/02-functions.mp4'},
+        {id:3,title:'OOP',               videoPath:'videos/python/03-oop.mp4'},
+        {id:4,title:'File I/O',          videoPath:'videos/python/04-fileio.mp4'},
+        {id:5,title:'AI Checkpoint',     type:'checkpoint'},
+        {id:6,title:'Decorators',        videoPath:'videos/python/06-decorators.mp4'},
+        {id:7,title:'Generators',        videoPath:'videos/python/07-generators.mp4'},
+        {id:8,title:'Standard Library',  videoPath:'videos/python/08-stdlib.mp4'},
+        {id:9,title:'Projects',          videoPath:'videos/python/09-projects.mp4'},
+        {id:10,title:'Final Mock Test',  type:'boss'},
+      ]
+    },
+    { id:'phy', title:'University Physics', color:'cyan', icon:'⚛️', desc:'Classical mechanics & electromagnetism',
+      question:'What law relates the net force on an object to its mass × acceleration?',
+      answers:["Hooke's Law","Newton's Second Law","Faraday's Law","Coulomb's Law"],
+      correct:1,
+      lessons:[
+        {id:1,title:'Kinematics',        videoPath:'videos/physics/01-kine.mp4'},
+        {id:2,title:'Newton\'s Laws',    videoPath:'videos/physics/02-newton.mp4'},
+        {id:3,title:'Energy & Work',     videoPath:'videos/physics/03-energy.mp4'},
+        {id:4,title:'Electrostatics',    videoPath:'videos/physics/04-electro.mp4'},
+        {id:5,title:'AI Checkpoint',     type:'checkpoint'},
+        {id:6,title:'Circuits',          videoPath:'videos/physics/06-circuits.mp4'},
+        {id:7,title:'Waves',             videoPath:'videos/physics/07-waves.mp4'},
+        {id:8,title:'Optics',            videoPath:'videos/physics/08-optics.mp4'},
+        {id:9,title:'Modern Physics',    videoPath:'videos/physics/09-modern.mp4'},
+        {id:10,title:'Final Mock Test',  type:'boss'},
+      ]
+    },
+    { id:'m1', title:'Maths 1 (Calculus)', color:'rose', icon:'∫', desc:'Limits, derivatives, integrals',
+      question:'What is the derivative of sin(x)?',
+      answers:['cos(x)','-cos(x)','tan(x)','-sin(x)'],
+      correct:0,
+      lessons:[
+        {id:1,title:'Limits',            videoPath:'videos/maths1/01-limits.mp4'},
+        {id:2,title:'Derivatives',       videoPath:'videos/maths1/02-derivatives.mp4'},
+        {id:3,title:'Chain Rule',        videoPath:'videos/maths1/03-chain.mp4'},
+        {id:4,title:'Integration',       videoPath:'videos/maths1/04-integration.mp4'},
+        {id:5,title:'AI Checkpoint',     type:'checkpoint'},
+        {id:6,title:'Applications',      videoPath:'videos/maths1/06-apps.mp4'},
+        {id:7,title:'Series',            videoPath:'videos/maths1/07-series.mp4'},
+        {id:8,title:'Multivariable',     videoPath:'videos/maths1/08-multi.mp4'},
+        {id:9,title:'Practice Problems', videoPath:'videos/maths1/09-practice.mp4'},
+        {id:10,title:'Final Mock Test',  type:'boss'},
+      ]
+    },
+    { id:'m2', title:'Maths 2 (Linear Algebra)', color:'indigo', icon:'⊞', desc:'Matrices, vector spaces, eigenvalues',
+      question:'What operation produces a scalar from two vectors of the same length?',
+      answers:['Cross Product','Dot Product','Matrix Multiply','Determinant'],
+      correct:1,
+      lessons:[
+        {id:1,title:'Vectors',           videoPath:'videos/maths2/01-vectors.mp4'},
+        {id:2,title:'Matrices',          videoPath:'videos/maths2/02-matrices.mp4'},
+        {id:3,title:'Determinants',      videoPath:'videos/maths2/03-det.mp4'},
+        {id:4,title:'Vector Spaces',     videoPath:'videos/maths2/04-spaces.mp4'},
+        {id:5,title:'AI Checkpoint',     type:'checkpoint'},
+        {id:6,title:'Eigenvalues',       videoPath:'videos/maths2/06-eigen.mp4'},
+        {id:7,title:'Linear Transforms', videoPath:'videos/maths2/07-transforms.mp4'},
+        {id:8,title:'Orthogonality',     videoPath:'videos/maths2/08-ortho.mp4'},
+        {id:9,title:'Applications',      videoPath:'videos/maths2/09-apps.mp4'},
+        {id:10,title:'Final Mock Test',  type:'boss'},
+      ]
+    },
+  ];
+
+  // ── State ──────────────────────────────────────────────────
+  let currentModule = null;
+  let currentNodeId = null;
+  let selectedAnswer = null;
+
+  const remoteProgressCache = {};
+
+  function getProgress(modId) {
+    if (remoteProgressCache[modId]) return { ...remoteProgressCache[modId] };
+    try { return JSON.parse(localStorage.getItem('alp_'+modId)||'{}'); } catch{ return {}; }
+  }
+  function saveProgress(modId, prog) {
+    remoteProgressCache[modId] = { ...prog };
+    localStorage.setItem('alp_'+modId, JSON.stringify(prog));
+  }
+
+  async function loadRemoteProgress(modId) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      const response = await window.AcadlyAuth.authFetch(`/api/roadmap/${modId}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data?.progress) {
+        saveProgress(modId, data.progress);
+      }
+    } catch (err) {
+      console.warn('roadmap sync load failed:', err.message);
+    }
+  }
+
+  async function syncLessonCompletion(modId, lessonId) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      await window.AcadlyAuth.authFetch(`/api/roadmap/${modId}/lesson/${lessonId}/complete`, { method:'POST' });
+    } catch (err) {
+      console.warn('roadmap lesson sync failed:', err.message);
+    }
+  }
+
+  async function trackActivity(eventType, payload = {}) {
+    if (!window.AcadlyAuth?.getAccessToken()) return;
+    try {
+      await window.AcadlyAuth.authFetch('/api/roadmap/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_type: eventType, payload }),
+      });
+    } catch (err) {
+      console.warn('activity track failed:', err.message);
+    }
+  }
+  function isUnlocked(modId, nodeId, prog) {
+    if (nodeId === 1) return true;
+    if (prog[nodeId-1] === 'done') return true;
+    // checkpoint unlocks 6+ after it's passed
+    if (nodeId >= 6 && prog['cp'] === 'passed') return true;
+    if (nodeId === 10 && prog[9] === 'done') return true;
+    return false;
+  }
+  function getXP(prog) {
+    return Object.values(prog).filter(v=>v==='done').length * 40;
+  }
+
+  // ── Module Grid (View A) ───────────────────────────────────
+  const colorMap = {
+    emerald:'from-emerald-600/30 to-teal-600/20 ring-emerald-500/40 text-emerald-400',
+    purple:'from-purple-600/30 to-violet-600/20 ring-purple-500/40 text-purple-400',
+    amber:'from-amber-600/30 to-orange-600/20 ring-amber-500/40 text-amber-400',
+    cyan:'from-cyan-600/30 to-sky-600/20 ring-cyan-500/40 text-cyan-400',
+    rose:'from-rose-600/30 to-pink-600/20 ring-rose-500/40 text-rose-400',
+    indigo:'from-indigo-600/30 to-blue-600/20 ring-indigo-500/40 text-indigo-400',
+  };
+  function buildGrid() {
+    const grid = document.getElementById('moduleGrid');
+    grid.innerHTML = MODULES.map((m,idx)=>{
+      const prog = getProgress(m.id);
+      const done = Object.values(prog).filter(v=>v==='done').length;
+      const pct  = Math.round(done/10*100);
+      const c    = colorMap[m.color]||colorMap.purple;
+      return `<button onclick="openModule('${m.id}')"
+        style="animation-delay:${idx*80}ms"
+        class="module-card card-enter text-left glass rounded-2xl p-6 ring-1 ${c.split(' ')[2]} flex flex-col justify-between gap-5 outline-none focus:ring-2 focus:ring-purple-400 bg-gradient-to-br ${c.split(' ')[0]} ${c.split(' ')[1]}">
+        <div>
+          <div class="text-4xl mb-4">${m.icon}</div>
+          <h3 class="text-xl font-semibold text-white mb-2">${m.title}</h3>
+          <p class="text-sm text-slate-400">${m.desc}</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs text-slate-400 mb-1">
+            <span>${done}/10 lessons</span><span>${pct}%</span>
+          </div>
+          <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full rounded-full progress-bar-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+      </button>`;
+    }).join('');
+  }
+  buildGrid();
+
+  // ── View navigation ────────────────────────────────────────
+  async function openModule(modId) {
+    await loadRemoteProgress(modId);
+    currentModule = MODULES.find(m=>m.id===modId);
+    document.getElementById('courseTitle').textContent = currentModule.title;
+    buildNodes();
+    updateHeaderProgress();
+    document.getElementById('viewA').classList.replace('view-a-active','view-a-hidden');
+    document.getElementById('viewB').classList.replace('view-b-hidden','view-b-active');
+    setTimeout(drawCurvyLine,120);
+    trackActivity("roadmap.module.open", { module_id: modId });
+  }
+  function navigateToViewA() {
+    closePanel();
+    document.getElementById('viewB').classList.replace('view-b-active','view-b-hidden');
+    document.getElementById('viewA').classList.replace('view-a-hidden','view-a-active');
+    buildGrid(); // refresh progress cards
+  }
+
+  // ── Build Nodes ────────────────────────────────────────────
+  function buildNodes() {
+    const prog = getProgress(currentModule.id);
+    const container = document.getElementById('nodePath');
+    // Clear old nodes (keep svg)
+    [...container.children].forEach(c=>{ if(c.nodeName.toLowerCase()!=='svg') c.remove(); });
+    currentModule.lessons.forEach((l,i)=>{
+      const done    = prog[l.id]==='done';
+      const unlocked= isUnlocked(currentModule.id, l.id, prog);
+      const isCP    = l.type==='checkpoint';
+      const isBoss  = l.type==='boss';
+      const isCPPass= prog['cp']==='passed';
+      let cls, icon, size='w-16 h-16', extra='rounded-full', label='';
+      if (isBoss) {
+        size='w-24 h-24';
+        cls = (unlocked&&isCPPass&&prog[9]==='done') ? 'node-boss' : 'node-locked';
+        icon= `<i class="fa-solid fa-crown text-3xl"></i>`;
+      } else if (isCP) {
+        size='w-16 h-16'; extra='rounded-xl rotate-45';
+        cls = unlocked ? (done?'node-completed':'node-checkpoint') : 'node-locked';
+        icon= `<i class="fa-solid fa-robot text-xl" style="transform:rotate(-45deg)"></i>`;
+      } else if (done) {
+        cls='node-completed'; icon=`<i class="fa-solid fa-check text-xl"></i>`;
+      } else if (unlocked) {
+        cls='node-active'; icon=`<i class="fa-solid fa-play text-xl ml-1"></i>`;
+      } else {
+        cls='node-locked'; icon=`<i class="fa-solid fa-lock text-lg"></i>`;
+      }
+      label = isBoss ? 'Final Test' : (isCP ? 'CHECKPOINT' : `${l.id}. ${l.title.split(' ').slice(0,2).join(' ')}`);
+      const mt = i%2===0 ? '-mt-20' : 'mt-20';
+      const btn = document.createElement('button');
+      btn.id=`node-${currentModule.id}-${l.id}`;
+      btn.className=`node-btn ${cls} ${size} ${extra} border-2 flex items-center justify-center outline-none shrink-0 group ${mt} ${!unlocked?'':'cursor-pointer'}`;
+      btn.disabled=!unlocked;
+      btn.innerHTML=`${icon}<span class="absolute -bottom-9 whitespace-nowrap text-xs font-medium text-slate-400 group-hover:text-white" style="${isBoss?'bottom:-44px;font-size:11px;letter-spacing:.05em':''}">${label}</span>`;
+      btn.onclick=()=> !btn.disabled && openPanel(l);
+      container.appendChild(btn);
+    });
+    setTimeout(drawCurvyLine,80);
+  }
+  function updateNode(nodeId, state) {
+    const el=document.getElementById(`node-${currentModule.id}-${nodeId}`);
+    if(!el) return;
+    el.classList.remove('node-locked','node-active','node-completed','node-checkpoint','node-boss');
+    el.classList.add(state);
+    el.disabled=false;
+    // Update the icon to match the new state
+    const label=el.querySelector('span');
+    const labelHTML=label ? label.outerHTML : '';
+    if(state==='node-completed'){
+      el.innerHTML=`<i class="fa-solid fa-check text-xl"></i>${labelHTML}`;
+    } else if(state==='node-active'){
+      el.innerHTML=`<i class="fa-solid fa-play text-xl ml-1"></i>${labelHTML}`;
+    } else if(state==='node-checkpoint'){
+      el.innerHTML=`<i class="fa-solid fa-robot text-xl" style="transform:rotate(-45deg)"></i>${labelHTML}`;
+    } else if(state==='node-boss'){
+      el.innerHTML=`<i class="fa-solid fa-crown text-3xl"></i>${labelHTML}`;
+    }
+    // Bounce animation
+    el.classList.add('unlock-anim');
+    setTimeout(()=>el.classList.remove('unlock-anim'),700);
+  }
+  function updateHeaderProgress() {
+    const prog=getProgress(currentModule.id);
+    const done=Object.values(prog).filter(v=>v==='done').length;
+    const total=currentModule.lessons.length;
+    document.getElementById('xpCount').textContent=getXP(prog);
+    document.getElementById('progressLabel').textContent=`${done}/${total} done`;
+    document.getElementById('progressBar').style.width=`${Math.round(done/total*100)}%`;
+  }
+
+  // ── Panel ──────────────────────────────────────────────────
+  const overlay=document.getElementById('contentPanelOverlay');
+  function openPanel(lesson) {
+    currentNodeId=lesson.id;
+    const prog=getProgress(currentModule.id);
+    const done=prog[lesson.id]==='done';
+    document.getElementById('panelBadge').textContent=lesson.id;
+    document.getElementById('panelTitle').textContent=lesson.title;
+    const mcBtn=document.getElementById('markCompleteBtn');
+    if(lesson.type==='checkpoint'||lesson.type==='boss') {
+      mcBtn.classList.add('hidden'); mcBtn.classList.remove('flex');
+    } else {
+      mcBtn.classList.remove('hidden'); mcBtn.classList.add('flex');
+      mcBtn.disabled=done;
+      mcBtn.style.opacity=done?'.5':'1';
+      mcBtn.innerHTML=done?`<i class="fa-solid fa-check-double"></i> Completed`:`<i class="fa-solid fa-check"></i> Mark Complete`;
+    }
+    document.getElementById('panelSubtitle').textContent=
+      lesson.type==='checkpoint' ? 'AI Knowledge Checkpoint' :
+      lesson.type==='boss' ? 'Final Evaluation' : `Lesson ${lesson.id} of ${currentModule.lessons.length}`;
+    renderPanelContent(lesson, prog);
+    overlay.classList.remove('panel-hidden'); overlay.classList.add('panel-visible');
+  }
+  function closePanel(e) {
+    if(e&&e.target!==overlay) return;
+    overlay.classList.remove('panel-visible'); overlay.classList.add('panel-hidden');
+  }
+  async function markComplete() {
+    const prog=getProgress(currentModule.id);
+    if(prog[currentNodeId]==='done') return;
+    prog[currentNodeId]='done';
+    saveProgress(currentModule.id,prog);
+    await syncLessonCompletion(currentModule.id, currentNodeId);
+    updateNode(currentNodeId,'node-completed');
+    // Unlock the very next lesson
+    const next=currentNodeId+1;
+    const nextLesson=currentModule.lessons.find(l=>l.id===next);
+    if(nextLesson) {
+      // Only unlock node 6 via checkpoint; skip if cp not yet passed
+      if(next===6 && prog['cp']!=='passed') {
+        // leave locked — checkpoint must be passed first
+      } else {
+        const nextState = nextLesson.type==='checkpoint' ? 'node-checkpoint'
+                        : nextLesson.type==='boss'       ? 'node-boss'
+                        : 'node-active';
+        updateNode(next, nextState);
+      }
+    }
+    updateHeaderProgress();
+    // Flash XP with pop
+    const xpEl=document.getElementById('xpCount');
+    document.getElementById('xpBadge').classList.add('xp-pop');
+    setTimeout(()=>document.getElementById('xpBadge').classList.remove('xp-pop'),500);
+    xpEl.classList.add('text-amber-300');
+    setTimeout(()=>xpEl.classList.remove('text-amber-300'),600);
+    // Close panel after brief delay
+    setTimeout(()=>{overlay.classList.remove('panel-visible');overlay.classList.add('panel-hidden');},400);
+  }
+
+  // ── Panel Content Renderer ─────────────────────────────────
+  function renderPanelContent(lesson, prog) {
+    const body=document.getElementById('panelBody');
+    if(lesson.type==='checkpoint') { renderCheckpoint(prog); return; }
+    if(lesson.type==='boss') { renderBoss(prog); return; }
+    const done=prog[lesson.id]==='done';
+    const vp=lesson.videoPath||'';
+    body.innerHTML=`<div class="max-w-4xl mx-auto lesson-fade">
+      <!-- VIDEO PLAYER -->
+      <div class="video-wrap mb-8">
+        ${vp ? `<video controls controlsList="nodownload" id="lessonVideo" preload="metadata" class="w-full max-h-[380px]">
+          <source src="${vp}" type="video/mp4">
+          <p class="text-slate-400 text-center p-8">Your browser doesn't support HTML5 video. <a href="${vp}" class="text-cyan-400">Download the video</a>.</p>
+        </video>
+        <div class="bg-slate-900/60 px-4 py-2 text-xs text-slate-500 flex items-center gap-2">
+          <i class="fa-solid fa-film text-purple-400"></i>
+          <span>Path: <code class="text-slate-300">${vp}</code></span>
+        </div>` :
+        `<div class="video-placeholder">
+          <i class="fa-solid fa-circle-play text-6xl text-purple-400 opacity-50"></i>
+          <div class="text-center">
+            <div class="text-slate-300 font-medium">Video not attached</div>
+            <div class="text-slate-500 text-sm mt-1">Set <code class="text-purple-300">videoPath</code> in the MODULES data above</div>
+          </div>
+        </div>`}
+      </div>
+      <!-- LESSON NOTES -->
+      <article class="max-w-none text-slate-300 space-y-6">
+        <h2 class="text-2xl font-semibold text-white border-b border-white/10 pb-3">${lesson.title}</h2>
+        <p class="leading-relaxed">This lesson covers the key concepts and practical skills in <strong class="text-white">${lesson.title}</strong> as part of the <strong class="text-purple-300">${currentModule.title}</strong> module. Watch the video above, take notes, and click <em class="text-cyan-400">Mark Complete</em> when ready to proceed.</p>
+        <ul class="space-y-3 bg-slate-900/50 p-5 rounded-xl border border-white/5">
+          <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i><span>Follow along with the video and pause to practice.</span></li>
+          <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i><span>Complete any exercises shown before moving on.</span></li>
+          <li class="flex gap-3"><i class="fa-solid fa-bolt text-cyan-400 mt-1"></i><span>Use the AI Assistant if you need clarification.</span></li>
+        </ul>
+        ${done?`<div class="flex items-center gap-3 text-emerald-400 bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-4">
+          <i class="fa-solid fa-circle-check text-xl"></i><span class="font-medium">You've completed this lesson!</span></div>`:''}
+      </article>
+    </div>`;
+  }
+
+  // ── Checkpoint Render ──────────────────────────────────────
+  function renderCheckpoint(prog) {
+    const body=document.getElementById('panelBody');
+    const passed=prog['cp']==='passed';
+    if(passed){ body.innerHTML=`<div class="max-w-xl mx-auto text-center pt-16 lesson-fade">
+      <div class="text-6xl mb-6">✅</div>
+      <h2 class="text-2xl font-bold text-white mb-3">Checkpoint Passed!</h2>
+      <p class="text-slate-400">Lessons unlock one by one as you complete each one. Keep going!</p>
+    </div>`; return; }
+    const m=currentModule; selectedAnswer=null;
+    body.innerHTML=`<div class="max-w-2xl mx-auto pt-6 lesson-fade" id="cpWrap">
+      <div class="w-14 h-14 bg-amber-500/20 border border-amber-500/40 rounded-2xl flex items-center justify-center mb-6">
+        <i class="fa-solid fa-robot text-2xl text-amber-400"></i></div>
+      <h2 class="text-2xl font-bold text-white mb-2">AI Knowledge Checkpoint</h2>
+      <p class="text-slate-400 mb-8">Answer correctly to unlock all remaining lessons.</p>
+      <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-6 mb-6">
+        <p class="text-lg text-slate-200">${m.question}</p>
+      </div>
+      <div class="space-y-3 mb-8" id="cpOptions">
+        ${m.answers.map((a,i)=>`<button onclick="selectCP(${i})" id="cp-${i}" class="quiz-opt w-full text-left p-5 rounded-xl flex items-center gap-4">
+          <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 cp-badge">${String.fromCharCode(65+i)}</span>
+          <span>${a}</span></button>`).join('')}
+      </div>
+      <div id="cpFeedback" class="hidden mb-4 text-sm text-red-400 text-center font-medium"></div>
+      <button id="cpSubmit" disabled onclick="submitCP()" class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all">
+        Submit Answer</button>
+    </div>`;
+  }
+  function selectCP(i) {
+    selectedAnswer=i;
+    document.querySelectorAll('[id^="cp-"]').forEach((el,j)=>{
+      el.classList.toggle('selected',j===i);
+      el.querySelector('.cp-badge').style.background=j===i?'#9333ea':'';
+    });
+    const btn=document.getElementById('cpSubmit');
+    btn.disabled=false;
+    btn.className='w-full py-4 rounded-xl font-bold text-lg bg-amber-500 hover:bg-amber-400 text-black transition-all cursor-pointer';
+  }
+  function submitCP() {
+    if(selectedAnswer===null) return;
+    const correct=currentModule.correct;
+    const wrap=document.getElementById('cpWrap');
+    if(selectedAnswer===correct) {
+      // Pass!
+      document.querySelectorAll('[id^="cp-"]').forEach((el,i)=>{
+        if(i===correct) el.classList.add('correct');
+      });
+      document.getElementById('cpFeedback').className='mb-4 text-sm text-emerald-400 text-center font-medium';
+      document.getElementById('cpFeedback').textContent='✅ Correct! Lesson 6 is now unlocked!';
+      document.getElementById('cpSubmit').textContent='🎉 Checkpoint Passed!';
+      const prog=getProgress(currentModule.id);
+      prog['cp']='passed'; prog[5]='done';
+      saveProgress(currentModule.id,prog);
+      syncLessonCompletion(currentModule.id, 5);
+      // Only unlock node 6 — the rest unlock one-by-one as each lesson is completed
+      setTimeout(()=>{
+        const l6=currentModule.lessons.find(x=>x.id===6);
+        if(l6) updateNode(6, l6.type==='checkpoint'?'node-checkpoint':'node-active');
+        updateHeaderProgress();
+        setTimeout(()=>{overlay.classList.remove('panel-visible');overlay.classList.add('panel-hidden');},900);
+      },800);
+    } else {
+      // Wrong
+      document.querySelectorAll('[id^="cp-"]').forEach((el,i)=>{
+        if(i===selectedAnswer) el.classList.add('wrong');
+      });
+      const fb=document.getElementById('cpFeedback');
+      fb.className='mb-4 text-sm text-red-400 text-center font-medium';
+      fb.textContent='❌ Incorrect. Review the lessons and try again!';
+      fb.classList.remove('hidden');
+      wrap.classList.add('shake');
+      setTimeout(()=>{wrap.classList.remove('shake'); selectedAnswer=null;
+        document.querySelectorAll('[id^="cp-"]').forEach(el=>el.classList.remove('wrong','selected'));
+        document.getElementById('cpSubmit').disabled=true;
+        document.getElementById('cpSubmit').className='w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all';
+      },600);
+    }
+  }
+
+  // ── Boss / Final Test ──────────────────────────────────────
+  function renderBoss(prog) {
+    const body=document.getElementById('panelBody');
+    const m=currentModule; selectedAnswer=null;
+    body.innerHTML=`<div class="max-w-2xl mx-auto pt-6 lesson-fade" id="bossWrap">
+      <div class="w-20 h-20 bg-cyan-900/50 border border-cyan-400 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,211,238,.4)] mx-auto">
+        <i class="fa-solid fa-crown text-4xl text-cyan-400"></i></div>
+      <h2 class="text-3xl font-bold text-white mb-2 text-center">Final Evaluation</h2>
+      <p class="text-slate-400 mb-8 text-center">Prove your mastery of <strong>${m.title}</strong>.</p>
+      <div class="bg-slate-900/60 border border-white/10 p-6 rounded-2xl mb-6"><p class="text-xl text-slate-200">${m.question}</p></div>
+      <div class="space-y-3 mb-8">
+        ${m.answers.map((a,i)=>`<button onclick="selectBoss(${i})" id="boss-${i}" class="quiz-opt w-full text-left p-5 rounded-xl flex items-center gap-4">
+          <span class="w-8 h-8 rounded bg-slate-700 text-slate-300 flex items-center justify-center font-bold shrink-0 boss-badge">${String.fromCharCode(65+i)}</span>
+          <span class="text-lg">${a}</span></button>`).join('')}
+      </div>
+      <button id="bossSubmit" disabled onclick="submitBoss()" class="w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed transition-all">SUBMIT FINAL TEST</button>
+    </div>`;
+  }
+  function selectBoss(i) {
+    selectedAnswer=i;
+    document.querySelectorAll('[id^="boss-"]').forEach((el,j)=>{
+      el.classList.toggle('selected',j===i);
+    });
+    const btn=document.getElementById('bossSubmit');
+    btn.disabled=false;
+    btn.className='w-full py-4 rounded-xl font-bold text-lg bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_20px_rgba(34,211,238,.5)] transition-all cursor-pointer transform hover:-translate-y-1';
+  }
+  async function submitBoss() {
+    if(selectedAnswer===null) return;
+    const prog=getProgress(currentModule.id);
+    prog[10]='done'; saveProgress(currentModule.id,prog);
+    await syncLessonCompletion(currentModule.id, 10);
+    updateNode(10,'node-completed');
+    updateHeaderProgress();
+    confetti();
+    // Close panel first, then show certificate
+    overlay.classList.remove('panel-visible'); overlay.classList.add('panel-hidden');
+    setTimeout(()=>showCertificate(),700);
+  }
+
+  // ── Certificate ───────────────────────────────────────────
+  function showCertificate() {
+    // Get student name from localStorage (acadly-user) or prompt
+    let name = 'Student';
+    try {
+      const u = localStorage.getItem('acadly-user');
+      if (u) {
+        const parsed = JSON.parse(u);
+        name = parsed.name || parsed.username || parsed.email || 'Student';
+      }
+    } catch {}
+    if (name === 'Student') {
+      const typed = prompt('Enter your name for the certificate:', '');
+      if (typed && typed.trim()) name = typed.trim();
+    }
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const certId = 'ALP-' + currentModule.id.toUpperCase() + '-' + now.getFullYear() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('certName').textContent = name;
+    document.getElementById('certModule').textContent = currentModule.title;
+    document.getElementById('certDate').textContent = dateStr;
+    document.getElementById('certId').textContent = certId;
+    const modal = document.getElementById('certModal');
+    // Re-trigger animation
+    const card = document.getElementById('certCard');
+    card.style.animation = 'none';
+    setTimeout(() => { card.style.animation = ''; }, 10);
+    modal.classList.remove('hidden');
+    modal.classList.add('cert-visible');
+    confetti(); confetti(); // double confetti for celebration
+  }
+  function closeCert() {
+    document.getElementById('certModal').classList.add('hidden');
+    document.getElementById('certModal').classList.remove('cert-visible');
+    navigateToViewA();
+  }
+  function downloadCert() {
+    // Inject print styles and trigger print dialog
+    let printStyle = document.getElementById('certPrintStyle');
+    if (!printStyle) {
+      printStyle = document.createElement('style');
+      printStyle.id = 'certPrintStyle';
+      printStyle.textContent = `@media print {
+        body > *:not(#certModal) { display:none!important; }
+        #certModal { position:fixed!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important; }
+        #certModal > div:last-child { display:none!important; }
+        #certCard { box-shadow:none!important;border:2px solid #e2e8f0!important;max-width:100%!important; }
+        #contentPanel,#contentPanelOverlay { display:none!important; }
+      }`;
+      document.head.appendChild(printStyle);
+    }
+    window.print();
+  }
+
+  // ── Confetti ───────────────────────────────────────────────
+  function confetti() {
+    const colors=['#22d3ee','#9333ea','#f59e0b','#10b981','#f43f5e'];
+    for(let i=0;i<60;i++){
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${colors[i%colors.length]};animation-delay:${Math.random()*.8}s;animation-duration:${1.2+Math.random()*.8}s;transform:rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),2500);
+    }
+  }
+
+  // ── SVG Path ───────────────────────────────────────────────
+  function drawCurvyLine(){
+    const nodes=[...document.querySelectorAll('.node-btn')];
+    const path=document.getElementById('curvePath');
+    if(!nodes.length||!path) return;
+    let d='';
+    nodes.forEach((n,i)=>{
+      const x=n.offsetLeft+n.offsetWidth/2, y=n.offsetTop+n.offsetHeight/2;
+      if(!i){ d+=`M ${x} ${y} `; }
+      else {
+        const p=nodes[i-1], px=p.offsetLeft+p.offsetWidth/2, py=p.offsetTop+p.offsetHeight/2;
+        const mx=(px+x)/2;
+        d+=`C ${mx} ${py}, ${mx} ${y}, ${x} ${y} `;
+      }
+    });
+    path.setAttribute('d',d);
+    // Update gradient based on progress
+    const prog=getProgress(currentModule?.id||'');
+    const done=Object.values(prog).filter(v=>v==='done').length;
+    const pct=Math.max(10,Math.round(done/10*100))+'%';
+    document.getElementById('gradStop1').setAttribute('offset',pct);
+    document.getElementById('gradStop2').setAttribute('offset',pct);
+  }
+  window.addEventListener('load',()=>setTimeout(drawCurvyLine,150));
+  window.addEventListener('resize',drawCurvyLine);
+
+  if (!window.AcadlyAuth?.requireAuth('Login.html')) {
+    // redirected to login page
+  }
+
+  // ── Theme ──────────────────────────────────────────────────
+  function toggleTheme(){
+    document.body.classList.toggle('light-theme');
+    const isLight=document.body.classList.contains('light-theme');
+    document.querySelectorAll('.theme-icon').forEach(i=>{ i.className=isLight?'fa-solid fa-moon theme-icon':'fa-solid fa-sun theme-icon'; });
+  }
+  </script>
+</body>
+</html>

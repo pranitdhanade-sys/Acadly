@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy — Mind Map Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/auth.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="CSS/mindmap.css">
+   
+  
+</head>
+<body class="text-slate-100 dark overflow-hidden">
+  <div class="min-h-screen grid grid-cols-1 lg:grid-cols-[360px,1fr]">
+    <aside class="glass border-r border-slate-700/40 p-5 space-y-4 overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <a href="dashboard_v2.html" class="text-sm text-cyan-300 hover:text-cyan-200"><i class="fa-solid fa-arrow-left mr-2"></i>Dashboard</a>
+        <button id="themeBtn" class="px-3 py-1.5 rounded-lg chip text-xs">Toggle Theme</button>
+      </div>
+
+      <header>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 text-transparent bg-clip-text">Mind Map Studio</h1>
+        <p class="text-sm text-slate-400 mt-1">Pick a subject card to open an interactive mind map with progress, notes, and branch controls.</p>
+      </header>
+
+      <div class="space-y-2">
+        <label class="text-xs text-slate-400">Search subjects</label>
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute top-1/2 -translate-y-1/2 left-3 text-slate-500 text-sm"></i>
+          <input id="searchInput" type="search" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-sm" placeholder="Try Data Structures" />
+        </div>
+        <div class="flex gap-2 flex-wrap" id="tagFilters"></div>
+      </div>
+
+      <section>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-sm uppercase tracking-wide text-slate-400">Subjects</h2>
+          <span id="subjectCount" class="text-xs text-slate-500"></span>
+        </div>
+        <div id="subjectList" class="space-y-3"></div>
+      </section>
+
+      <section class="glass rounded-2xl p-3">
+        <div class="text-xs uppercase tracking-wide text-slate-400">Shortcuts</div>
+        <ul class="mt-2 text-xs text-slate-300 space-y-1.5">
+          <li><kbd class="px-2 py-0.5 rounded bg-slate-800">Wheel</kbd> zoom canvas</li>
+          <li><kbd class="px-2 py-0.5 rounded bg-slate-800">Drag</kbd> pan map</li>
+          <li><kbd class="px-2 py-0.5 rounded bg-slate-800">R</kbd> reset view</li>
+          <li><kbd class="px-2 py-0.5 rounded bg-slate-800">/</kbd> focus search</li>
+        </ul>
+      </section>
+    </aside>
+
+    <main class="relative p-4 lg:p-6 overflow-hidden">
+      <div class="glass rounded-2xl h-full min-h-[92vh] grid grid-rows-[auto,1fr]">
+        <div class="border-b border-slate-700/40 p-3 lg:p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 id="subjectTitle" class="text-xl font-semibold">Select a subject card</h2>
+            <p id="subjectMeta" class="text-sm text-slate-400">Your mind map will appear here.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <button id="zoomOutBtn" class="chip px-3 py-2 rounded-lg">-</button>
+            <button id="resetBtn" class="chip px-3 py-2 rounded-lg">Reset</button>
+            <button id="zoomInBtn" class="chip px-3 py-2 rounded-lg">+</button>
+            <button id="focusCoreBtn" class="chip px-3 py-2 rounded-lg">Focus Core</button>
+            <button id="toggleBranchesBtn" class="chip px-3 py-2 rounded-lg">Hide optional</button>
+          </div>
+        </div>
+
+        <div class="grid xl:grid-cols-[1fr,320px] min-h-0">
+          <section class="map-area relative min-h-[65vh] overflow-hidden border-r border-slate-700/40">
+            <div id="emptyState" class="absolute inset-0 grid place-items-center text-center px-6">
+              <div>
+                <div class="text-4xl text-violet-300 mb-3"><i class="fa-solid fa-diagram-project"></i></div>
+                <h3 class="text-lg font-semibold">No subject selected</h3>
+                <p class="text-sm text-slate-400 mt-1">Choose any card on the left to open a rich mind map view.</p>
+              </div>
+            </div>
+
+            <div id="canvasViewport" class="absolute inset-0 hidden overflow-hidden">
+              <div id="mapRoot" class="map-root">
+                <svg id="lineSvg" class="line-layer absolute inset-0 w-full h-full pointer-events-none"></svg>
+              </div>
+            </div>
+          </section>
+
+          <aside class="p-4 space-y-4 overflow-y-auto">
+            <div class="glass rounded-xl p-3">
+              <div class="text-xs uppercase tracking-wide text-slate-400">Progress</div>
+              <div class="mt-2 h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400" style="width:0%"></div>
+              </div>
+              <div id="progressText" class="mt-2 text-sm text-slate-300">0 / 0 nodes complete</div>
+            </div>
+
+            <div class="glass rounded-xl p-3 space-y-3">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-semibold">Node Details</h3>
+                <button id="markDoneBtn" class="chip px-3 py-1.5 rounded-lg text-xs" disabled>Mark Done</button>
+              </div>
+              <div id="nodeTitle" class="text-sm font-medium text-slate-200">Select a node</div>
+              <p id="nodeDescription" class="text-xs text-slate-400">Click any node in the map to inspect key points.</p>
+              <textarea id="nodeNotes" rows="4" class="w-full bg-slate-900/60 border border-slate-700 rounded-xl p-2 text-sm" placeholder="Add revision notes..."></textarea>
+              <button id="saveNoteBtn" class="w-full bg-violet-600 hover:bg-violet-500 text-white text-sm rounded-xl py-2">Save note</button>
+            </div>
+
+            <div class="glass rounded-xl p-3">
+              <h3 class="text-sm font-semibold mb-2">Recent subjects</h3>
+              <div id="recentSubjects" class="text-xs text-slate-400 space-y-1"></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const subjectData = [
+      {
+        id: 'dsa', title: 'Data Structures', level: 'Intermediate', tag: 'Computer Science', eta: '4.5h',
+        nodes: [
+          { id:'dsa-core', title:'Data Structures Core', x:760, y:420, type:'core', optional:false, description:'Complexity, memory models, and selecting structures by workload.' },
+          { id:'arrays', title:'Arrays & Strings', x:470, y:220, type:'foundation', optional:false, description:'Indexing, prefix sums, sliding window patterns.' },
+          { id:'ll', title:'Linked Lists', x:450, y:590, type:'foundation', optional:false, description:'Pointers, fast/slow runner, cycle detection.' },
+          { id:'trees', title:'Trees & BST', x:1020, y:190, type:'topic', optional:false, description:'Traversals, balancing, recursion and divide & conquer.' },
+          { id:'graphs', title:'Graphs', x:1120, y:560, type:'topic', optional:false, description:'BFS, DFS, shortest path, topo sort.' },
+          { id:'heap', title:'Heaps & Priority Queue', x:840, y:710, type:'topic', optional:true, description:'Top-k, scheduling and greedy optimization.' },
+          { id:'adv', title:'Advanced DS', x:1380, y:420, type:'advanced', optional:true, description:'Segment tree, Fenwick tree, disjoint set, sparse table.' }
+        ],
+        edges: [['dsa-core','arrays'],['dsa-core','ll'],['dsa-core','trees'],['dsa-core','graphs'],['dsa-core','heap'],['trees','adv'],['graphs','adv']]
+      },
+      {
+        id:'organic', title:'Organic Chemistry', level:'Advanced', tag:'Chemistry', eta:'5h',
+        nodes:[
+          { id:'org-core', title:'Organic Chemistry Core', x:760, y:420, type:'core', optional:false, description:'Mechanism-first learning with stability and reactivity rules.' },
+          { id:'bond', title:'Bonding & Hybridization', x:490, y:220, type:'foundation', optional:false, description:'Orbital overlap, resonance, and molecular shape prediction.' },
+          { id:'mech', title:'Reaction Mechanisms', x:450, y:580, type:'foundation', optional:false, description:'SN1/SN2, E1/E2, carbocation shifts and transition states.' },
+          { id:'fun', title:'Functional Groups', x:1030, y:200, type:'topic', optional:false, description:'Identification, naming, and reactivity trends.' },
+          { id:'spect', title:'Spectroscopy', x:1080, y:620, type:'topic', optional:true, description:'IR, NMR and MS interpretation workflow.' },
+          { id:'synth', title:'Synthesis Routes', x:1370, y:420, type:'advanced', optional:true, description:'Retrosynthesis and protecting-group strategy.' }
+        ],
+        edges:[['org-core','bond'],['org-core','mech'],['org-core','fun'],['org-core','spect'],['fun','synth'],['mech','synth']]
+      },
+      {
+        id:'calculus', title:'Calculus', level:'Beginner', tag:'Mathematics', eta:'3.5h',
+        nodes:[
+          { id:'calc-core', title:'Calculus Core', x:760, y:420, type:'core', optional:false, description:'Limits, rates of change, and area accumulation ideas.' },
+          { id:'limits', title:'Limits', x:450, y:260, type:'foundation', optional:false, description:'Approach behavior and continuity checks.' },
+          { id:'derivative', title:'Derivatives', x:1030, y:220, type:'topic', optional:false, description:'Rules, implicit differentiation, applications.' },
+          { id:'integrals', title:'Integrals', x:1020, y:620, type:'topic', optional:false, description:'Fundamental theorem and accumulation models.' },
+          { id:'series', title:'Series', x:1410, y:430, type:'advanced', optional:true, description:'Convergence tests and power series modeling.' },
+          { id:'optimization', title:'Optimization', x:460, y:610, type:'topic', optional:true, description:'Local extrema and real-world constrained optimization.' }
+        ],
+        edges:[['calc-core','limits'],['calc-core','derivative'],['calc-core','integrals'],['derivative','optimization'],['integrals','series']]
+      }
+    ];
+
+    const el = {
+      subjectList: document.getElementById('subjectList'),
+      subjectCount: document.getElementById('subjectCount'),
+      searchInput: document.getElementById('searchInput'),
+      tagFilters: document.getElementById('tagFilters'),
+      subjectTitle: document.getElementById('subjectTitle'),
+      subjectMeta: document.getElementById('subjectMeta'),
+      emptyState: document.getElementById('emptyState'),
+      canvasViewport: document.getElementById('canvasViewport'),
+      mapRoot: document.getElementById('mapRoot'),
+      lineSvg: document.getElementById('lineSvg'),
+      progressBar: document.getElementById('progressBar'),
+      progressText: document.getElementById('progressText'),
+      nodeTitle: document.getElementById('nodeTitle'),
+      nodeDescription: document.getElementById('nodeDescription'),
+      nodeNotes: document.getElementById('nodeNotes'),
+      markDoneBtn: document.getElementById('markDoneBtn'),
+      saveNoteBtn: document.getElementById('saveNoteBtn'),
+      recentSubjects: document.getElementById('recentSubjects')
+    };
+
+    const store = {
+      done: JSON.parse(localStorage.getItem('acadlyMindmapDone') || '{}'),
+      notes: JSON.parse(localStorage.getItem('acadlyMindmapNotes') || '{}'),
+      favorites: JSON.parse(localStorage.getItem('acadlyMindmapFavs') || '[]'),
+      recent: JSON.parse(localStorage.getItem('acadlyMindmapRecent') || '[]')
+    };
+
+    let activeSubject = null;
+    let activeNodeId = null;
+    let selectedTag = 'All';
+    let includeOptional = true;
+    let zoom = 0.72;
+    let panX = 40;
+    let panY = 25;
+    let isDragging = false;
+    let dragStart = null;
+
+    const tags = ['All', ...new Set(subjectData.map(s => s.tag))];
+
+    function persist() {
+      localStorage.setItem('acadlyMindmapDone', JSON.stringify(store.done));
+      localStorage.setItem('acadlyMindmapNotes', JSON.stringify(store.notes));
+      localStorage.setItem('acadlyMindmapFavs', JSON.stringify(store.favorites));
+      localStorage.setItem('acadlyMindmapRecent', JSON.stringify(store.recent));
+    }
+
+    function renderTags() {
+      el.tagFilters.innerHTML = tags.map(tag => `<button class="chip ${selectedTag === tag ? 'active' : ''} px-2.5 py-1 rounded-full text-xs" data-tag="${tag}">${tag}</button>`).join('');
+      el.tagFilters.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+        selectedTag = btn.dataset.tag;
+        renderTags();
+        renderSubjects();
+      }));
+    }
+
+    function isFav(id) { return store.favorites.includes(id); }
+
+    function renderSubjects() {
+      const q = el.searchInput.value.toLowerCase().trim();
+      const rows = subjectData.filter(s =>
+        (selectedTag === 'All' || s.tag === selectedTag) &&
+        (!q || `${s.title} ${s.level} ${s.tag}`.toLowerCase().includes(q))
+      );
+      el.subjectCount.textContent = `${rows.length} shown`;
+      el.subjectList.innerHTML = rows.map(s => `
+        <button class="subject-card glass rounded-xl p-3 w-full text-left border ${activeSubject?.id === s.id ? 'active' : ''}" data-id="${s.id}">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-semibold text-sm">${s.title}</div>
+              <div class="text-xs text-slate-400 mt-1">${s.tag} • ${s.level}</div>
+            </div>
+            <i class="${isFav(s.id) ? 'fa-solid text-amber-300' : 'fa-regular text-slate-400'} fa-star" data-fav="${s.id}"></i>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
+            <span><i class="fa-regular fa-clock mr-1"></i>${s.eta}</span>
+            <span>${s.nodes.length} nodes</span>
+          </div>
+        </button>
+      `).join('') || `<div class="text-sm text-slate-400">No subjects match the current filter.</div>`;
+
+      el.subjectList.querySelectorAll('[data-id]').forEach(card => card.addEventListener('click', (e) => {
+        if (e.target.dataset.fav) return;
+        loadSubject(card.dataset.id);
+      }));
+      el.subjectList.querySelectorAll('[data-fav]').forEach(star => star.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = star.dataset.fav;
+        store.favorites = isFav(id) ? store.favorites.filter(x => x !== id) : [id, ...store.favorites];
+        persist();
+        renderSubjects();
+      }));
+    }
+
+    function nodeKey(id) { return `${activeSubject.id}:${id}`; }
+
+    function drawMap() {
+      const nodes = activeSubject.nodes.filter(n => includeOptional || !n.optional);
+      const visible = new Set(nodes.map(n => n.id));
+      el.mapRoot.querySelectorAll('.node').forEach(n => n.remove());
+      el.lineSvg.innerHTML = '';
+
+      nodes.forEach(node => {
+        const done = !!store.done[nodeKey(node.id)];
+        const nodeEl = document.createElement('button');
+        nodeEl.className = `node ${node.type === 'core' ? 'center' : ''} ${done ? 'done' : ''} ${activeNodeId === node.id ? 'highlight' : ''}`;
+        nodeEl.style.left = `${node.x}px`;
+        nodeEl.style.top = `${node.y}px`;
+        nodeEl.innerHTML = `
+          <div class="font-semibold text-sm">${node.title}</div>
+          <div class="mt-2 flex gap-1.5 flex-wrap">
+            <span class="node-tag">${node.type}</span>
+            ${node.optional ? '<span class="node-tag">optional</span>' : ''}
+            ${done ? '<span class="node-tag">done</span>' : ''}
+          </div>
+        `;
+        nodeEl.addEventListener('click', () => selectNode(node.id));
+        el.mapRoot.appendChild(nodeEl);
+      });
+
+      activeSubject.edges.forEach(([from, to]) => {
+        if (!visible.has(from) || !visible.has(to)) return;
+        const a = activeSubject.nodes.find(n => n.id === from);
+        const b = activeSubject.nodes.find(n => n.id === to);
+        const x1 = a.x + 190;
+        const y1 = a.y + 42;
+        const x2 = b.x;
+        const y2 = b.y + 42;
+        const c1 = x1 + (x2 - x1) * .45;
+        const c2 = x1 + (x2 - x1) * .55;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} C ${c1} ${y1}, ${c2} ${y2}, ${x2} ${y2}`);
+        el.lineSvg.appendChild(path);
+      });
+
+      refreshProgress();
+      applyTransform();
+    }
+
+    function refreshProgress() {
+      const visible = activeSubject.nodes.filter(n => includeOptional || !n.optional);
+      const done = visible.filter(n => store.done[nodeKey(n.id)]).length;
+      const pct = visible.length ? Math.round((done / visible.length) * 100) : 0;
+      el.progressBar.style.width = `${pct}%`;
+      el.progressText.textContent = `${done} / ${visible.length} nodes complete (${pct}%)`;
+    }
+
+    function selectNode(nodeId) {
+      activeNodeId = nodeId;
+      const node = activeSubject.nodes.find(n => n.id === nodeId);
+      const key = nodeKey(nodeId);
+      el.nodeTitle.textContent = node.title;
+      el.nodeDescription.textContent = node.description;
+      el.nodeNotes.value = store.notes[key] || '';
+      el.markDoneBtn.disabled = false;
+      el.markDoneBtn.textContent = store.done[key] ? 'Undo done' : 'Mark Done';
+      drawMap();
+    }
+
+    function loadSubject(subjectId) {
+      activeSubject = subjectData.find(s => s.id === subjectId);
+      activeNodeId = null;
+      includeOptional = true;
+      document.getElementById('toggleBranchesBtn').textContent = 'Hide optional';
+
+      el.subjectTitle.textContent = activeSubject.title;
+      el.subjectMeta.textContent = `${activeSubject.tag} • ${activeSubject.level} • Estimated ${activeSubject.eta}`;
+      el.emptyState.classList.add('hidden');
+      el.canvasViewport.classList.remove('hidden');
+
+      store.recent = [activeSubject.id, ...store.recent.filter(x => x !== activeSubject.id)].slice(0, 5);
+      persist();
+      renderRecent();
+      renderSubjects();
+      drawMap();
+    }
+
+    function renderRecent() {
+      if (!store.recent.length) {
+        el.recentSubjects.innerHTML = '<div>No recent subjects yet.</div>';
+        return;
+      }
+      el.recentSubjects.innerHTML = store.recent.map(id => {
+        const s = subjectData.find(item => item.id === id);
+        return `<button class="text-cyan-300 hover:text-cyan-200 text-left w-full" data-recent="${id}">${s.title}</button>`;
+      }).join('');
+      el.recentSubjects.querySelectorAll('[data-recent]').forEach(btn => {
+        btn.addEventListener('click', () => loadSubject(btn.dataset.recent));
+      });
+    }
+
+    function applyTransform() {
+      el.mapRoot.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+
+    function adjustZoom(delta) {
+      zoom = Math.min(1.35, Math.max(0.45, zoom + delta));
+      applyTransform();
+    }
+
+    function resetView(focusCore = false) {
+      zoom = 0.72;
+      panX = focusCore ? -280 : 40;
+      panY = focusCore ? -200 : 25;
+      applyTransform();
+    }
+
+    // UI events
+    el.searchInput.addEventListener('input', renderSubjects);
+    document.getElementById('zoomInBtn').addEventListener('click', () => adjustZoom(0.1));
+    document.getElementById('zoomOutBtn').addEventListener('click', () => adjustZoom(-0.1));
+    document.getElementById('resetBtn').addEventListener('click', () => resetView(false));
+    document.getElementById('focusCoreBtn').addEventListener('click', () => resetView(true));
+
+    document.getElementById('toggleBranchesBtn').addEventListener('click', (e) => {
+      if (!activeSubject) return;
+      includeOptional = !includeOptional;
+      e.currentTarget.textContent = includeOptional ? 'Hide optional' : 'Show optional';
+      drawMap();
+    });
+
+    el.markDoneBtn.addEventListener('click', () => {
+      if (!activeSubject || !activeNodeId) return;
+      const key = nodeKey(activeNodeId);
+      store.done[key] = !store.done[key];
+      if (!store.done[key]) delete store.done[key];
+      persist();
+      selectNode(activeNodeId);
+    });
+
+    el.saveNoteBtn.addEventListener('click', () => {
+      if (!activeSubject || !activeNodeId) return;
+      const key = nodeKey(activeNodeId);
+      if (el.nodeNotes.value.trim()) store.notes[key] = el.nodeNotes.value.trim();
+      else delete store.notes[key];
+      persist();
+      el.saveNoteBtn.textContent = 'Saved ✓';
+      setTimeout(() => el.saveNoteBtn.textContent = 'Save note', 1200);
+    });
+
+    // Pan/zoom interactions
+    el.canvasViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      adjustZoom(e.deltaY > 0 ? -0.06 : 0.06);
+    }, { passive: false });
+
+    el.canvasViewport.addEventListener('mousedown', (e) => {
+      if (!activeSubject) return;
+      isDragging = true;
+      dragStart = { x: e.clientX - panX, y: e.clientY - panY };
+      el.mapRoot.classList.add('dragging');
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - dragStart.x;
+      panY = e.clientY - dragStart.y;
+      applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      el.mapRoot.classList.remove('dragging');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/') {
+        e.preventDefault();
+        el.searchInput.focus();
+      }
+      if (e.key.toLowerCase() === 'r') resetView(false);
+    });
+
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('acadlyMindMapTheme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    const storedTheme = localStorage.getItem('acadlyMindMapTheme');
+    if (storedTheme === 'light') document.documentElement.classList.remove('dark');
+
+    renderTags();
+    renderSubjects();
+    renderRecent();
+    applyTransform();
+  </script>
+</body>
+</html>

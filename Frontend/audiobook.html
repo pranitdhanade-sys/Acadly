@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy Audiobooks — Learn by Listening</title>
+  <meta name="description"
+    content="Explore focused audiobook lessons with playlists, bookmarks, notes, progress tracking, and smart listening controls." />
+
+  <script>
+    (function () {
+      const saved = localStorage.getItem("acadly-theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const useDark = saved ? saved === "dark" : prefersDark;
+      if (useDark) document.documentElement.classList.add("dark");
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          boxShadow: {
+            neon: "0 0 0 1px rgba(34,211,238,.55), 0 0 18px rgba(34,211,238,.22)",
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="CSS/audiobook.css">
+  
+</head>
+
+<body class="min-h-screen antialiased selection:bg-cyan-300/30 selection:text-slate-900 dark:selection:text-white">
+  <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-[rgb(var(--bg))]/85 backdrop-blur dark:border-slate-800/70">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+      <a href="Homepage.html"
+        class="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 transition hover:shadow-neon dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
+        ← Back to Homepage
+      </a>
+
+      <h1 class="text-lg font-semibold tracking-tight md:text-xl">AcadLy Audiobooks</h1>
+
+      <button id="themeToggle"
+        class="rounded-full border border-slate-200 bg-white/70 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:shadow-neon dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Toggle
+        Theme</button>
+    </div>
+  </header>
+
+  <main class="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-12">
+    <!-- Upload Section -->
+    <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700 lg:col-span-8">
+      <div class="mb-4 p-4 rounded-lg bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-700">
+        <h3 class="font-semibold text-cyan-900 dark:text-cyan-100 mb-2">
+          <i class="fas fa-cloud-arrow-up mr-2"></i> Upload Audiobooks
+        </h3>
+        <p class="text-sm text-cyan-800 dark:text-cyan-200 mb-3">
+          Upload MP3/WAV files from your NotebookLM audiobooks folder. Supported formats: MP3, M4A, WAV, OGG
+        </p>
+        
+        <!-- Drop Zone -->
+        <div id="uploadZone" class="border-2 border-dashed border-cyan-300 dark:border-cyan-600 rounded-lg p-6 text-center cursor-pointer hover:bg-cyan-100/30 dark:hover:bg-cyan-900/20 transition-all">
+          <input id="audiobookUpload" type="file" multiple accept=".mp3,.m4a,.wav,.ogg" class="hidden" />
+          <div id="uploadPrompt">
+            <i class="fas fa-music text-3xl text-cyan-400 mb-2 block"></i>
+            <p class="font-semibold text-slate-900 dark:text-slate-100">Drag audiobooks here or click to browse</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">You can upload multiple files at once</p>
+          </div>
+          <div id="uploadProgress" class="hidden space-y-2">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-spinner animate-spin text-cyan-400"></i>
+              <span id="uploadStatus" class="text-sm text-slate-600 dark:text-slate-300">Uploading...</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+              <div id="uploadBar" class="bg-cyan-500 h-2 rounded-full transition-all" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploaded Files List -->
+        <div id="uploadedList" class="mt-4 space-y-2 hidden">
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Recently Uploaded:</p>
+          <ul id="uploadedItems" class="space-y-1 text-sm"></ul>
+        </div>
+      </div>
+
+    <!-- Original Content -->
+    <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
+      <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-2xl font-bold md:text-3xl">Listen smarter with <span class="accent-text">focus-first</span> audiobooks</h2>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Search, filter, sort, queue, bookmark, and take notes while you learn.</p>
+        </div>
+        <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700 dark:border-cyan-900/70 dark:bg-cyan-950/40 dark:text-cyan-300">
+          Goal today: <span id="goalMinutes">45</span> min
+        </div>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-4">
+        <input id="searchInput" type="search" placeholder="Search by title, author, topic..."
+          class="md:col-span-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-cyan-300 transition focus:ring dark:border-slate-600 dark:bg-slate-800" />
+        <select id="categoryFilter"
+          class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-cyan-300 transition focus:ring dark:border-slate-600 dark:bg-slate-800"></select>
+        <select id="sortBy"
+          class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-cyan-300 transition focus:ring dark:border-slate-600 dark:bg-slate-800">
+          <option value="popular">Sort: Most Popular</option>
+          <option value="durationAsc">Sort: Shortest First</option>
+          <option value="durationDesc">Sort: Longest First</option>
+          <option value="rating">Sort: Top Rated</option>
+        </select>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+        <label class="inline-flex items-center gap-2"><input id="favoritesOnly" type="checkbox" class="accent-cyan-500" /> Favorites only</label>
+        <label class="inline-flex items-center gap-2">Max duration
+          <input id="maxDuration" type="range" min="30" max="240" value="240" class="accent-cyan-500" />
+          <span id="durationLabel" class="font-medium">240m</span>
+        </label>
+      </div>
+
+      <div id="bookGrid" class="mt-5 grid gap-4 md:grid-cols-2"></div>
+    </section>
+
+    <aside class="space-y-6 lg:col-span-4">
+      <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
+        <h3 class="text-lg font-semibold">Now Playing</h3>
+        <p id="nowTitle" class="mt-2 text-sm font-medium text-slate-700 dark:text-slate-200">Choose an audiobook</p>
+        <p id="nowMeta" class="text-xs text-slate-500 dark:text-slate-400">—</p>
+
+        <div class="mt-4">
+          <input id="progressBar" type="range" min="0" max="100" value="0" class="w-full accent-cyan-500" />
+          <div class="mt-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span id="elapsed">00:00</span><span id="remaining">00:00</span>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between gap-2">
+          <button id="prevBtn" class="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600">⏮</button>
+          <button id="playBtn" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-white dark:text-slate-900">▶ Play</button>
+          <button id="nextBtn" class="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600">⏭</button>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <label class="text-xs text-slate-600 dark:text-slate-400">Speed
+            <select id="speedSelect" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-800">
+              <option>1x</option>
+              <option>1.25x</option>
+              <option>1.5x</option>
+              <option>1.75x</option>
+              <option>2x</option>
+            </select>
+          </label>
+          <label class="text-xs text-slate-600 dark:text-slate-400">Sleep timer
+            <select id="sleepTimer" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-800">
+              <option value="0">Off</option>
+              <option value="5">5 min</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="bookmarkBtn" class="flex-1 rounded-lg border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-700 dark:border-cyan-700 dark:text-cyan-300">+ Bookmark</button>
+          <button id="ttsBtn" class="flex-1 rounded-lg border border-violet-300 px-3 py-2 text-xs font-semibold text-violet-700 dark:border-violet-700 dark:text-violet-300">Read Summary</button>
+        </div>
+      </section>
+
+      <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
+        <h3 class="text-base font-semibold">Bookmarks</h3>
+        <ul id="bookmarkList" class="mt-3 space-y-2 text-sm"></ul>
+      </section>
+
+      <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
+        <h3 class="text-base font-semibold">Notes</h3>
+        <textarea id="noteInput" rows="4" placeholder="Save key takeaways..."
+          class="mt-3 w-full rounded-lg border border-slate-300 bg-white p-2 text-sm outline-none ring-cyan-300 focus:ring dark:border-slate-600 dark:bg-slate-800"></textarea>
+        <button id="saveNoteBtn" class="mt-2 w-full rounded-lg bg-cyan-600 px-3 py-2 text-sm font-semibold text-white">Save Note</button>
+      </section>
+
+      <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
+        <h3 class="text-base font-semibold">Learning Stats</h3>
+        <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+          <p>Total listening: <span id="totalMinutes" class="font-semibold text-slate-900 dark:text-white">0</span> min</p>
+          <p>Completed books: <span id="completedBooks" class="font-semibold text-slate-900 dark:text-white">0</span></p>
+          <p>Current streak: <span id="streak" class="font-semibold text-slate-900 dark:text-white">1</span> days</p>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    const books = [
+      { id: 1, title: "Atomic Habits", author: "James Clear", category: "Productivity", duration: 160, rating: 4.9, popularity: 98, summary: "Small habits compound into remarkable outcomes when systems are intentional.", color: "from-cyan-500 to-blue-500" },
+      { id: 2, title: "Deep Work", author: "Cal Newport", category: "Focus", duration: 210, rating: 4.8, popularity: 90, summary: "Attention is a high-value asset. Protect uninterrupted concentration blocks.", color: "from-indigo-500 to-violet-500" },
+      { id: 3, title: "The Psychology of Money", author: "Morgan Housel", category: "Finance", duration: 145, rating: 4.8, popularity: 92, summary: "Financial outcomes are shaped by behavior, patience, and risk awareness.", color: "from-emerald-500 to-teal-500" },
+      { id: 4, title: "A Brief History of Time", author: "Stephen Hawking", category: "Science", duration: 230, rating: 4.7, popularity: 85, summary: "Cosmology links space, time, and quantum ideas to understand the universe.", color: "from-fuchsia-500 to-rose-500" },
+      { id: 5, title: "Clean Code", author: "Robert C. Martin", category: "Engineering", duration: 200, rating: 4.8, popularity: 88, summary: "Readable software is maintained through naming, small functions, and discipline.", color: "from-amber-500 to-orange-500" },
+      { id: 6, title: "Thinking, Fast and Slow", author: "Daniel Kahneman", category: "Psychology", duration: 240, rating: 4.7, popularity: 87, summary: "Human judgment alternates between intuition and deliberate reasoning.", color: "from-sky-500 to-cyan-500" }
+    ];
+
+    const state = {
+      activeBook: null,
+      playing: false,
+      progress: 0,
+      favorites: new Set(JSON.parse(localStorage.getItem("audio-favs") || "[]")),
+      notes: JSON.parse(localStorage.getItem("audio-notes") || "{}"),
+      bookmarks: JSON.parse(localStorage.getItem("audio-bookmarks") || "{}"),
+      totalMinutes: Number(localStorage.getItem("audio-total-minutes") || 0),
+      completed: new Set(JSON.parse(localStorage.getItem("audio-completed") || "[]")),
+      sleepTimeout: null,
+      playInterval: null
+    };
+
+    const categoryFilter = document.getElementById("categoryFilter");
+    const sortBy = document.getElementById("sortBy");
+    const searchInput = document.getElementById("searchInput");
+    const favoritesOnly = document.getElementById("favoritesOnly");
+    const maxDuration = document.getElementById("maxDuration");
+    const durationLabel = document.getElementById("durationLabel");
+    const bookGrid = document.getElementById("bookGrid");
+    const nowTitle = document.getElementById("nowTitle");
+    const nowMeta = document.getElementById("nowMeta");
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const progressBar = document.getElementById("progressBar");
+    const elapsed = document.getElementById("elapsed");
+    const remaining = document.getElementById("remaining");
+    const speedSelect = document.getElementById("speedSelect");
+    const sleepTimer = document.getElementById("sleepTimer");
+    const bookmarkBtn = document.getElementById("bookmarkBtn");
+    const bookmarkList = document.getElementById("bookmarkList");
+    const noteInput = document.getElementById("noteInput");
+    const saveNoteBtn = document.getElementById("saveNoteBtn");
+    const totalMinutes = document.getElementById("totalMinutes");
+    const completedBooks = document.getElementById("completedBooks");
+    const streak = document.getElementById("streak");
+    const ttsBtn = document.getElementById("ttsBtn");
+
+    function formatMMSS(seconds) {
+      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const s = String(Math.floor(seconds % 60)).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function getFilteredBooks() {
+      const q = searchInput.value.trim().toLowerCase();
+      const category = categoryFilter.value;
+      const max = Number(maxDuration.value);
+      const sorted = books.filter((b) => {
+        const matchesQ = [b.title, b.author, b.category].join(" ").toLowerCase().includes(q);
+        const matchesCategory = category === "All" || b.category === category;
+        const matchesFav = !favoritesOnly.checked || state.favorites.has(b.id);
+        return matchesQ && matchesCategory && matchesFav && b.duration <= max;
+      });
+
+      if (sortBy.value === "durationAsc") sorted.sort((a, b) => a.duration - b.duration);
+      if (sortBy.value === "durationDesc") sorted.sort((a, b) => b.duration - a.duration);
+      if (sortBy.value === "rating") sorted.sort((a, b) => b.rating - a.rating);
+      if (sortBy.value === "popular") sorted.sort((a, b) => b.popularity - a.popularity);
+      return sorted;
+    }
+
+    function renderBooks() {
+      const list = getFilteredBooks();
+      if (!list.length) {
+        bookGrid.innerHTML = `<p class="col-span-2 rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500 dark:border-slate-600">No audiobooks match the current filters.</p>`;
+        return;
+      }
+
+      bookGrid.innerHTML = list.map((book) => {
+        const fav = state.favorites.has(book.id);
+        return `
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-900">
+            <div class="h-2 rounded-full bg-gradient-to-r ${book.color}"></div>
+            <h4 class="mt-3 text-lg font-semibold">${book.title}</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400">${book.author} • ${book.category}</p>
+            <div class="mt-2 text-xs text-slate-600 dark:text-slate-400">${book.duration} min • ★ ${book.rating}</div>
+            <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">${book.summary}</p>
+            <div class="mt-4 flex gap-2">
+              <button data-play="${book.id}" class="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-900">Play</button>
+              <button data-fav="${book.id}" class="rounded-lg border px-3 py-2 text-xs font-semibold ${fav ? "border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-300" : "border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-300"}">${fav ? "★" : "☆"}</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function selectBook(bookId) {
+      const book = books.find((b) => b.id === bookId);
+      if (!book) return;
+      state.activeBook = book;
+      state.progress = 0;
+      nowTitle.textContent = book.title;
+      nowMeta.textContent = `${book.author} • ${book.duration} min • ${book.category}`;
+      noteInput.value = state.notes[book.id] || "";
+      renderBookmarks();
+      syncProgressUI();
+    }
+
+    function togglePlayback() {
+      if (!state.activeBook) return;
+      state.playing = !state.playing;
+      playBtn.textContent = state.playing ? "⏸ Pause" : "▶ Play";
+      clearInterval(state.playInterval);
+
+      if (state.playing) {
+        state.playInterval = setInterval(() => {
+          const speed = Number(speedSelect.value.replace("x", ""));
+          state.progress = Math.min(100, state.progress + (0.5 * speed));
+          state.totalMinutes += (0.5 * speed) / 100 * state.activeBook.duration;
+          if (state.progress >= 100) {
+            state.completed.add(state.activeBook.id);
+            state.playing = false;
+            playBtn.textContent = "▶ Play";
+            clearInterval(state.playInterval);
+          }
+          persistStats();
+          syncProgressUI();
+        }, 1000);
+      }
+    }
+
+    function syncProgressUI() {
+      if (!state.activeBook) return;
+      progressBar.value = state.progress;
+      const totalSeconds = state.activeBook.duration * 60;
+      const elapsedSeconds = (state.progress / 100) * totalSeconds;
+      elapsed.textContent = formatMMSS(elapsedSeconds);
+      remaining.textContent = formatMMSS(Math.max(0, totalSeconds - elapsedSeconds));
+      totalMinutes.textContent = Math.round(state.totalMinutes);
+      completedBooks.textContent = state.completed.size;
+      streak.textContent = Math.max(1, Math.floor(state.totalMinutes / 30));
+    }
+
+    function persistStats() {
+      localStorage.setItem("audio-total-minutes", String(state.totalMinutes));
+      localStorage.setItem("audio-completed", JSON.stringify([...state.completed]));
+    }
+
+    function renderBookmarks() {
+      if (!state.activeBook) {
+        bookmarkList.innerHTML = "<li class='text-sm text-slate-500'>No active audiobook.</li>";
+        return;
+      }
+      const list = state.bookmarks[state.activeBook.id] || [];
+      bookmarkList.innerHTML = list.length
+        ? list.map((item, idx) => `<li class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs dark:border-slate-700"><span>${item}</span><button data-remove-bookmark="${idx}" class="text-rose-500">Remove</button></li>`).join("")
+        : "<li class='text-sm text-slate-500'>No bookmarks yet.</li>";
+    }
+
+    function setSleepTimer(minutes) {
+      clearTimeout(state.sleepTimeout);
+      if (!minutes) return;
+      state.sleepTimeout = setTimeout(() => {
+        if (state.playing) togglePlayback();
+      }, minutes * 60 * 1000);
+    }
+
+    function buildCategoryOptions() {
+      const categories = ["All", ...new Set(books.map((b) => b.category))];
+      categoryFilter.innerHTML = categories.map((c) => `<option>${c}</option>`).join("");
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      const isDark = document.documentElement.classList.toggle("dark");
+      localStorage.setItem("acadly-theme", isDark ? "dark" : "light");
+    });
+
+    [searchInput, categoryFilter, sortBy, favoritesOnly, maxDuration].forEach((el) => {
+      el.addEventListener("input", () => {
+        durationLabel.textContent = `${maxDuration.value}m`;
+        renderBooks();
+      });
+      el.addEventListener("change", renderBooks);
+    });
+
+    bookGrid.addEventListener("click", (e) => {
+      const playId = Number(e.target.dataset.play || 0);
+      const favId = Number(e.target.dataset.fav || 0);
+
+      if (playId) {
+        selectBook(playId);
+        if (!state.playing) togglePlayback();
+      }
+
+      if (favId) {
+        if (state.favorites.has(favId)) state.favorites.delete(favId);
+        else state.favorites.add(favId);
+        localStorage.setItem("audio-favs", JSON.stringify([...state.favorites]));
+        renderBooks();
+      }
+    });
+
+    playBtn.addEventListener("click", togglePlayback);
+
+    progressBar.addEventListener("input", () => {
+      state.progress = Number(progressBar.value);
+      syncProgressUI();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      const visible = getFilteredBooks();
+      if (!visible.length) return;
+      const idx = Math.max(0, visible.findIndex((b) => b.id === state.activeBook?.id) - 1);
+      selectBook(visible[idx].id);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      const visible = getFilteredBooks();
+      if (!visible.length) return;
+      const current = visible.findIndex((b) => b.id === state.activeBook?.id);
+      const idx = current >= 0 && current < visible.length - 1 ? current + 1 : 0;
+      selectBook(visible[idx].id);
+    });
+
+    sleepTimer.addEventListener("change", () => setSleepTimer(Number(sleepTimer.value)));
+
+    bookmarkBtn.addEventListener("click", () => {
+      if (!state.activeBook) return;
+      const entry = `${elapsed.textContent} • ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      state.bookmarks[state.activeBook.id] = state.bookmarks[state.activeBook.id] || [];
+      state.bookmarks[state.activeBook.id].push(entry);
+      localStorage.setItem("audio-bookmarks", JSON.stringify(state.bookmarks));
+      renderBookmarks();
+    });
+
+    bookmarkList.addEventListener("click", (e) => {
+      const idx = Number(e.target.dataset.removeBookmark);
+      if (Number.isNaN(idx) || !state.activeBook) return;
+      state.bookmarks[state.activeBook.id].splice(idx, 1);
+      localStorage.setItem("audio-bookmarks", JSON.stringify(state.bookmarks));
+      renderBookmarks();
+    });
+
+    saveNoteBtn.addEventListener("click", () => {
+      if (!state.activeBook) return;
+      state.notes[state.activeBook.id] = noteInput.value;
+      localStorage.setItem("audio-notes", JSON.stringify(state.notes));
+      saveNoteBtn.textContent = "Saved ✓";
+      setTimeout(() => saveNoteBtn.textContent = "Save Note", 1200);
+    });
+
+    ttsBtn.addEventListener("click", () => {
+      if (!state.activeBook || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(`${state.activeBook.title}. ${state.activeBook.summary}`);
+      utterance.rate = Number(speedSelect.value.replace("x", ""));
+      window.speechSynthesis.speak(utterance);
+    });
+
+    buildCategoryOptions();
+    renderBooks();
+    totalMinutes.textContent = Math.round(state.totalMinutes);
+    completedBooks.textContent = state.completed.size;
+  </script>
+  <script src="js/audiobook-upload.js"></script>
+</body>
+
+</html>

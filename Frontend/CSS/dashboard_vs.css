@@ -1,0 +1,9 @@
+﻿/* Dashboard V2 CSS */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.dashboard { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.metric-card { background: rgba(15, 23, 42, 0.5); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgb(var(--border)); }
+.metric-value { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, rgb(var(--blue)), rgb(124, 58, 237)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0.5rem 0; }
+.metadata { font-size: 0.85rem; color: rgb(148, 163, 184); }
+

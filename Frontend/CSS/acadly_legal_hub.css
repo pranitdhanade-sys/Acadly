@@ -1,0 +1,8 @@
+﻿/* Acadly Legal Hub CSS */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.legal-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.section { background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+.section h2 { color: rgb(var(--blue)); margin-bottom: 1rem; }
+.section p { line-height: 1.8; margin-bottom: 0.75rem; }
+

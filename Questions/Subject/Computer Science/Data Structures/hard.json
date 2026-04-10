@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "Time complexity of inserting at head in singly linked list is:",
+      "options": [
+        "O(1)",
+        "O(n)",
+        "O(log n)",
+        "O(n log n)"
+      ],
+      "answer": "O(1)"
+    },
+    {
+      "question": "Which structure is most suitable for Dijkstra's priority updates?",
+      "options": [
+        "Min-Heap",
+        "Stack",
+        "Queue",
+        "Hash Map"
+      ],
+      "answer": "Min-Heap"
+    },
+    {
+      "question": "Worst-case search in balanced BST is:",
+      "options": [
+        "O(log n)",
+        "O(n)",
+        "O(1)",
+        "O(n\u00b2)"
+      ],
+      "answer": "O(log n)"
+    }
+  ]
+}

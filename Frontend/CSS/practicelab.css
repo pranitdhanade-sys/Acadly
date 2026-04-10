@@ -1,0 +1,11 @@
+﻿/* Practicelab CSS */
+:root { --bg: 2 6 23; --text: 226 232 240; --border: 30 41 59; --blue: 34 211 238; }
+body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
+.container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.quiz-card { background: rgba(15, 23, 42, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1rem; }
+.question { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+.options { display: flex; flex-direction: column; gap: 0.75rem; }
+.option { padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; cursor: pointer; transition: all 200ms; }
+.option:hover { background: rgba(var(--blue), 0.1); border-color: rgb(var(--blue)); }
+.option.selected { background: rgba(var(--blue), 0.2); border-color: rgb(var(--blue)); }
+

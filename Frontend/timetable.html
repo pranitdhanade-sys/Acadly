@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Timetable Builder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="CSS/timetable.css">
+  
+</head>
+<body>
+  <!-- AcadLy Navigation Header -->
+  <nav style="
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid #d9e0f2;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 2px 16px rgba(24,39,75,0.07);
+  ">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="Homepage.html" style="display:inline-flex;align-items:center;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        <img src="js/public 2.0/image.png" alt="AcadLy Logo" style="height:48px;width:auto;object-fit:contain;">
+      </a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="dashboard_v2.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#fff;border:1px solid #d9e0f2;color:#1f2a44;text-decoration:none;
+        transition:box-shadow .2s,background .2s;
+      " onmouseover="this.style.boxShadow='0 0 0 3px rgba(48,86,211,0.18)'" onmouseout="this.style.boxShadow='none'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Dashboard
+      </a>
+      <a href="acadly_learning_path.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#fff;border:1px solid #d9e0f2;color:#1f2a44;text-decoration:none;
+        transition:box-shadow .2s,background .2s;
+      " onmouseover="this.style.boxShadow='0 0 0 3px rgba(48,86,211,0.18)'" onmouseout="this.style.boxShadow='none'">
+        📚 Learning Path
+      </a>
+      <a href="ai-assistant.html" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;
+        background:#3056d3;color:#fff;text-decoration:none;
+        box-shadow:0 4px 14px rgba(48,86,211,0.28);
+        transition:transform .15s,box-shadow .2s;
+      " onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(48,86,211,0.38)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(48,86,211,0.28)'">
+        ✨ AI Assistant
+      </a>
+    </div>
+  </nav>
+
+  <!-- Spacer for fixed nav -->
+  <div style="height:72px;"></div>
+
+  <main class="container">
+    <section class="header">
+      <h1>Weekly Timetable Builder</h1>
+      <p>Fill each slot with subject, class name, room, or activity. Your timetable is saved in your browser.</p>
+    </section>
+
+    <section class="controls">
+      <button id="saveBtn" class="btn btn-primary">Save Timetable</button>
+      <button id="downloadBtn" class="btn btn-secondary">Download as JSON</button>
+      <button id="resetBtn" class="btn btn-danger">Reset Timetable</button>
+      <span id="status" class="status" aria-live="polite"></span>
+    </section>
+
+    <section class="table-wrap">
+      <table id="timetable" aria-label="Student weekly timetable"></table>
+    </section>
+
+    <p class="footer-note">Tip: Press <strong>Tab</strong> to move quickly between cells while entering your schedule.</p>
+  </main>
+
+  <script>
+    const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const SLOTS = [
+      "08:00 - 09:00",
+      "09:00 - 10:00",
+      "10:00 - 11:00",
+      "11:00 - 12:00",
+      "12:00 - 01:00",
+      "01:00 - 02:00",
+      "02:00 - 03:00",
+      "03:00 - 04:00"
+    ];
+
+    const STORAGE_KEY = "acadly_student_timetable";
+    const table = document.getElementById("timetable");
+    const statusEl = document.getElementById("status");
+
+    function getDefaultData() {
+      return SLOTS.map(() => Object.fromEntries(DAYS.map(day => [day, ""])));
+    }
+
+    function showStatus(message, success = false) {
+      statusEl.textContent = message;
+      statusEl.className = success ? "status success" : "status";
+      if (message) {
+        setTimeout(() => {
+          statusEl.textContent = "";
+          statusEl.className = "status";
+        }, 2500);
+      }
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultData();
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length !== SLOTS.length) return getDefaultData();
+        return parsed;
+      } catch {
+        return getDefaultData();
+      }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function readTableData() {
+      return SLOTS.map((_, slotIndex) => {
+        const rowData = {};
+        DAYS.forEach((day, dayIndex) => {
+          const input = table.querySelector(`input[data-slot="${slotIndex}"][data-day="${dayIndex}"]`);
+          rowData[day] = input ? input.value.trim() : "";
+        });
+        return rowData;
+      });
+    }
+
+    function renderTable(data) {
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      const timeHeader = document.createElement("th");
+      timeHeader.textContent = "Time";
+      timeHeader.className = "time-col";
+      headerRow.appendChild(timeHeader);
+
+      DAYS.forEach(day => {
+        const th = document.createElement("th");
+        th.textContent = day;
+        headerRow.appendChild(th);
+      });
+
+      thead.appendChild(headerRow);
+
+      const tbody = document.createElement("tbody");
+      SLOTS.forEach((slot, slotIndex) => {
+        const row = document.createElement("tr");
+
+        const timeCell = document.createElement("td");
+        timeCell.textContent = slot;
+        timeCell.className = "time-col";
+        row.appendChild(timeCell);
+
+        DAYS.forEach((day, dayIndex) => {
+          const cell = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          input.placeholder = "Subject / Activity";
+          input.setAttribute("data-slot", slotIndex);
+          input.setAttribute("data-day", dayIndex);
+          input.value = data?.[slotIndex]?.[day] || "";
+          cell.appendChild(input);
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+
+      table.innerHTML = "";
+      table.appendChild(thead);
+      table.appendChild(tbody);
+    }
+
+    function downloadAsJson(data) {
+      const blob = new Blob([JSON.stringify({ days: DAYS, slots: SLOTS, timetable: data }, null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "student-timetable.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const data = readTableData();
+      saveData(data);
+      showStatus("Timetable saved successfully.", true);
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const data = readTableData();
+      downloadAsJson(data);
+      showStatus("Download started.", true);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      const confirmed = window.confirm("Reset all timetable entries?");
+      if (!confirmed) return;
+      const empty = getDefaultData();
+      saveData(empty);
+      renderTable(empty);
+      showStatus("Timetable reset.", true);
+    });
+
+    renderTable(loadData());
+  </script>
+</body>
+</html>

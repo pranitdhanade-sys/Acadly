@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcadLy — AI Learning Video Hub (Live)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/video-metadata.js"></script>
+    <script src="js/sync-manager.js"></script>
+    <link rel="stylesheet" href="CSS/videoplayer-live.css">
+    
+  </head>
+  <body class="min-h-screen font-sans text-slate-100">
+    <main class="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row lg:py-10">
+      <!-- MAIN PLAYER SECTION -->
+      <section class="glass relative flex-1 rounded-3xl border border-slate-700/70 p-4 shadow-2xl lg:p-6">
+        <!-- LIVE XP DISPLAY -->
+        <div class="absolute top-4 right-4 bg-gradient-to-r from-cyan-400 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 z-10">
+          <span>⭐ XP: <span id="liveXpCount">0</span></span>
+        </div>
+
+        <header class="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-300/80">AI Learning · Playlist</p>
+            <h1 id="videoTitle" class="mt-1 text-lg font-semibold tracking-tight text-slate-50 sm:text-xl">Loading video…</h1>
+            <p id="videoMeta" class="mt-1 text-xs text-slate-400">—</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnMinimize" class="h-6 w-6 rounded-full bg-slate-900/80 text-[10px] text-slate-300 hover:bg-slate-800" title="Minimize player">_</button>
+            <button id="btnFloat" class="h-6 w-6 rounded-full bg-slate-900/80 text-[10px] text-slate-300 hover:bg-slate-800" title="Toggle floating mini-player">⧉</button>
+            <button id="btnClosePlayer" class="h-6 w-6 rounded-full bg-slate-900/80 text-[10px] text-red-300 hover:bg-red-600/70 hover:text-white" title="Close player">×</button>
+          </div>
+        </header>
+
+        <!-- RESUME NOTIFICATION -->
+        <div id="resumeNotification" class="hidden mb-3 p-3 bg-cyan-500/20 border border-cyan-400/50 rounded-lg text-sm text-cyan-300 flex items-center justify-between">
+          <span>📍 Resumed from <span id="resumeTimeDisplay">--:--</span></span>
+          <button id="skipResume" class="text-xs text-cyan-300 hover:text-white">Start from beginning</button>
+        </div>
+
+        <!-- VIDEO PLAYER -->
+        <div id="playerShell" class="relative aspect-video overflow-hidden rounded-2xl border border-slate-700/80">
+          <video id="player" class="h-full w-full bg-black object-contain" preload="metadata"></video>
+
+          <div id="quizOverlay" class="absolute inset-0 z-20 hidden items-center justify-center bg-black/70">
+            <div class="w-full max-w-md rounded-2xl border border-cyan-400/40 bg-slate-900/95 p-4 text-sm text-slate-100 shadow-[0_0_40px_rgba(34,211,238,.45)]">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">Quick check-in</p>
+              <h3 id="quizQuestion" class="mt-1 text-sm font-semibold"></h3>
+              <div id="quizOptions" class="mt-3 space-y-2"></div>
+              <div id="quizMessage" class="mt-2 text-xs text-slate-300"></div>
+              <div class="mt-4 flex items-center justify-between gap-2">
+                <button id="quizSkip" type="button" class="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300">Skip for now</button>
+                <button id="quizSubmit" type="button" class="rounded-full bg-cyan-500 px-4 py-1.5 text-xs font-semibold text-slate-900">Submit & continue</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIDEO COMPLETION BANNER -->
+          <div id="completionBanner" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur">
+            <div class="text-center">
+              <div class="text-5xl mb-3">🎉</div>
+              <h2 class="text-3xl font-bold text-cyan-300 mb-2">Video Complete!</h2>
+              <p id="completionXpText" class="text-2xl text-green-400 font-bold mb-4">+25 XP</p>
+              <button id="nextVideoBtn" class="px-6 py-2 bg-cyan-500 text-slate-900 font-bold rounded-full hover:bg-cyan-400 transition">Next Video →</button>
+            </div>
+          </div>
+
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
+            <div class="pointer-events-auto flex items-center gap-2 text-[10px] text-slate-200">
+              <span id="currentTime">00:00</span>
+              <div class="relative flex-1">
+                <div class="h-1.5 w-full rounded-full bg-slate-600/60">
+                  <div id="progressBar" class="h-1.5 w-0 rounded-full bg-gradient-to-r from-cyan-400 to-violet-400"></div>
+                </div>
+                <input id="progressInput" type="range" min="0" max="100" value="0" class="absolute inset-0 h-1.5 w-full cursor-pointer opacity-0" />
+              </div>
+              <span id="duration">00:00</span>
+            </div>
+
+            <div class="pointer-events-auto flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <button id="btnPlayPause" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-slate-50 ring-1 ring-cyan-400/60">
+                  <span id="iconPlay">▶</span><span id="iconPause" class="hidden">❚❚</span>
+                </button>
+                <button id="btnBack10" class="h-9 w-9 rounded-full bg-slate-900/90 text-slate-200 ring-1 ring-slate-600/70">-10</button>
+                <button id="btnFwd10" class="h-9 w-9 rounded-full bg-slate-900/90 text-slate-200 ring-1 ring-slate-600/70">+10</button>
+              </div>
+
+              <div class="flex items-center gap-2 text-xs">
+                <button id="btnSpeed" class="h-9 rounded-full bg-slate-900/80 px-3 font-medium text-slate-100 ring-1 ring-slate-600/70"><span id="speedLabel">1.0x</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIDEBAR -->
+      <aside class="glass flex w-full max-w-md flex-col rounded-3xl border border-slate-700/70 p-4 shadow-xl lg:w-80">
+        <!-- CONTINUE WATCHING -->
+        <div id="continueWatchingSection" class="mb-4 hidden">
+          <h3 class="text-xs uppercase tracking-[0.18em] text-slate-400 mb-2">Continue Watching</h3>
+          <div id="continueWatchingList" class="space-y-2 mb-4 max-h-48 overflow-y-auto"></div>
+          <hr class="border-slate-700 my-3" />
+        </div>
+
+        <!-- STATS -->
+        <div class="mb-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+          <div class="flex justify-around text-center">
+            <div>
+              <p class="text-xs text-slate-400">Videos Watched</p>
+              <p id="statsVideosWatched" class="text-lg font-bold text-cyan-300">0</p>
+            </div>
+            <div class="border-l border-slate-700"></div>
+            <div>
+              <p class="text-xs text-slate-400">Total XP</p>
+              <p id="statsXpTotal" class="text-lg font-bold text-green-400">0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYLIST HEADER -->
+        <div class="mb-3">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs uppercase tracking-[0.18em] text-slate-400">Your AI learning queue</p>
+            <span id="dbBadge" class="hidden rounded-full px-2 py-0.5 text-[10px] font-medium bg-green-500/30 text-green-300">Live</span>
+          </div>
+          <h2 class="text-sm font-semibold text-slate-100">
+            Up next
+            <span id="videoCount" class="ml-1 text-xs font-normal text-slate-500"></span>
+          </h2>
+        </div>
+        <div id="playlist" class="flex-1 space-y-2 overflow-y-auto pr-1 text-sm"></div>
+      </aside>
+    </main>
+
+    <script>
+      // Initialize Sync Manager
+      const sync = new SyncManager({
+        userId: 1,
+        pollInterval: 5000,
+        enableLogging: true,
+        onXPChange: (data) => {
+          document.getElementById("liveXpCount").textContent = data.total;
+          document.getElementById("statsXpTotal").textContent = data.total;
+          
+          // Show XP notification
+          showXpNotification(data.awarded);
+        },
+        onVideoComplete: (data) => {
+          console.log("Video completed!", data);
+          showCompletionBanner(data.xpAwarded);
+        },
+      });
+
+      let currentVideo = null;
+      let playlist = [];
+      let saveProgressInterval = null;
+      let resumedFromTimestamp = false;
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Load user stats
+        await sync.loadUserStats();
+        document.getElementById("statsXpTotal").textContent = sync.userStats.xp_total;
+        document.getElementById("statsVideosWatched").textContent = sync.userStats.completed_videos;
+
+        // Load continue watching
+        await sync.loadContinueWatching();
+        renderContinueWatching();
+
+        // Load playlist
+        loadPlaylist();
+
+        // Setup player events
+        setupPlayerEvents();
+
+        // Show live badge
+        document.getElementById("dbBadge").classList.remove("hidden");
+      });
+
+      function loadPlaylist() {
+        // In real scenario, fetch from /api/videos
+        // For now, use demo data from video-metadata.js if available
+        if (window.ACADLY_VIDEO_ENHANCEMENTS) {
+          playlist = [
+            {
+              id: "video_oops_001",
+              title: "Object-Oriented Programming (OOPs)",
+              duration: 1200,
+              thumbnail: "https://via.placeholder.com/200x112?text=OOPs",
+            },
+            {
+              id: "video_backprop_001",
+              title: "Backpropagation - AI's Learning Engine",
+              duration: 1800,
+              thumbnail: "https://via.placeholder.com/200x112?text=Backprop",
+            },
+          ];
+        }
+
+        renderPlaylist();
+        if (playlist.length > 0) {
+          loadVideo(playlist[0]);
+        }
+      }
+
+      function renderPlaylist() {
+        const playlistEl = document.getElementById("playlist");
+        playlistEl.innerHTML = "";
+        document.getElementById("videoCount").textContent = `(${playlist.length})`;
+
+        playlist.forEach((vid, idx) => {
+          const item = document.createElement("div");
+          item.className = "p-2 rounded-lg cursor-pointer border border-slate-700/50 hover:border-cyan-400/50 transition";
+          if (currentVideo?.id === vid.id) {
+            item.setAttribute("data-active", "true");
+          }
+          item.innerHTML = `
+            <p class="text-xs font-medium text-slate-100">${idx + 1}. ${vid.title}</p>
+            <p class="text-[10px] text-slate-400">
+              ${formatTime(vid.duration)}
+            </p>
+          `;
+          item.onclick = () => loadVideo(vid);
+          playlistEl.appendChild(item);
+        });
+      }
+
+      async function loadVideo(video) {
+        currentVideo = video;
+        document.getElementById("videoTitle").textContent = video.title;
+        document.getElementById("videoCount").textContent = `(${playlist.length})`;
+
+        // Show demo video or placeholder
+        document.getElementById("player").src = `https://www.w3schools.com/html/mov_bbb.mp4`;
+
+        // Load saved progress for this video
+        const progress = await sync.getVideoProgress(video.id);
+        
+        if (progress.watch_seconds > 5) {
+          // Resume from saved position
+          document.getElementById("resumeNotification").classList.remove("hidden");
+          document.getElementById("resumeTimeDisplay").textContent = formatTime(progress.watch_seconds);
+          
+          document.getElementById("player").currentTime = progress.watch_seconds;
+          resumedFromTimestamp = true;
+        } else {
+          document.getElementById("resumeNotification").classList.add("hidden");
+          document.getElementById("player").currentTime = 0;
+          resumedFromTimestamp = false;
+        }
+
+        // Show completion state if already watched
+        if (progress.completed) {
+          document.getElementById("videoMeta").textContent = `✅ Completed on ${new Date(progress.last_watched).toLocaleDateString()}`;
+        } else {
+          document.getElementById("videoMeta").textContent = `${progress.watch_seconds > 0 ? '📍 Resume from ' + formatTime(progress.watch_seconds) : '▶ Start watching'}`;
+        }
+
+        // Start auto-save interval
+        clearInterval(saveProgressInterval);
+        saveProgressInterval = setInterval(() => {
+          const currentTime = document.getElementById("player").currentTime;
+          sync.saveWatchProgress(video.id, currentTime);
+        }, 5000); // Save every 5 seconds
+
+        // Update playlist UI
+        renderPlaylist();
+      }
+
+      function setupPlayerEvents() {
+        const player = document.getElementById("player");
+        const btnPlayPause = document.getElementById("btnPlayPause");
+        const currentTimeEl = document.getElementById("currentTime");
+        const durationEl = document.getElementById("duration");
+        const progressInput = document.getElementById("progressInput");
+        const progressBar = document.getElementById("progressBar");
+
+        // Play/Pause
+        btnPlayPause.addEventListener("click", () => {
+          if (player.paused) {
+            player.play();
+            document.getElementById("iconPlay").classList.add("hidden");
+            document.getElementById("iconPause").classList.remove("hidden");
+          } else {
+            player.pause();
+            document.getElementById("iconPlay").classList.remove("hidden");
+            document.getElementById("iconPause").classList.add("hidden");
+          }
+        });
+
+        // Update time display
+        player.addEventListener("timeupdate", () => {
+          currentTimeEl.textContent = formatTime(player.currentTime);
+          const progress = (player.currentTime / player.duration) * 100;
+          progressBar.style.width = progress + "%";
+          progressInput.value = progress;
+        });
+
+        player.addEventListener("loadedmetadata", () => {
+          durationEl.textContent = formatTime(player.duration);
+          progressInput.max = 100;
+        });
+
+        // Seek
+        progressInput.addEventListener("input", (e) => {
+          player.currentTime = (e.target.value / 100) * player.duration;
+        });
+
+        // Skip buttons
+        document.getElementById("btnBack10").addEventListener("click", () => {
+          player.currentTime = Math.max(0, player.currentTime - 10);
+        });
+
+        document.getElementById("btnFwd10").addEventListener("click", () => {
+          player.currentTime = Math.min(player.duration, player.currentTime + 10);
+        });
+
+        // Speed control
+        document.getElementById("btnSpeed").addEventListener("click", () => {
+          const speeds = [0.75, 1, 1.5, 2];
+          const current = player.playbackRate;
+          const nextSpeed = speeds[(speeds.indexOf(current) + 1) % speeds.length];
+          player.playbackRate = nextSpeed;
+          document.getElementById("speedLabel").textContent = nextSpeed + "x";
+        });
+
+        // Video ended
+        player.addEventListener("ended", () => {
+          completeVideo();
+        });
+
+        // Skip resume
+        document.getElementById("skipResume").addEventListener("click", () => {
+          player.currentTime = 0;
+          document.getElementById("resumeNotification").classList.add("hidden");
+          resumedFromTimestamp = false;
+        });
+
+        // Next video button
+        document.getElementById("nextVideoBtn").addEventListener("click", () => {
+          const currentIdx = playlist.findIndex((v) => v.id === currentVideo.id);
+          if (currentIdx < playlist.length - 1) {
+            loadVideo(playlist[currentIdx + 1]);
+          }
+        });
+      }
+
+      async function completeVideo() {
+        if (!currentVideo) return;
+
+        const watchedSeconds = document.getElementById("player").currentTime;
+        const result = await sync.markVideoComplete(currentVideo.id, watchedSeconds, 0);
+
+        // Update stats
+        await sync.loadUserStats();
+        document.getElementById("statsXpTotal").textContent = sync.userStats.xp_total;
+        document.getElementById("statsVideosWatched").textContent = sync.userStats.completed_videos;
+
+        // Stop auto-save
+        clearInterval(saveProgressInterval);
+      }
+
+      function renderContinueWatching() {
+        const section = document.getElementById("continueWatchingSection");
+        const list = document.getElementById("continueWatchingList");
+
+        if (sync.continueWatching.length === 0) {
+          section.classList.add("hidden");
+          return;
+        }
+
+        section.classList.remove("hidden");
+        list.innerHTML = "";
+
+        sync.continueWatching.forEach((item) => {
+          const el = document.createElement("button");
+          el.className = "w-full text-left p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 hover:border-cyan-400/50 transition text-xs";
+          el.innerHTML = `
+            <div class="flex justify-between items-start">
+              <span class="text-cyan-300">📍Video ID: ${item.video_id.substring(0, 8)}...</span>
+              <span class="text-slate-400">${formatTime(item.watch_seconds)}</span>
+            </div>
+          `;
+          el.onclick = () => {
+            // In real scenario, fetch video by ID
+            alert("Load video: " + item.video_id);
+          };
+          list.appendChild(el);
+        });
+      }
+
+      function showXpNotification(xpAmount) {
+        const notification = document.createElement("div");
+        notification.className = "xp-notification text-center";
+        notification.innerHTML = `
+          <div class="text-2xl font-bold text-green-400">+${xpAmount} XP</div>
+          <div class="text-sm text-slate-300">Great progress!</div>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.style.animation = "slideIn 0.3s ease-out reverse";
+          setTimeout(() => notification.remove(), 300);
+        }, 2000);
+      }
+
+      function showCompletionBanner(xpAwarded) {
+        const banner = document.getElementById("completionBanner");
+        document.getElementById("completionXpText").textContent = `+${xpAwarded} XP`;
+        banner.classList.remove("hidden");
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      // Auto-save on page unload
+      window.addEventListener("beforeunload", () => {
+        if (currentVideo) {
+          const currentTime = document.getElementById("player").currentTime;
+          sync.saveWatchProgress(currentVideo.id, currentTime);
+        }
+      });
+    </script>
+  </body>
+</html>

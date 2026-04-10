@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acadly PDF Hub</title>
+    <link rel="stylesheet" href="CSS/library.css" />
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+
+    <header class="hub-header">
+      <div class="header-copy">
+        <p class="eyebrow">Acadly Knowledge Center</p>
+        <h1>PDF Hub</h1>
+        <p class="subtitle">Explore PDFs synced from MongoDB and instantly open your study materials.</p>
+      </div>
+      <div class="header-stats" id="statsBar">
+        <article>
+          <span>Total PDFs</span>
+          <strong id="totalCount">0</strong>
+        </article>
+        <article>
+          <span>Categories</span>
+          <strong id="categoryCount">0</strong>
+        </article>
+        <article>
+          <span>Last update</span>
+          <strong id="lastUpdated">--</strong>
+        </article>
+      </div>
+    </header>
+
+    <main class="hub-main">
+      <section class="control-panel" aria-label="PDF filters and controls">
+        <div class="control-group grow">
+          <label for="searchInput">Search PDF</label>
+          <input id="searchInput" type="search" placeholder="Search by title, file name, or category" />
+        </div>
+
+        <div class="control-group">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="sortBy">Sort by</label>
+          <select id="sortBy">
+            <option value="title-asc">Title (A–Z)</option>
+            <option value="title-desc">Title (Z–A)</option>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </div>
+
+        <button id="refreshButton" type="button" class="button button-primary">Refresh</button>
+      </section>
+
+      <section class="status-row">
+        <p id="status" class="status-pill">Loading PDF library...</p>
+        <p id="resultCount" class="result-count"></p>
+      </section>
+
+      <section id="pdfGrid" class="pdf-grid" aria-live="polite"></section>
+    </main>
+
+    <template id="pdfCardTemplate">
+      <article class="pdf-card">
+        <div class="card-glow" aria-hidden="true"></div>
+        <div class="card-header">
+          <h2 class="pdf-title"></h2>
+          <span class="category-chip"></span>
+        </div>
+
+        <p class="pdf-file"></p>
+
+        <div class="pdf-actions">
+          <a class="button button-primary open-link" target="_blank" rel="noopener noreferrer">Open</a>
+          <button class="button button-ghost copy-link" type="button">Copy link</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="library.js"></script>
+  </body>
+</html>

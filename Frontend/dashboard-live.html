@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AcadLy — Live Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/sync-manager.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="CSS/dashboard-live.css">
+</head>
+<body class="min-h-screen font-sans">
+    <!-- HEADER -->
+    <header class="glass border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-50">AcadLy Dashboard</h1>
+                <p class="text-xs text-slate-400 mt-1">Live activity tracking</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="live-badge">
+                    Live Sync Active
+                </div>
+                <button id="refreshBtn" class="px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 rounded-lg text-xs font-medium transition">
+                    ↻ Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- KEY METRICS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total XP -->
+            <div class="stat-card card-hover">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase">Total XP</h3>
+                    <div class="text-xl">⭐</div>
+                </div>
+                <p id="metricXp" class="text-3xl font-bold text-cyan-300">0</p>
+                <p class="text-xs text-slate-500 mt-2">From completed videos</p>
+            </div>
+
+            <!-- Videos Watched -->
+            <div class="stat-card card-hover">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase">Videos Watched</h3>
+                    <div class="text-xl">▶</div>
+                </div>
+                <p id="metricVideos" class="text-3xl font-bold text-green-400">0</p>
+                <p class="text-xs text-slate-500 mt-2">Completed videos</p>
+            </div>
+
+            <!-- Current Level -->
+            <div class="stat-card card-hover">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase">Level</h3>
+                    <div class="text-xl">🎖️</div>
+                </div>
+                <p id="metricLevel" class="text-3xl font-bold text-purple-400">1</p>
+                <p class="text-xs text-slate-500 mt-2">Keep learning</p>
+            </div>
+
+            <!-- Streak -->
+            <div class="stat-card card-hover">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase">Streak</h3>
+                    <div class="text-xl">🔥</div>
+                </div>
+                <p id="metricStreak" class="text-3xl font-bold text-orange-400">0</p>
+                <p class="text-xs text-slate-500 mt-2">Days active</p>
+            </div>
+        </div>
+
+        <!-- CONTINUE WATCHING SECTION -->
+        <div id="continueWatchingContainer" class="glass rounded-2xl border border-slate-700/50 p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-50 flex items-center gap-2">
+                    📍 Continue Watching
+                    <span id="continueCount" class="text-sm font-normal text-slate-400 bg-slate-800/50 px-2 py-1 rounded-full">0</span>
+                </h2>
+                <a href="videoplayer-live.html" class="text-sm text-cyan-400 hover:text-cyan-300">Open Player →</a>
+            </div>
+
+            <div id="continueWatchingList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Populated by JS -->
+            </div>
+
+            <div id="noContinueMessage" class="text-center py-8 text-slate-400">
+                <p class="text-lg mb-2">No videos in progress</p>
+                <p class="text-sm">Start watching a video to see it here</p>
+            </div>
+        </div>
+
+        <!-- LEARNING STATS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- XP Growth Chart -->
+            <div class="glass rounded-2xl border border-slate-700/50 p-6 card-hover">
+                <h3 class="text-lg font-bold text-slate-50 mb-4">XP Growth</h3>
+                <div id="xpProgressContainer" class="space-y-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-slate-300">This Week</span>
+                            <span id="weekXp" class="text-sm font-bold text-cyan-300">0 XP</span>
+                        </div>
+                        <div class="video-progress">
+                            <div id="weekXpBar" class="video-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-slate-300">This Month</span>
+                            <span id="monthXp" class="text-sm font-bold text-cyan-300">0 XP</span>
+                        </div>
+                        <div class="video-progress">
+                            <div id="monthXpBar" class="video-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Categories -->
+            <div class="glass rounded-2xl border border-slate-700/50 p-6 card-hover">
+                <h3 class="text-lg font-bold text-slate-50 mb-4">Learning Path</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                        <span class="text-sm text-slate-300">AI & Machine Learning</span>
+                        <span class="text-sm font-bold text-green-400">5/10</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                        <span class="text-sm text-slate-300">Programming Fundamentals</span>
+                        <span class="text-sm font-bold text-green-400">3/8</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg">
+                        <span class="text-sm text-slate-300">Web Development</span>
+                        <span class="text-sm font-bold text-green-400">2/6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <div class="glass rounded-2xl border border-slate-700/50 p-6 mt-8 card-hover">
+            <h3 class="text-lg font-bold text-slate-50 mb-4">Recent Activity</h3>
+            <div id="activityList" class="space-y-3">
+                <p class="text-slate-400 text-sm">Loading activity...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Sync Manager
+        const sync = new SyncManager({
+            userId: 1,
+            enableLogging: true,
+            onXPChange: (data) => {
+                updateXpDisplay(data);
+            },
+        });
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadDashboardData();
+            setupRefreshButton();
+            
+            // Auto-refresh every 10 seconds
+            setInterval(loadDashboardData, 10000);
+        });
+
+        async function loadDashboardData() {
+            try {
+                // Load user stats
+                await sync.loadUserStats();
+
+                // Update metrics
+                document.getElementById("metricXp").textContent = sync.userStats.xp_total;
+                document.getElementById("metricVideos").textContent = sync.userStats.completed_videos;
+                document.getElementById("metricLevel").textContent = Math.floor(sync.userStats.xp_total / 100) + 1;
+
+                // Load continue watching
+                await sync.loadContinueWatching();
+                renderContinueWatching();
+
+                // Update activity
+                updateActivityFeed();
+            } catch (err) {
+                console.error("Error loading dashboard data:", err);
+            }
+        }
+
+        function renderContinueWatching() {
+            const list = document.getElementById("continueWatchingList");
+            const container = document.getElementById("continueWatchingContainer");
+            const noMessage = document.getElementById("noContinueMessage");
+            const count = document.getElementById("continueCount");
+
+            if (sync.continueWatching.length === 0) {
+                list.style.display = "none";
+                noMessage.style.display = "block";
+                count.textContent = "0";
+                return;
+            }
+
+            list.style.display = "grid";
+            noMessage.style.display = "none";
+            count.textContent = sync.continueWatching.length;
+
+            list.innerHTML = "";
+
+            sync.continueWatching.forEach((video) => {
+                const totalSeconds = 1200; // Assume 20 min default
+                const progressPercent = Math.min(100, (video.watch_seconds / totalSeconds) * 100);
+                
+                const card = document.createElement("div");
+                card.className = "glass rounded-lg p-4 card-hover";
+                card.innerHTML = `
+                    <div class="mb-3">
+                        <div class="flex items-start justify-between mb-2">
+                            <h4 class="text-sm font-semibold text-slate-100 flex-1">
+                                Video ${video.video_id.substring(0, 8)}...
+                            </h4>
+                            <span class="text-xs bg-cyan-500/30 text-cyan-200 px-2 py-1 rounded">
+                                ${formatTime(video.watch_seconds)}
+                            </span>
+                        </div>
+                        <div class="video-progress">
+                            <div class="video-progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        ${progressPercent.toFixed(0)}% watched
+                    </p>
+                    <button class="mt-3 w-full px-3 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 rounded-lg text-xs font-medium text-cyan-300 transition">
+                        Resume ↗
+                    </button>
+                `;
+                
+                card.querySelector("button").onclick = () => {
+                    window.location.href = "videoplayer-live.html?video=" + video.video_id;
+                };
+
+                list.appendChild(card);
+            });
+        }
+
+        function updateXpDisplay(data) {
+            document.getElementById("metricXp").textContent = data.total;
+            
+            // Animate XP bar
+            const weekBar = document.getElementById("weekXpBar");
+            const weekXpEl = document.getElementById("weekXp");
+            const currentWidth = parseFloat(weekBar.style.width) || 0;
+            const newWidth = Math.min(100, currentWidth + (data.awarded / 250) * 100);
+            
+            weekBar.style.width = newWidth + "%";
+            weekXpEl.textContent = Math.floor(newWidth / 100 * 250) + " XP";
+        }
+
+        function updateActivityFeed() {
+            const feed = document.getElementById("activityList");
+            feed.innerHTML = "";
+
+            const activities = [
+                { type: "xp", text: "Earned 25 XP from video completion", time: "Just now" },
+                { type: "video", text: "Resumed watching Machine Learning Basics", time: "2 minutes ago" },
+                { type: "milestone", text: "Reached 100 XP!", time: "1 hour ago" },
+            ];
+
+            activities.forEach((activity) => {
+                const icon = activity.type === "xp" ? "⭐" : activity.type === "video" ? "▶" : "🎯";
+                const el = document.createElement("div");
+                el.className = "flex items-start gap-3 p-3 bg-slate-900/50 rounded-lg";
+                el.innerHTML = `
+                    <div class="text-lg">${icon}</div>
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-100">${activity.text}</p>
+                        <p class="text-xs text-slate-400">${activity.time}</p>
+                    </div>
+                `;
+                feed.appendChild(el);
+            });
+        }
+
+        function setupRefreshButton() {
+            document.getElementById("refreshBtn").addEventListener("click", async () => {
+                const btn = document.getElementById("refreshBtn");
+                btn.style.animation = "spin 1s linear";
+                await loadDashboardData();
+                setTimeout(() => {
+                    btn.style.animation = "";
+                }, 1000);
+            });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+        }
+    </script>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

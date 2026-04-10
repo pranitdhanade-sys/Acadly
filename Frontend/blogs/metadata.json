@@ -1,0 +1,702 @@
+[
+  {
+    "title": "Understanding Transformer KV-Cache Internals",
+    "author": "Acadly Engineering",
+    "date": "2026-04-08",
+    "slug": "understanding-transformer-kv-cache-internals",
+    "excerpt": "Technical deep dive #1: architecture decisions, implementation details, and production trade-offs for understanding transformer kv-cache internals.",
+    "tags": [
+      "llm",
+      "transformers",
+      "systems"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Implementing Raft Consensus from Scratch",
+    "author": "Acadly Engineering",
+    "date": "2026-04-07",
+    "slug": "implementing-raft-consensus-from-scratch",
+    "excerpt": "Technical deep dive #2: architecture decisions, implementation details, and production trade-offs for implementing raft consensus from scratch.",
+    "tags": [
+      "distributed-systems",
+      "raft",
+      "consensus"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Vector Databases: HNSW vs IVF-PQ",
+    "author": "Acadly Engineering",
+    "date": "2026-04-06",
+    "slug": "vector-databases-hnsw-vs-ivf-pq",
+    "excerpt": "Technical deep dive #3: architecture decisions, implementation details, and production trade-offs for vector databases: hnsw vs ivf-pq.",
+    "tags": [
+      "vector-db",
+      "ann",
+      "retrieval"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Designing Idempotent APIs at Scale",
+    "author": "Acadly Engineering",
+    "date": "2026-04-05",
+    "slug": "designing-idempotent-apis-at-scale",
+    "excerpt": "Technical deep dive #4: architecture decisions, implementation details, and production trade-offs for designing idempotent apis at scale.",
+    "tags": [
+      "api",
+      "backend",
+      "reliability"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Zero-Downtime PostgreSQL Migrations",
+    "author": "Acadly Engineering",
+    "date": "2026-04-04",
+    "slug": "zero-downtime-postgresql-migrations",
+    "excerpt": "Technical deep dive #5: architecture decisions, implementation details, and production trade-offs for zero-downtime postgresql migrations.",
+    "tags": [
+      "postgres",
+      "database",
+      "devops"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Inside Linux eBPF: Maps, Hooks, and Verifier",
+    "author": "Acadly Engineering",
+    "date": "2026-04-03",
+    "slug": "inside-linux-ebpf-maps-hooks-and-verifier",
+    "excerpt": "Technical deep dive #6: architecture decisions, implementation details, and production trade-offs for inside linux ebpf: maps, hooks, and verifier.",
+    "tags": [
+      "linux",
+      "ebpf",
+      "kernel"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Building a Stream Processor with Exactly-Once Semantics",
+    "author": "Acadly Engineering",
+    "date": "2026-04-02",
+    "slug": "building-a-stream-processor-with-exactly-once-semantics",
+    "excerpt": "Technical deep dive #7: architecture decisions, implementation details, and production trade-offs for building a stream processor with exactly-once semantics.",
+    "tags": [
+      "streaming",
+      "kafka",
+      "data-eng"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Practical CRDTs for Collaborative Editors",
+    "author": "Acadly Engineering",
+    "date": "2026-04-01",
+    "slug": "practical-crdts-for-collaborative-editors",
+    "excerpt": "Technical deep dive #8: architecture decisions, implementation details, and production trade-offs for practical crdts for collaborative editors.",
+    "tags": [
+      "crdt",
+      "collaboration",
+      "algorithms"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Memory Layout Optimizations in C++",
+    "author": "Acadly Engineering",
+    "date": "2026-03-31",
+    "slug": "memory-layout-optimizations-in-cplusplus",
+    "excerpt": "Technical deep dive #9: architecture decisions, implementation details, and production trade-offs for memory layout optimizations in c++.",
+    "tags": [
+      "c++",
+      "performance",
+      "memory"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "GPU Programming Basics with CUDA Kernels",
+    "author": "Acadly Engineering",
+    "date": "2026-03-30",
+    "slug": "gpu-programming-basics-with-cuda-kernels",
+    "excerpt": "Technical deep dive #10: architecture decisions, implementation details, and production trade-offs for gpu programming basics with cuda kernels.",
+    "tags": [
+      "gpu",
+      "cuda",
+      "parallel-computing"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Query Planning and Cost-Based Optimization",
+    "author": "Acadly Engineering",
+    "date": "2026-03-29",
+    "slug": "query-planning-and-cost-based-optimization",
+    "excerpt": "Technical deep dive #11: architecture decisions, implementation details, and production trade-offs for query planning and cost-based optimization.",
+    "tags": [
+      "databases",
+      "sql",
+      "query-planner"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Advanced Indexing: B-Tree, LSM, and Fractal Trees",
+    "author": "Acadly Engineering",
+    "date": "2026-03-28",
+    "slug": "advanced-indexing-b-tree-lsm-and-fractal-trees",
+    "excerpt": "Technical deep dive #12: architecture decisions, implementation details, and production trade-offs for advanced indexing: b-tree, lsm, and fractal trees.",
+    "tags": [
+      "database",
+      "indexing",
+      "storage"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Event-Driven Architecture with Outbox Pattern",
+    "author": "Acadly Engineering",
+    "date": "2026-03-27",
+    "slug": "event-driven-architecture-with-outbox-pattern",
+    "excerpt": "Technical deep dive #13: architecture decisions, implementation details, and production trade-offs for event-driven architecture with outbox pattern.",
+    "tags": [
+      "architecture",
+      "events",
+      "reliability"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Formal Verification for Smart Contracts",
+    "author": "Acadly Engineering",
+    "date": "2026-03-26",
+    "slug": "formal-verification-for-smart-contracts",
+    "excerpt": "Technical deep dive #14: architecture decisions, implementation details, and production trade-offs for formal verification for smart contracts.",
+    "tags": [
+      "blockchain",
+      "formal-methods",
+      "security"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Building a Compiler Frontend with AST Passes",
+    "author": "Acadly Engineering",
+    "date": "2026-03-25",
+    "slug": "building-a-compiler-frontend-with-ast-passes",
+    "excerpt": "Technical deep dive #15: architecture decisions, implementation details, and production trade-offs for building a compiler frontend with ast passes.",
+    "tags": [
+      "compiler",
+      "ast",
+      "language-tools"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Distributed Tracing with OpenTelemetry",
+    "author": "Acadly Engineering",
+    "date": "2026-03-24",
+    "slug": "distributed-tracing-with-opentelemetry",
+    "excerpt": "Technical deep dive #16: architecture decisions, implementation details, and production trade-offs for distributed tracing with opentelemetry.",
+    "tags": [
+      "observability",
+      "tracing",
+      "sre"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Secure Session Management Beyond JWT Basics",
+    "author": "Acadly Engineering",
+    "date": "2026-03-23",
+    "slug": "secure-session-management-beyond-jwt-basics",
+    "excerpt": "Technical deep dive #17: architecture decisions, implementation details, and production trade-offs for secure session management beyond jwt basics.",
+    "tags": [
+      "security",
+      "auth",
+      "web"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Temporal Tables and Audit Logging Patterns",
+    "author": "Acadly Engineering",
+    "date": "2026-03-22",
+    "slug": "temporal-tables-and-audit-logging-patterns",
+    "excerpt": "Technical deep dive #18: architecture decisions, implementation details, and production trade-offs for temporal tables and audit logging patterns.",
+    "tags": [
+      "sql",
+      "auditing",
+      "compliance"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Optimizing React Rendering in Data-Heavy UIs",
+    "author": "Acadly Engineering",
+    "date": "2026-03-21",
+    "slug": "optimizing-react-rendering-in-data-heavy-uis",
+    "excerpt": "Technical deep dive #19: architecture decisions, implementation details, and production trade-offs for optimizing react rendering in data-heavy uis.",
+    "tags": [
+      "react",
+      "frontend",
+      "performance"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "WebAssembly for High-Performance Browser Compute",
+    "author": "Acadly Engineering",
+    "date": "2026-03-20",
+    "slug": "webassembly-for-high-performance-browser-compute",
+    "excerpt": "Technical deep dive #20: architecture decisions, implementation details, and production trade-offs for webassembly for high-performance browser compute.",
+    "tags": [
+      "wasm",
+      "browser",
+      "systems"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Hybrid Search: BM25 + Dense Retrieval",
+    "author": "Acadly Engineering",
+    "date": "2026-03-19",
+    "slug": "hybrid-search-bm25-plus-dense-retrieval",
+    "excerpt": "Technical deep dive #21: architecture decisions, implementation details, and production trade-offs for hybrid search: bm25 + dense retrieval.",
+    "tags": [
+      "search",
+      "nlp",
+      "retrieval"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Building Resilient Job Queues with Backpressure",
+    "author": "Acadly Engineering",
+    "date": "2026-03-18",
+    "slug": "building-resilient-job-queues-with-backpressure",
+    "excerpt": "Technical deep dive #22: architecture decisions, implementation details, and production trade-offs for building resilient job queues with backpressure.",
+    "tags": [
+      "queues",
+      "reliability",
+      "backend"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Feature Stores for Real-Time ML Systems",
+    "author": "Acadly Engineering",
+    "date": "2026-03-17",
+    "slug": "feature-stores-for-real-time-ml-systems",
+    "excerpt": "Technical deep dive #23: architecture decisions, implementation details, and production trade-offs for feature stores for real-time ml systems.",
+    "tags": [
+      "mlops",
+      "feature-store",
+      "ml"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Sharding Strategies for Multi-Tenant SaaS",
+    "author": "Acadly Engineering",
+    "date": "2026-03-16",
+    "slug": "sharding-strategies-for-multi-tenant-saas",
+    "excerpt": "Technical deep dive #24: architecture decisions, implementation details, and production trade-offs for sharding strategies for multi-tenant saas.",
+    "tags": [
+      "database",
+      "sharding",
+      "saas"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "S3-Compatible Object Storage Design Notes",
+    "author": "Acadly Engineering",
+    "date": "2026-03-15",
+    "slug": "s3-compatible-object-storage-design-notes",
+    "excerpt": "Technical deep dive #25: architecture decisions, implementation details, and production trade-offs for s3-compatible object storage design notes.",
+    "tags": [
+      "storage",
+      "object-store",
+      "cloud"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Practical SIMD Optimization Techniques",
+    "author": "Acadly Engineering",
+    "date": "2026-03-14",
+    "slug": "practical-simd-optimization-techniques",
+    "excerpt": "Technical deep dive #26: architecture decisions, implementation details, and production trade-offs for practical simd optimization techniques.",
+    "tags": [
+      "simd",
+      "cpu",
+      "performance"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Network Protocol Design: Framing and Retries",
+    "author": "Acadly Engineering",
+    "date": "2026-03-13",
+    "slug": "network-protocol-design-framing-and-retries",
+    "excerpt": "Technical deep dive #27: architecture decisions, implementation details, and production trade-offs for network protocol design: framing and retries.",
+    "tags": [
+      "networking",
+      "protocols",
+      "systems"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "CQRS + Event Sourcing Trade-offs",
+    "author": "Acadly Engineering",
+    "date": "2026-03-12",
+    "slug": "cqrs-plus-event-sourcing-trade-offs",
+    "excerpt": "Technical deep dive #28: architecture decisions, implementation details, and production trade-offs for cqrs + event sourcing trade-offs.",
+    "tags": [
+      "architecture",
+      "cqrs",
+      "event-sourcing"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Implementing Time-Series Compression",
+    "author": "Acadly Engineering",
+    "date": "2026-03-11",
+    "slug": "implementing-time-series-compression",
+    "excerpt": "Technical deep dive #29: architecture decisions, implementation details, and production trade-offs for implementing time-series compression.",
+    "tags": [
+      "time-series",
+      "compression",
+      "data-eng"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Kubernetes Scheduling and Bin Packing Deep Dive",
+    "author": "Acadly Engineering",
+    "date": "2026-03-10",
+    "slug": "kubernetes-scheduling-and-bin-packing-deep-dive",
+    "excerpt": "Technical deep dive #30: architecture decisions, implementation details, and production trade-offs for kubernetes scheduling and bin packing deep dive.",
+    "tags": [
+      "kubernetes",
+      "scheduling",
+      "devops"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Secrets Management and Envelope Encryption",
+    "author": "Acadly Engineering",
+    "date": "2026-03-09",
+    "slug": "secrets-management-and-envelope-encryption",
+    "excerpt": "Technical deep dive #31: architecture decisions, implementation details, and production trade-offs for secrets management and envelope encryption.",
+    "tags": [
+      "security",
+      "encryption",
+      "devops"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Advanced Git Internals: Objects, Refs, and Packfiles",
+    "author": "Acadly Engineering",
+    "date": "2026-03-08",
+    "slug": "advanced-git-internals-objects-refs-and-packfiles",
+    "excerpt": "Technical deep dive #32: architecture decisions, implementation details, and production trade-offs for advanced git internals: objects, refs, and packfiles.",
+    "tags": [
+      "git",
+      "tooling",
+      "internals"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Async Rust Patterns for High Concurrency",
+    "author": "Acadly Engineering",
+    "date": "2026-03-07",
+    "slug": "async-rust-patterns-for-high-concurrency",
+    "excerpt": "Technical deep dive #33: architecture decisions, implementation details, and production trade-offs for async rust patterns for high concurrency.",
+    "tags": [
+      "rust",
+      "async",
+      "backend"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Designing for P99 Latency Budgets",
+    "author": "Acadly Engineering",
+    "date": "2026-03-06",
+    "slug": "designing-for-p99-latency-budgets",
+    "excerpt": "Technical deep dive #34: architecture decisions, implementation details, and production trade-offs for designing for p99 latency budgets.",
+    "tags": [
+      "performance",
+      "latency",
+      "sre"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Rate Limiting Algorithms: Token vs Leaky Bucket",
+    "author": "Acadly Engineering",
+    "date": "2026-03-05",
+    "slug": "rate-limiting-algorithms-token-vs-leaky-bucket",
+    "excerpt": "Technical deep dive #35: architecture decisions, implementation details, and production trade-offs for rate limiting algorithms: token vs leaky bucket.",
+    "tags": [
+      "api",
+      "rate-limiting",
+      "algorithms"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Implementing Merkle Trees for Data Integrity",
+    "author": "Acadly Engineering",
+    "date": "2026-03-04",
+    "slug": "implementing-merkle-trees-for-data-integrity",
+    "excerpt": "Technical deep dive #36: architecture decisions, implementation details, and production trade-offs for implementing merkle trees for data integrity.",
+    "tags": [
+      "crypto",
+      "merkle-tree",
+      "integrity"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Data Contracts in Streaming Pipelines",
+    "author": "Acadly Engineering",
+    "date": "2026-03-03",
+    "slug": "data-contracts-in-streaming-pipelines",
+    "excerpt": "Technical deep dive #37: architecture decisions, implementation details, and production trade-offs for data contracts in streaming pipelines.",
+    "tags": [
+      "data-eng",
+      "schema",
+      "streaming"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Incremental Static Regeneration at Scale",
+    "author": "Acadly Engineering",
+    "date": "2026-03-02",
+    "slug": "incremental-static-regeneration-at-scale",
+    "excerpt": "Technical deep dive #38: architecture decisions, implementation details, and production trade-offs for incremental static regeneration at scale.",
+    "tags": [
+      "web",
+      "ssg",
+      "performance"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Differential Privacy in Analytics Systems",
+    "author": "Acadly Engineering",
+    "date": "2026-03-01",
+    "slug": "differential-privacy-in-analytics-systems",
+    "excerpt": "Technical deep dive #39: architecture decisions, implementation details, and production trade-offs for differential privacy in analytics systems.",
+    "tags": [
+      "privacy",
+      "analytics",
+      "security"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Practical Homomorphic Encryption Overview",
+    "author": "Acadly Engineering",
+    "date": "2026-02-28",
+    "slug": "practical-homomorphic-encryption-overview",
+    "excerpt": "Technical deep dive #40: architecture decisions, implementation details, and production trade-offs for practical homomorphic encryption overview.",
+    "tags": [
+      "cryptography",
+      "privacy",
+      "research"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "GraphQL Federation Architecture Guide",
+    "author": "Acadly Engineering",
+    "date": "2026-02-27",
+    "slug": "graphql-federation-architecture-guide",
+    "excerpt": "Technical deep dive #41: architecture decisions, implementation details, and production trade-offs for graphql federation architecture guide.",
+    "tags": [
+      "graphql",
+      "microservices",
+      "api"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Reliable Webhooks: Retries, Signatures, and Ordering",
+    "author": "Acadly Engineering",
+    "date": "2026-02-26",
+    "slug": "reliable-webhooks-retries-signatures-and-ordering",
+    "excerpt": "Technical deep dive #42: architecture decisions, implementation details, and production trade-offs for reliable webhooks: retries, signatures, and ordering.",
+    "tags": [
+      "webhooks",
+      "reliability",
+      "security"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Building a Typed SDK from OpenAPI",
+    "author": "Acadly Engineering",
+    "date": "2026-02-25",
+    "slug": "building-a-typed-sdk-from-openapi",
+    "excerpt": "Technical deep dive #43: architecture decisions, implementation details, and production trade-offs for building a typed sdk from openapi.",
+    "tags": [
+      "openapi",
+      "sdk",
+      "tooling"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Modern Password Hashing with Argon2id",
+    "author": "Acadly Engineering",
+    "date": "2026-02-24",
+    "slug": "modern-password-hashing-with-argon2id",
+    "excerpt": "Technical deep dive #44: architecture decisions, implementation details, and production trade-offs for modern password hashing with argon2id.",
+    "tags": [
+      "security",
+      "authentication",
+      "argon2"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Runtime Feature Flags with Safe Rollouts",
+    "author": "Acadly Engineering",
+    "date": "2026-02-23",
+    "slug": "runtime-feature-flags-with-safe-rollouts",
+    "excerpt": "Technical deep dive #45: architecture decisions, implementation details, and production trade-offs for runtime feature flags with safe rollouts.",
+    "tags": [
+      "release-engineering",
+      "flags",
+      "devops"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Data Lakehouse Architecture Explained",
+    "author": "Acadly Engineering",
+    "date": "2026-02-22",
+    "slug": "data-lakehouse-architecture-explained",
+    "excerpt": "Technical deep dive #46: architecture decisions, implementation details, and production trade-offs for data lakehouse architecture explained.",
+    "tags": [
+      "data",
+      "lakehouse",
+      "analytics"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Adaptive Caching with TinyLFU",
+    "author": "Acadly Engineering",
+    "date": "2026-02-21",
+    "slug": "adaptive-caching-with-tinylfu",
+    "excerpt": "Technical deep dive #47: architecture decisions, implementation details, and production trade-offs for adaptive caching with tinylfu.",
+    "tags": [
+      "caching",
+      "algorithms",
+      "backend"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Designing Multi-Region Active-Active Systems",
+    "author": "Acadly Engineering",
+    "date": "2026-02-20",
+    "slug": "designing-multi-region-active-active-systems",
+    "excerpt": "Technical deep dive #48: architecture decisions, implementation details, and production trade-offs for designing multi-region active-active systems.",
+    "tags": [
+      "distributed-systems",
+      "multi-region",
+      "sre"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "Schema Evolution in Avro and Protobuf",
+    "author": "Acadly Engineering",
+    "date": "2026-02-19",
+    "slug": "schema-evolution-in-avro-and-protobuf",
+    "excerpt": "Technical deep dive #49: architecture decisions, implementation details, and production trade-offs for schema evolution in avro and protobuf.",
+    "tags": [
+      "schema",
+      "avro",
+      "protobuf"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  },
+  {
+    "title": "A/B Testing Platforms: Metrics and Pitfalls",
+    "author": "Acadly Engineering",
+    "date": "2026-02-18",
+    "slug": "a-b-testing-platforms-metrics-and-pitfalls",
+    "excerpt": "Technical deep dive #50: architecture decisions, implementation details, and production trade-offs for a/b testing platforms: metrics and pitfalls.",
+    "tags": [
+      "experimentation",
+      "stats",
+      "product"
+    ],
+    "format": "markdown",
+    "ext": "md"
+  }
+]

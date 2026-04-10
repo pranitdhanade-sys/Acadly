@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "question": "What is the value of x in x + 5 = 9?",
+      "options": [
+        "4",
+        "5",
+        "9",
+        "14"
+      ],
+      "answer": "4"
+    },
+    {
+      "question": "Simplify: 3a + 2a",
+      "options": [
+        "5a",
+        "6a",
+        "a",
+        "3a2"
+      ],
+      "answer": "5a"
+    },
+    {
+      "question": "What is (a)(a)?",
+      "options": [
+        "a\u00b2",
+        "2a",
+        "a",
+        "a/2"
+      ],
+      "answer": "a\u00b2"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy — Log In</title>
+  <meta name="description" content="Log in to AcadLy." />
+
+  <script>
+    (function () {
+      try {
+        const saved = localStorage.getItem("acadly-auth-theme");
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const useDark = saved ? saved === "dark" : prefersDark;
+        document.documentElement.classList.toggle("dark", useDark);
+      } catch { }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          colors: {
+            brand: {
+              500: "#6B4FBB",
+              600: "#5E43B3",
+              700: "#5239A4",
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    referrerpolicy="no-referrer" />
+</head>
+
+<body class="min-h-dvh bg-slate-50 font-sans text-slate-900 antialiased dark:bg-[#2A2736] dark:text-white">
+  <main class="mx-auto flex min-h-dvh max-w-6xl items-center justify-center px-4 py-12">
+    <section class="w-full max-w-md">
+      <div class="flex items-center justify-between gap-4">
+        <a href="Homepage.html" class="inline-flex items-center gap-2 transition hover:opacity-80">
+          <img src="js/public 2.0/image.png" alt="AcadLy Logo" class="h-16 w-auto object-contain drop-shadow-sm">
+        </a>
+        <button id="themeToggle" type="button"
+          class="inline-flex items-center gap-2 rounded-md bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-white dark:bg-slate-800/60 dark:text-slate-200 dark:ring-white/10 dark:hover:bg-slate-800/80"
+          aria-label="Toggle theme">
+          <i id="themeIconSun" class="fa-solid fa-sun hidden text-amber-500"></i>
+          <i id="themeIconMoon" class="fa-solid fa-moon hidden text-slate-200"></i>
+          <span id="themeLabel">Theme</span>
+        </button>
+      </div>
+
+      <div
+        class="mt-8 rounded-2xl bg-white/80 p-6 shadow-[0_20px_60px_rgba(0,0,0,.08)] ring-1 ring-slate-200 dark:bg-slate-900/30 dark:shadow-[0_20px_60px_rgba(0,0,0,.35)] dark:ring-white/10">
+        <header>
+          <h1 class="text-3xl font-bold tracking-tight">Welcome back</h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Don't have an account?
+            <a href="signin.html" class="font-semibold text-brand-500 transition hover:text-brand-400">Sign up</a>
+          </p>
+        </header>
+
+        <form class="mt-6 space-y-4" id="loginForm">
+          <label class="block">
+            <span class="text-sm text-slate-700 dark:text-slate-200">Email</span>
+            <input id="emailInput"
+              class="mt-2 w-full rounded-md bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-1 ring-slate-200 transition focus:ring-2 focus:ring-brand-500/80 dark:bg-slate-800 dark:text-white dark:ring-transparent"
+              type="email" placeholder="you@acadly.com" autocomplete="email" required />
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-slate-700 dark:text-slate-200">Enter your password</span>
+            <div class="relative mt-2">
+              <input id="loginPassword"
+                class="w-full rounded-md bg-white px-4 py-3 pr-12 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-1 ring-slate-200 transition focus:ring-2 focus:ring-brand-500/80 dark:bg-slate-800 dark:text-white dark:ring-transparent"
+                type="password" placeholder="••••••••" autocomplete="current-password" required />
+              <button id="loginToggleBtn" type="button"
+                class="absolute inset-y-0 right-0 grid w-12 place-items-center text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+                aria-label="Show password">
+                <i id="loginEyeIcon" class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </label>
+
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex cursor-pointer items-center gap-3">
+              <input type="checkbox"
+                class="h-4 w-4 cursor-pointer rounded border-slate-300 text-brand-500 accent-brand-500 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800" />
+              <span class="text-sm text-slate-600 dark:text-slate-300">Remember me</span>
+            </label>
+            <a href="#" class="text-sm font-semibold text-brand-500 transition hover:text-brand-400">Forgot
+              password?</a>
+          </div>
+
+          <button type="submit"
+            class="mt-2 w-full rounded-md bg-brand-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/70 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-[#2A2736]">
+            Log in
+          </button>
+
+          <div class="my-6 flex items-center gap-4">
+            <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
+            <div class="text-xs font-medium text-slate-500 dark:text-slate-300">Or log in with</div>
+            <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-transparent px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 dark:border-white/15 dark:text-white/90 dark:hover:border-white/25 dark:hover:bg-white/5">
+              <span class="inline-flex h-5 w-5 items-center justify-center" aria-hidden="true">
+                <svg viewBox="0 0 48 48" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#EA4335"
+                    d="M24 9.5c3.54 0 6.72 1.22 9.23 3.6l6.9-6.9C35.96 2.33 30.36 0 24 0 14.64 0 6.51 5.38 2.56 13.22l8.04 6.24C12.54 13.02 17.83 9.5 24 9.5z" />
+                  <path fill="#4285F4"
+                    d="M46.5 24c0-1.58-.14-3.1-.4-4.58H24v9.02h12.66c-.55 2.96-2.2 5.47-4.66 7.17l7.2 5.57C43.44 37.18 46.5 31.08 46.5 24z" />
+                  <path fill="#FBBC05"
+                    d="M10.6 28.46A14.5 14.5 0 0 1 9.83 24c0-1.55.27-3.05.77-4.46l-8.04-6.24A23.93 23.93 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l8.04-6.32z" />
+                  <path fill="#34A853"
+                    d="M24 48c6.36 0 11.7-2.1 15.6-5.7l-7.2-5.57c-2 1.35-4.56 2.15-8.4 2.15-6.17 0-11.46-3.52-13.4-8.2l-8.04 6.32C6.51 42.62 14.64 48 24 48z" />
+                  <path fill="none" d="M0 0h48v48H0z" />
+                </svg>
+              </span>
+              Google
+            </button>
+
+            <button type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-transparent px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 dark:border-white/15 dark:text-white/90 dark:hover:border-white/25 dark:hover:bg-white/5">
+              <i class="fa-brands fa-apple text-slate-900 dark:text-white" aria-hidden="true"></i>
+              Apple
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script>
+    function syncThemeToggle() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const sun = document.getElementById("themeIconSun");
+      const moon = document.getElementById("themeIconMoon");
+      const label = document.getElementById("themeLabel");
+      if (sun) sun.classList.toggle("hidden", isDark);
+      if (moon) moon.classList.toggle("hidden", !isDark);
+      if (label) label.textContent = isDark ? "Night" : "Light";
+    }
+
+    document.getElementById("themeToggle")?.addEventListener("click", () => {
+      const root = document.documentElement;
+      const nextIsDark = !root.classList.contains("dark");
+      root.classList.toggle("dark", nextIsDark);
+      try {
+        localStorage.setItem("acadly-auth-theme", nextIsDark ? "dark" : "light");
+      } catch { }
+      syncThemeToggle();
+    });
+
+    function wirePasswordToggle({ inputId, buttonId, iconId }) {
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(buttonId);
+      const icon = document.getElementById(iconId);
+      if (!input || !btn || !icon) return;
+
+      btn.addEventListener("click", () => {
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+        icon.className = isHidden ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+      });
+    }
+
+    wirePasswordToggle({
+      inputId: "loginPassword",
+      buttonId: "loginToggleBtn",
+      iconId: "loginEyeIcon",
+    });
+
+    syncThemeToggle();
+
+    // Preserve "next" when user clicks "Sign up"
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const nextUrl = params.get("next") || "ai-assistant.html";
+      const signUpLink = document.querySelector('a[href="signin.html"]');
+      if (signUpLink) {
+        signUpLink.setAttribute(
+          "href",
+          "signin.html?next=" + encodeURIComponent(nextUrl)
+        );
+      }
+    } catch { }
+
+    function getStoredUserByEmail(email) {
+      try {
+        const raw = localStorage.getItem("acadly-user");
+        if (!raw) return null;
+        const user = JSON.parse(raw);
+        if (!user?.email) return null;
+        return user.email.toLowerCase() === String(email).toLowerCase() ? user : null;
+      } catch {
+        return null;
+      }
+    }
+
+    // Login form handling
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const params = new URLSearchParams(window.location.search);
+      const nextUrl = params.get('next') || 'ai-assistant.html';
+
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      // Disable button and show loading
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Logging in...';
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data?.error || 'Login failed');
+        }
+
+        window.AcadlyAuth?.setSession(data);
+        localStorage.setItem('acadly-last-login-at', new Date().toISOString());
+        window.location.href = nextUrl;
+      } catch (error) {
+        // Fallback mode for static frontend usage (no backend API).
+        const localUser = getStoredUserByEmail(email);
+        if (localUser && password) {
+          window.AcadlyAuth?.setSession({ user: localUser });
+          localStorage.setItem('acadly-authenticated', 'true');
+          localStorage.setItem('acadly-last-login-at', new Date().toISOString());
+          window.location.href = nextUrl;
+          return;
+        }
+
+        alert(error.message || 'Unable to login. Please check your credentials.');
+      } finally {
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log in';
+      }
+    });
+  </script>
+</body>
+
+</html>
