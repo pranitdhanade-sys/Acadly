@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcadLy Chatbot</title>
+  <meta name="description" content="AcadLy chatbot page with no login required." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6B4FBB',
+              600: '#5E43B3'
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <main class="mx-auto flex h-screen w-full max-w-6xl flex-col p-3 sm:p-4 md:p-6">
+    <header class="mb-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5">
+      <div>
+        <h1 class="text-base font-bold sm:text-lg">AcadLy Chatbot</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Direct access enabled — no login required</p>
+      </div>
+      <a href="Homepage.html" class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:border-white/15 dark:hover:bg-white/10">Home</a>
+    </header>
+
+    <section class="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
+      <div id="messages" class="flex-1 space-y-3 overflow-y-auto p-3 sm:p-4">
+        <div class="max-w-[92%] rounded-2xl bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800/80 sm:max-w-[80%]">
+          Hi! I am the AcadLy chatbot. Ask me anything and I will call the AI API.
+        </div>
+      </div>
+
+      <form id="chatForm" class="border-t border-slate-200 p-3 dark:border-white/10 sm:p-4">
+        <div class="flex items-end gap-2 sm:gap-3">
+          <textarea id="prompt" rows="1" placeholder="Type your message..."
+            class="max-h-40 min-h-[44px] w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-white/20 dark:bg-slate-900"></textarea>
+          <button type="submit" id="sendBtn"
+            class="h-11 shrink-0 rounded-xl bg-brand-500 px-4 text-sm font-semibold text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60">
+            Send
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const AI_URL = 'https://pseudoroyally-sulphuric-hector.ngrok-free.dev/ask';
+
+    const form = document.getElementById('chatForm');
+    const messages = document.getElementById('messages');
+    const prompt = document.getElementById('prompt');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function addMessage(text, role = 'bot') {
+      const el = document.createElement('div');
+      el.className = [
+        'max-w-[92%] rounded-2xl px-3 py-2 text-sm sm:max-w-[80%]',
+        role === 'user'
+          ? 'ml-auto bg-brand-500 text-white'
+          : 'bg-slate-100 text-slate-900 dark:bg-slate-800/80 dark:text-slate-100'
+      ].join(' ');
+      el.textContent = text;
+      messages.appendChild(el);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function askApi(question) {
+      const response = await fetch(AI_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '69420'
+        },
+        body: JSON.stringify({ question })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data?.error || `Server Error ${response.status}`);
+      }
+      return data?.answer || 'No answer returned.';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = prompt.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      prompt.value = '';
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+
+      try {
+        const answer = await askApi(text);
+        addMessage(answer);
+      } catch (err) {
+        addMessage(`Request failed: ${err.message}`);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
+        prompt.focus();
+      }
+    });
+  </script>
+</body>
+</html>
