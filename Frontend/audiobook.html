@@ -30,47 +30,8 @@
       },
     };
   </script>
-
-  <style>
-    :root {
-      --bg: 248 250 252;
-      --panel: 255 255 255;
-      --text: 15 23 42;
-      --muted: 71 85 105;
-      --ring: 34 211 238;
-      --ring2: 168 85 247;
-      --border: 226 232 240;
-    }
-
-    html.dark {
-      --bg: 2 6 23;
-      --panel: 15 23 42;
-      --text: 226 232 240;
-      --muted: 148 163 184;
-      --border: 51 65 85;
-    }
-
-    body {
-      background: rgb(var(--bg));
-      color: rgb(var(--text));
-    }
-
-    .glass {
-      background: linear-gradient(130deg, rgba(255, 255, 255, .86), rgba(255, 255, 255, .65));
-      backdrop-filter: blur(10px);
-    }
-
-    html.dark .glass {
-      background: linear-gradient(130deg, rgba(15, 23, 42, .88), rgba(15, 23, 42, .7));
-    }
-
-    .accent-text {
-      background: linear-gradient(90deg, rgba(var(--ring), 1), rgba(var(--ring2), 1));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  </style>
+  <link rel="stylesheet" href="CSS/audiobook.css">
+  
 </head>
 
 <body class="min-h-screen antialiased selection:bg-cyan-300/30 selection:text-slate-900 dark:selection:text-white">
@@ -90,7 +51,44 @@
   </header>
 
   <main class="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-12">
+    <!-- Upload Section -->
     <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700 lg:col-span-8">
+      <div class="mb-4 p-4 rounded-lg bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-700">
+        <h3 class="font-semibold text-cyan-900 dark:text-cyan-100 mb-2">
+          <i class="fas fa-cloud-arrow-up mr-2"></i> Upload Audiobooks
+        </h3>
+        <p class="text-sm text-cyan-800 dark:text-cyan-200 mb-3">
+          Upload MP3/WAV files from your NotebookLM audiobooks folder. Supported formats: MP3, M4A, WAV, OGG
+        </p>
+        
+        <!-- Drop Zone -->
+        <div id="uploadZone" class="border-2 border-dashed border-cyan-300 dark:border-cyan-600 rounded-lg p-6 text-center cursor-pointer hover:bg-cyan-100/30 dark:hover:bg-cyan-900/20 transition-all">
+          <input id="audiobookUpload" type="file" multiple accept=".mp3,.m4a,.wav,.ogg" class="hidden" />
+          <div id="uploadPrompt">
+            <i class="fas fa-music text-3xl text-cyan-400 mb-2 block"></i>
+            <p class="font-semibold text-slate-900 dark:text-slate-100">Drag audiobooks here or click to browse</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">You can upload multiple files at once</p>
+          </div>
+          <div id="uploadProgress" class="hidden space-y-2">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-spinner animate-spin text-cyan-400"></i>
+              <span id="uploadStatus" class="text-sm text-slate-600 dark:text-slate-300">Uploading...</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+              <div id="uploadBar" class="bg-cyan-500 h-2 rounded-full transition-all" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploaded Files List -->
+        <div id="uploadedList" class="mt-4 space-y-2 hidden">
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Recently Uploaded:</p>
+          <ul id="uploadedItems" class="space-y-1 text-sm"></ul>
+        </div>
+      </div>
+
+    <!-- Original Content -->
+    <section class="glass rounded-2xl border border-slate-200/80 p-5 shadow-sm dark:border-slate-700">
       <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 class="text-2xl font-bold md:text-3xl">Listen smarter with <span class="accent-text">focus-first</span> audiobooks</h2>
@@ -460,6 +458,7 @@
     totalMinutes.textContent = Math.round(state.totalMinutes);
     completedBooks.textContent = state.completed.size;
   </script>
+  <script src="js/audiobook-upload.js"></script>
 </body>
 
 </html>

@@ -3,99 +3,400 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acadly 3D Upload</title>
+    <title>Acadly 3D Upload - Model Upload & AI Generation</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+      .glass-effect {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(34, 211, 238, 0.2);
+      }
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      .slide-in { animation: slideIn 0.3s ease-out; }
+    </style>
   </head>
-  <body class="min-h-screen bg-slate-950 text-slate-100">
-    <main class="mx-auto max-w-3xl px-4 py-10">
-      <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-        <h1 class="text-2xl font-semibold text-cyan-300">3D Model Upload Hub</h1>
-        <p class="mt-2 text-sm text-slate-300">
-          Upload .glb/.gltf/.obj/.stl/.fbx files. File will be saved in
-          <code class="rounded bg-slate-800 px-1">Frontend/3d-models</code> and metadata in MongoDB.
-        </p>
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100">
+    <!-- Floating background -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+    </div>
 
-        <form id="modelUploadForm" class="mt-6 space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium">3D model file</label>
-            <input id="model" name="model" type="file" accept=".glb,.gltf,.obj,.stl,.fbx" required class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+    <main class="relative z-10 mx-auto max-w-4xl px-4 py-10">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">
+          <i class="fas fa-cube mr-3"></i> 3D Model Hub
+        </h1>
+        <p class="text-slate-400">Upload 3D models or generate them using AI instructions</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-6 sticky top-4 z-20">
+        <button id="tabUpload" class="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold transition-all">
+          <i class="fas fa-upload"></i> Upload Model
+        </button>
+        <button id="tabGenerate" class="flex items-center gap-2 px-6 py-3 rounded-lg glass-effect text-slate-300 font-semibold hover:bg-slate-800/50 transition-all">
+          <i class="fas fa-wand-magic-sparkles"></i> Generate with AI
+        </button>
+      </div>
+
+      <!-- UPLOAD SECTION -->
+      <section id="uploadSection" class="glass-effect rounded-2xl p-8 mb-8">
+        <h2 class="text-2xl font-bold mb-2 text-cyan-300">Upload 3D Model</h2>
+        <p class="text-sm text-slate-400 mb-6">Supports GLB, GLTF, OBJ, STL, and FBX formats</p>
+
+        <form id="modelUploadForm" class="space-y-5">
+          <!-- File Upload -->
+          <div class="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-cyan-500/50 transition-all cursor-pointer" id="dropZone">
+            <input id="model" name="model" type="file" accept=".glb,.gltf,.obj,.stl,.fbx" required class="hidden" />
+            <div id="uploadPrompt">
+              <i class="fas fa-cloud-arrow-up text-4xl text-cyan-400 mb-3 block"></i>
+              <p class="text-slate-200 font-semibold mb-1">Drag files here or click to browse</p>
+              <p class="text-sm text-slate-400">Maximum 100MB per file</p>
+            </div>
+            <div id="fileSelected" class="hidden">
+              <i class="fas fa-check-circle text-3xl text-emerald-400 mb-3 block"></i>
+              <p id="fileName" class="text-slate-200 font-semibold"></p>
+              <p id="fileSize" class="text-sm text-slate-400 mt-1"></p>
+            </div>
           </div>
 
+          <!-- Metadata Grid -->
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="mb-1 block text-sm font-medium">Title</label>
-              <input name="title" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Human Heart Model" />
+              <label class="block text-sm font-medium mb-2 text-cyan-300">Model Title</label>
+              <input name="title" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30" placeholder="e.g., Human Heart" />
             </div>
             <div>
-              <label class="mb-1 block text-sm font-medium">Tags (comma separated)</label>
-              <input name="tags" type="text" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="biology, anatomy, organ" />
+              <label class="block text-sm font-medium mb-2 text-cyan-300">Category</label>
+              <select name="category" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-cyan-500">
+                <option value="">Select Category</option>
+                <option value="anatomy">🧬 Anatomy</option>
+                <option value="biology">🧪 Biology</option>
+                <option value="architecture">🏛️ Architecture</option>
+                <option value="mechanical">⚙️ Mechanical</option>
+                <option value="nature">🌿 Nature</option>
+                <option value="technology">🔬 Technology</option>
+              </select>
             </div>
           </div>
 
           <div>
-            <label class="mb-1 block text-sm font-medium">Description</label>
-            <textarea name="description" rows="4" class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Explain what this 3D model demonstrates..."></textarea>
+            <label class="block text-sm font-medium mb-2 text-cyan-300">Tags (comma separated)</label>
+            <input name="tags" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-cyan-500" placeholder="anatomy, human, organ, heart" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2 text-cyan-300">Description</label>
+            <textarea name="description" rows="4" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 resize-none" placeholder="Explain what this 3D model demonstrates..."></textarea>
           </div>
 
           <div class="flex flex-wrap gap-3">
-            <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400">
-              Upload 3D Model
+            <button type="submit" class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 font-semibold text-white hover:shadow-lg hover:shadow-cyan-500/50 transition-all">
+              <i class="fas fa-rocket"></i> Upload Model
             </button>
-            <a href="3d-lab.html" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">
-              Open 3D Lab
+            <a href="3d-lab.html" class="flex items-center gap-2 rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition-all">
+              <i class="fas fa-arrow-left"></i> Back to Lab
             </a>
           </div>
-        </form>
 
-        <div id="status" class="mt-4 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-300">
-          Waiting for upload…
-        </div>
-      </div>
+          <div id="uploadStatus" class="rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300 hidden">
+            <i class="fas fa-circle-info text-cyan-400 mr-2"></i> Waiting for upload…
+          </div>
+        </form>
+      </section>
+
+      <!-- GENERATE WITH AI SECTION -->
+      <section id="generateSection" class="glass-effect rounded-2xl p-8 hidden">
+        <h2 class="text-2xl font-bold mb-2 text-purple-300">Generate 3D Model with AI</h2>
+        <p class="text-sm text-slate-400 mb-6">Describe your 3D model and let AI generate it for you</p>
+
+        <form id="aiGenerateForm" class="space-y-5">
+          <!-- Instructions Input -->
+          <div>
+            <label class="block text-sm font-medium mb-2 text-purple-300">Your Instructions</label>
+            <textarea id="aiInstructions" rows="4" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-3 text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 resize-none" placeholder="Example: Create a 3D model of a DNA double helix structure with accurate proportions and twisted shape. Include detailed base pairs along the spiral with connected phosphate-sugar backbone chains. Make it scientifically accurate with smooth textures and realistic colors - use blue for one strand and reddish color for the other." required></textarea>
+            <p class="mt-2 text-xs text-slate-500">
+              <i class="fas fa-lightbulb mr-1"></i> Be specific! Include colors, proportions, textures, scientific accuracy, and educational details
+            </p>
+          </div>
+
+          <!-- Preset Examples -->
+          <div>
+            <label class="block text-sm font-medium mb-2 text-slate-300">Quick Templates</label>
+            <div id="presetButtons" class="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="DNA">
+                <i class="fas fa-dna"></i> DNA Helix
+              </button>
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="ATOM">
+                <i class="fas fa-atom"></i> Atom Model
+              </button>
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="CELL">
+                <i class="fas fa-circle"></i> Cell Structure
+              </button>
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="BRAIN">
+                <i class="fas fa-brain"></i> Brain Model
+              </button>
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="HEART">
+                <i class="fas fa-heart"></i> Heart Anatomy
+              </button>
+              <button type="button" class="preset-btn rounded-lg border border-slate-700 hover:border-purple-500 bg-slate-900/50 hover:bg-slate-800 px-4 py-2 text-sm text-slate-300 transition-all" data-template="MOLECULE">
+                <i class="fas fa-flask"></i> Molecule
+              </button>
+            </div>
+          </div>
+
+          <!-- Output Settings -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium mb-2 text-purple-300">Model Title</label>
+              <input id="aiTitle" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-purple-500" placeholder="AI Generated Model" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2 text-purple-300">Quality</label>
+              <select id="aiQuality" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                <option value="low">Low (Faster)</option>
+                <option value="medium" selected>Medium (Balanced)</option>
+                <option value="high">High (Detailed)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2 text-purple-300">Tags</label>
+            <input id="aiTags" type="text" class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm focus:outline-none focus:border-purple-500" placeholder="education, science, generated" />
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="submit" class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 font-semibold text-white hover:shadow-lg hover:shadow-purple-500/50 transition-all">
+              <i class="fas fa-wand-magic-sparkles"></i> Generate Model
+            </button>
+            <a href="3d-lab.html" class="flex items-center gap-2 rounded-lg border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition-all">
+              <i class="fas fa-arrow-left"></i> Back
+            </a>
+          </div>
+
+          <div id="aiStatus" class="rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300 hidden">
+            <i class="fas fa-spinner animate-spin mr-2"></i> <span id="aiStatusText">Ready to generate...</span>
+          </div>
+        </form>
+      </section>
     </main>
 
     <script>
-      const form = document.getElementById("modelUploadForm");
-      const statusBox = document.getElementById("status");
+      const tabUpload = document.getElementById('tabUpload');
+      const tabGenerate = document.getElementById('tabGenerate');
+      const uploadSection = document.getElementById('uploadSection');
+      const generateSection = document.getElementById('generateSection');
+      const fileInput = document.getElementById('model');
+      const dropZone = document.getElementById('dropZone');
+      const uploadPrompt = document.getElementById('uploadPrompt');
+      const fileSelected = document.getElementById('fileSelected');
+      const uploadForm = document.getElementById('modelUploadForm');
+      const uploadStatus = document.getElementById('uploadStatus');
+      const aiForm = document.getElementById('aiGenerateForm');
+      const aiInstructions = document.getElementById('aiInstructions');
+      const aiQuality = document.getElementById('aiQuality');
+      const aiTitle = document.getElementById('aiTitle');
+      const aiTags = document.getElementById('aiTags');
+      const aiStatus = document.getElementById('aiStatus');
+      const aiStatusText = document.getElementById('aiStatusText');
+      const presetButtons = document.querySelectorAll('.preset-btn');
 
-      function setStatus(message, tone = "info") {
-        const tones = {
-          info: "border-slate-800 text-slate-300",
-          success: "border-emerald-700 text-emerald-300",
-          error: "border-red-700 text-red-300",
-        };
-        statusBox.className = `mt-4 rounded-lg bg-slate-950 p-3 text-sm ${tones[tone] || tones.info}`;
-        statusBox.textContent = message;
-      }
+      // Template presets
+      const templates = {
+        DNA: `Create a scientifically accurate 3D model of a DNA double helix structure. Include:
+- Two intertwined helical strands
+- Base pairs (A, T, G, C) connecting the strands
+- Phosphate-sugar backbone clearly visible
+- Color one strand blue and the other red-orange for clarity
+- Smooth, realistic textures with proper proportions
+- Educational reference points for major and minor grooves`,
+        
+        ATOM: `Generate a 3D atomic model showing:
+- A nucleus at the center (dark color, small sphere)
+- Electron orbital shells around the nucleus
+- Electrons represented as small spheres on the orbital paths
+- Use colors: yellow/gold for nucleus, blue for electron shells
+- Make it scientifically accurate with proper scale representation
+- Include 2-3 electron shells for a medium-sized atom`,
+        
+        CELL: `Create a detailed 3D cell structure model with:
+- Cell membrane (semi-transparent outer layer)
+- Nucleus (large central sphere with visible nucleolus)
+- Mitochondria (bean-shaped organelles)
+- Endoplasmic reticulum (stack-like structures)
+- Ribosomes (small dots on ER)
+- Use vibrant colors for different organelles
+- Make it cutaway view to show internal structure`,
+        
+        BRAIN: `Model a human brain with:
+- Two hemispheres with visible sulci and gyri
+- Different regions color-coded by function
+- Cerebellum at the back
+- The main structures clearly distinguishable
+- Realistic shape and proportions
+- Smooth surface with anatomical accuracy`,
+        
+        HEART: `Generate a human heart model showing:
+- Four chambers (left/right atria and ventricles)
+- Major blood vessels (aorta, pulmonary artery, vena cava, pulmonary vein)
+- Color chambers by oxygenation level (red and blue)
+- Anatomically accurate valve positions
+- Slightly cutaway view to show internal chambers
+- Educational labels ready for annotation`,
+        
+        MOLECULE: `Create a 3D molecule model of your choice (H2O, CO2, or glucose):
+- Atoms represented as colored spheres (C=black, H=white, O=red, N=blue)
+- Bonds shown as connecting rods or cylinders
+- Proper 3D geometry and bond angles
+- Realistic chemical structure
+- Use ball-and-stick model style
+- Make it suitable for chemistry education`
+      };
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+      // Tab switching
+      tabUpload.addEventListener('click', () => {
+        uploadSection.classList.remove('hidden');
+        generateSection.classList.add('hidden');
+        tabUpload.classList.replace('glass-effect', 'bg-gradient-to-r from-cyan-500 to-blue-600');
+        tabUpload.classList.add('text-white');
+        tabGenerate.classList.add('glass-effect');
+        tabGenerate.classList.remove('text-white');
+        tabGenerate.classList.add('text-slate-300');
+      });
 
-        const fileInput = document.getElementById("model");
-        if (!fileInput.files.length) {
-          setStatus("Please choose a 3D model file first.", "error");
-          return;
+      tabGenerate.addEventListener('click', () => {
+        generateSection.classList.remove('hidden');
+        uploadSection.classList.add('hidden');
+        tabGenerate.classList.replace('glass-effect', 'bg-gradient-to-r from-purple-500 to-pink-600');
+        tabGenerate.classList.add('text-white');
+        tabUpload.classList.add('glass-effect');
+        tabUpload.classList.remove('text-white');
+        tabUpload.classList.add('text-slate-300');
+      });
+
+      // File upload handling
+      dropZone.addEventListener('click', () => fileInput.click());
+      
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          uploadPrompt.classList.add('hidden');
+          fileSelected.classList.remove('hidden');
+          document.getElementById('fileName').textContent = file.name;
+          document.getElementById('fileSize').textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
         }
+      });
 
-        const formData = new FormData(form);
-        setStatus("Uploading model… please wait.");
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-cyan-500');
+        dropZone.classList.add('bg-cyan-500/5');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-cyan-500');
+        dropZone.classList.remove('bg-cyan-500/5');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-cyan-500');
+        dropZone.classList.remove('bg-cyan-500/5');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+          fileInput.files = files;
+          const event = new Event('change', { bubbles: true });
+          fileInput.dispatchEvent(event);
+        }
+      });
+
+      // Upload form
+      uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(uploadForm);
+        
+        uploadStatus.classList.remove('hidden');
+        uploadStatus.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Uploading model...';
 
         try {
-          const response = await fetch("/api/models/upload", {
-            method: "POST",
-            body: formData,
+          const response = await fetch('/api/models/upload', {
+            method: 'POST',
+            body: formData
           });
 
           const result = await response.json().catch(() => ({}));
+          
           if (!response.ok) {
-            throw new Error(result.detail || result.error || "Upload failed");
+            throw new Error(result.error || result.detail || 'Upload failed');
           }
 
-          setStatus(`Upload complete. Model ID: ${result.id}`, "success");
-          form.reset();
+          uploadStatus.classList.remove('hidden');
+          uploadStatus.classList.add('bg-emerald-900/20', 'border-emerald-700');
+          uploadStatus.innerHTML = `<i class="fas fa-check-circle text-emerald-400 mr-2"></i> ✓ Upload complete! Model ID: ${result.id}`;
+          uploadForm.reset();
+          fileSelected.classList.add('hidden');
+          uploadPrompt.classList.remove('hidden');
         } catch (error) {
-          setStatus(`Upload failed: ${error.message}`, "error");
+          uploadStatus.classList.remove('hidden');
+          uploadStatus.classList.add('bg-red-900/20', 'border-red-700', 'text-red-300');
+          uploadStatus.innerHTML = `<i class="fas fa-exclamation-circle text-red-400 mr-2"></i> Error: ${error.message}`;
+        }
+      });
+
+      // Preset template buttons
+      presetButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const template = btn.dataset.template;
+          aiInstructions.value = templates[template] || '';
+          aiTitle.value = btn.textContent.trim();
+          aiInstructions.focus();
+        });
+      });
+
+      // AI Generation form
+      aiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        aiStatus.classList.remove('hidden');
+        aiStatusText.textContent = 'Processing your instructions... Starting AI generation...';
+
+        try {
+          const payload = {
+            instructions: aiInstructions.value,
+            title: aiTitle.value || 'AI Generated Model',
+            quality: aiQuality.value,
+            tags: aiTags.value.split(',').map(t => t.trim()).filter(t => t)
+          };
+
+          const response = await fetch('/api/models/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(result.error || result.detail || 'Generation failed');
+          }
+
+          aiStatus.classList.add('bg-emerald-900/20', 'border-emerald-700');
+          aiStatusText.innerHTML = `<i class="fas fa-check-circle text-emerald-400 mr-2"></i> ✓ Model generated! Model ID: ${result.id}`;
+          aiForm.reset();
+          aiInstructions.value = '';
+        } catch (error) {
+          aiStatus.classList.add('bg-red-900/20', 'border-red-700');
+          aiStatusText.innerHTML = `<i class="fas fa-exclamation-circle text-red-400 mr-2"></i> Error: ${error.message}`;
         }
       });
     </script>
   </body>
+</html>
 </html>

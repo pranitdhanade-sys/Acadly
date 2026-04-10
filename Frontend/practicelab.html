@@ -4,188 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Practice The Lab (PTL)</title>
-<style>
-  :root {
-    --bg: #030712;
-    --card: #111827;
-    --line: #1f2937;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --accent: #4f46e5;
-    --accent-soft: rgba(79, 70, 229, 0.2);
-    --success: #22c55e;
-  }
+<link rel="stylesheet" href="CSS/practicelab.css">
 
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color: var(--text);
-    background: radial-gradient(circle at 10% 0%, #111827, var(--bg) 45%);
-    min-height: 100vh;
-  }
-
-  .wrap {
-    max-width: 1160px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-  }
-
-  .hero {
-    border: 1px solid var(--line);
-    background: linear-gradient(130deg, rgba(79,70,229,0.28), rgba(17,24,39,0.8));
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 20px;
-  }
-
-  .hero h1 {
-    margin: 0 0 8px;
-    font-size: clamp(1.4rem, 2.7vw, 2rem);
-  }
-
-  .hero p {
-    margin: 0;
-    color: var(--muted);
-    max-width: 760px;
-  }
-
-  .toolbar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .toolbar input,
-  .toolbar select {
-    width: 100%;
-    border: 1px solid var(--line);
-    background: var(--card);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
-  }
-
-  .machine {
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgba(17, 24, 39, 0.85);
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .pill {
-    display: inline-flex;
-    border: 1px solid var(--line);
-    background: #0b1220;
-    border-radius: 999px;
-    padding: 3px 9px;
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
-
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .machine h3 {
-    margin: 0;
-    font-size: 1.05rem;
-  }
-
-  .machine p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-    line-height: 1.4;
-  }
-
-  .machine button,
-  .lab-panel button {
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .primary {
-    background: var(--accent);
-  }
-
-  .primary:hover {
-    filter: brightness(1.1);
-  }
-
-  .panel-wrap {
-    margin-top: 22px;
-  }
-
-  .lab-panel {
-    border: 1px solid var(--line);
-    background: var(--card);
-    border-radius: 14px;
-    padding: 16px;
-  }
-
-  .lab-panel h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
-  }
-
-  .lab-panel ul {
-    color: var(--muted);
-    line-height: 1.5;
-    margin-top: 10px;
-  }
-
-  .connection {
-    border: 1px dashed #374151;
-    background: #0b1220;
-    border-radius: 10px;
-    padding: 10px;
-    margin-top: 12px;
-    font-size: 0.87rem;
-  }
-
-  .flag-box {
-    margin-top: 14px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .flag-box input {
-    flex: 1;
-    min-width: 230px;
-    border: 1px solid var(--line);
-    background: #0b1220;
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  #status {
-    margin-top: 10px;
-    font-size: 0.9rem;
-  }
-
-  .ok { color: var(--success); }
-  .muted { color: var(--muted); }
-</style>
 </head>
 <body>
 
@@ -236,13 +56,6 @@
   <div id="testArea" hidden>
     <div id="testMeta" class="meta"></div>
     <div id="questionsList"></div>
-  </div>
-
-  <div class="labs-preview">
-    <h3>Command Learning Labs</h3>
-    <div id="labsMeta" class="meta">Loading labs...</div>
-    <div class="labs-grid" id="labsGrid"></div>
-    <a class="labs-link" href="/practicallab">Open full Practical Labs page →</a>
   </div>
 </div>
 
@@ -339,10 +152,15 @@ function startLab() {
     .then((data) => {
       renderTest(data);
     })
-    .catch((err) => {
-      alert(err.message);
-      console.error(err);
-  <main class="wrap">
+      .catch((err) => {
+        alert(err.message);
+        console.error(err);
+      });
+    }
+  </script>
+  
+  </body>
+  </html>
     <section class="hero">
       <h1>Practice The Lab (PTL)</h1>
       <p>
@@ -394,32 +212,6 @@ function startLab() {
       track: trackSelect.value,
       difficulty: difficultySelect.value,
     });
-}
-
-function loadLabsPreview() {
-  const labsMeta = document.getElementById('labsMeta');
-  const labsGrid = document.getElementById('labsGrid');
-
-  fetch('/api/ptl/labs')
-    .then((res) => res.json())
-    .then((payload) => {
-      const labs = Array.isArray(payload.labs) ? payload.labs : [];
-      labsMeta.textContent = `${labs.length} practical lab(s) available.`;
-      labsGrid.innerHTML = labs.slice(0, 6).map((lab) => `
-        <div class="lab-tile">
-          <h4>${lab.name}</h4>
-          <p>${lab.track} • ${lab.level} • ${lab.taskCount} tasks</p>
-        </div>
-      `).join('');
-    })
-    .catch(() => {
-      labsMeta.textContent = 'Could not load practical labs.';
-      labsGrid.innerHTML = '';
-    });
-}
-
-loadLabsPreview();
-</script>
 
     const response = await fetch(`/api/ptl/machines?${params.toString()}`);
     if (!response.ok) throw new Error('Could not load machines right now.');

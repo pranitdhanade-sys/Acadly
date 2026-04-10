@@ -7,6 +7,7 @@ const generateBtn = document.getElementById('generateBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const previewBtn = document.getElementById('previewBtn');
 const metadataPreview = document.getElementById('metadataPreview');
+const metadataText = metadataPreview?.parentElement?.querySelector('#metadataText') || document.createElement('span');
 
 const titleInput = document.getElementById('title');
 const authorInput = document.getElementById('author');
@@ -19,6 +20,8 @@ const italicBtn = document.getElementById('italicBtn');
 const h2Btn = document.getElementById('h2Btn');
 
 let activeMode = 'markdown';
+const BLOG_METADATA_KEY = 'acadly-blog-metadata';
+const BLOG_DRAFT_KEY = 'acadly-blog-draft';
 
 function setMode(mode) {
   activeMode = mode;
@@ -40,15 +43,19 @@ function createSlug(text) {
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/-+/g, '-')
+    .slice(0, 50);
 }
 
 function toMarkdownFromRich(html) {
   return html
     .replace(/<h2>(.*?)<\/h2>/gi, '## $1\n\n')
+    .replace(/<h3>(.*?)<\/h3>/gi, '### $1\n\n')
     .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
     .replace(/<em>(.*?)<\/em>/gi, '*$1*')
-    .replace(/<br\s*\/?/gi, '\n')
+    .replace(/<code class="tok-code">(.*?)<\/code>/gi, '`$1`')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li>(.*?)<\/li>/gi, '- $1\n')
     .replace(/<[^>]+>/g, '')
     .trim();
 }
@@ -57,33 +64,75 @@ function renderPreview() {
   const content = currentContent();
 
   if (!content) {
-    preview.innerHTML = '<em>Nothing to preview yet.</em>';
+    preview.innerHTML = '<p class="text-slate-400 italic">Nothing to preview yet. Start writing below...</p>';
     return;
   }
 
-  if (activeMode === 'latex') {
-    preview.innerHTML = `$$${content}$$`;
-  } else if (activeMode === 'rich') {
-    preview.innerHTML = content;
-  } else {
-    preview.innerHTML = marked.parse(content);
-  }
+  try {
+    if (activeMode === 'latex') {
+      preview.innerHTML = `<div class="text-center p-4">$$${content}$$</div>`;
+    } else if (activeMode === 'rich') {
+      preview.innerHTML = content;
+    } else {
+      preview.innerHTML = marked.parse(content);
+    }
 
-  if (window.renderMathInElement) {
-    window.renderMathInElement(preview, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false }
-      ]
-    });
+    if (window.renderMathInElement) {
+      window.renderMathInElement(preview, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '\\[', right: '\\]', display: true }
+        ]
+      });
+    }
+  } catch (e) {
+    preview.innerHTML = `<p class="text-red-400">Error rendering preview: ${e.message}</p>`;
   }
 }
 
+function saveDraft() {
+  const draft = {
+    title: titleInput.value,
+    author: authorInput.value,
+    tags: tagsInput.value,
+    slug: slugInput.value,
+    excerpt: excerptInput.value,
+    content: currentContent(),
+    mode: activeMode,
+    savedAt: new Date().toISOString()
+  };
+  try {
+    localStorage.setItem(BLOG_DRAFT_KEY, JSON.stringify(draft));
+  } catch {}
+}
+
+function loadDraft() {
+  try {
+    const draft = JSON.parse(localStorage.getItem(BLOG_DRAFT_KEY) || '{}');
+    if (draft.title) {
+      titleInput.value = draft.title;
+      authorInput.value = draft.author || '';
+      tagsInput.value = draft.tags || '';
+      slugInput.value = draft.slug || '';
+      excerptInput.value = draft.excerpt || '';
+      
+      if (draft.mode === 'markdown') markdownEditor.value = draft.content || '';
+      else if (draft.mode === 'rich') richEditor.innerHTML = draft.content || '';
+      else if (draft.mode === 'latex') latexEditor.value = draft.content || '';
+      
+      setMode(draft.mode || 'markdown');
+      renderPreview();
+    }
+  } catch {}
+}
+
 function buildOutput() {
-  const title = titleInput.value.trim();
+  const title = titleInput.value.trim() || 'Untitled Blog';
   const author = authorInput.value.trim() || 'Acadly Contributor';
   const date = new Date().toISOString().slice(0, 10);
-  const slug = (slugInput.value.trim() || createSlug(title || 'blog-post'));
+  const slug = (slugInput.value.trim() || createSlug(title)).toLowerCase();
   const tags = tagsInput.value.split(',').map((tag) => tag.trim()).filter(Boolean);
   const excerpt = excerptInput.value.trim();
 
@@ -95,7 +144,7 @@ function buildOutput() {
     content = `$$\n${content}\n$$`;
   }
 
-  const metadataObject = {
+  const metadata = {
     title,
     author,
     date,
@@ -106,29 +155,46 @@ function buildOutput() {
     ext: 'md'
   };
 
-  const metadataText = JSON.stringify(metadataObject, null, 2);
-  const finalFileText = `# ${title || 'Untitled'}\n\n${content}`;
+  const finalFileText = `---\ntitle: ${title}\nauthor: ${author}\ndate: ${date}\ntags: ${tags.join(', ')}\n---\n\n# ${title}\n\n${content}`;
 
-  metadataPreview.textContent = `Add this object in Frontend/blogs/metadata.json:\n\n${metadataText}`;
+  // Show success message
+  if (metadataPreview) {
+    metadataPreview.classList.remove('hidden');
+    if (metadataText) metadataText.textContent = `✓ Blog generated! Filename: "${slug}.md"`;
+  }
 
-  return { slug, finalFileText };
+  return { slug, finalFileText, metadata };
 }
 
 function downloadFile(filename, text) {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+  
+  // Clear draft after download
+  setTimeout(() => {
+    try {
+      localStorage.removeItem(BLOG_DRAFT_KEY);
+    } catch {}
+  }, 1000);
 }
 
+// Event Listeners
 tabs.forEach((tab) => {
-  tab.addEventListener('click', () => setMode(tab.dataset.mode));
+  tab.addEventListener('click', () => {
+    setMode(tab.dataset.mode);
+    setTimeout(() => renderPreview(), 100);
+  });
 });
 
-previewBtn.addEventListener('click', renderPreview);
+previewBtn.addEventListener('click', () => {
+  renderPreview();
+  alert('Preview updated!');
+});
 
 generateBtn.addEventListener('click', () => {
   buildOutput();
@@ -138,15 +204,75 @@ generateBtn.addEventListener('click', () => {
 downloadBtn.addEventListener('click', () => {
   const { slug, finalFileText } = buildOutput();
   downloadFile(`${slug}.md`, finalFileText);
+  alert(`✓ Blog downloaded as ${slug}.md\n\nNext step: Add this entry to Frontend/blogs/metadata.json`);
+});
+
+h2Btn.addEventListener('click', () => {
+  if (activeMode === 'rich') {
+    document.execCommand('formatBlock', false, '<h2>');
+  } else if (activeMode === 'markdown') {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.substring(start, end);
+    markdownEditor.value = markdownEditor.value.substring(0, start) + 
+                           `## ${selected || 'Heading'}` + 
+                           markdownEditor.value.substring(end);
+    renderPreview();
+  }
 });
 
 boldBtn.addEventListener('click', () => {
-  if (activeMode === 'rich') document.execCommand('bold');
+  if (activeMode === 'rich') {
+    document.execCommand('bold');
+  } else if (activeMode === 'markdown') {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.substring(start, end);
+    markdownEditor.value = markdownEditor.value.substring(0, start) + 
+                           `**${selected || 'bold'}**` + 
+                           markdownEditor.value.substring(end);
+    renderPreview();
+  }
 });
 
 italicBtn.addEventListener('click', () => {
-  if (activeMode === 'rich') document.execCommand('italic');
+  if (activeMode === 'rich') {
+    document.execCommand('italic');
+  } else if (activeMode === 'markdown') {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.substring(start, end);
+    markdownEditor.value = markdownEditor.value.substring(0, start) + 
+                           `*${selected || 'italic'}*` + 
+                           markdownEditor.value.substring(end);
+    renderPreview();
+  }
 });
+
+// Auto-save draft every 30 seconds
+setInterval(saveDraft, 30000);
+
+// Save draft on input
+[markdownEditor, richEditor, latexEditor, titleInput, authorInput, tagsInput, slugInput, excerptInput].forEach(el => {
+  if (el) el.addEventListener('input', saveDraft);
+});
+
+// Auto-update slug when title changes
+titleInput.addEventListener('blur', () => {
+  if (!slugInput.value) {
+    slugInput.value = createSlug(titleInput.value);
+  }
+});
+
+// Live preview on input
+markdownEditor.addEventListener('input', renderPreview);
+richEditor.addEventListener('input', renderPreview);
+latexEditor.addEventListener('input', renderPreview);
+
+// Initialize
+loadDraft();
+setTimeout(() => renderPreview(), 500);
+
 
 h2Btn.addEventListener('click', () => {
   if (activeMode === 'rich') document.execCommand('formatBlock', false, 'h2');
