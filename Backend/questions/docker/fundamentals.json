@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "id": "docker-easy-1",
+      "prompt": "Which Docker command lists running containers?",
+      "topic": "Docker",
+      "difficulty": "easy",
+      "type": "mcq",
+      "tags": ["docker", "cli", "containers"],
+      "options": ["docker ps", "docker images", "docker ls", "docker inspect"],
+      "correctAnswer": "docker ps",
+      "explanation": "docker ps shows active containers; add -a to include stopped containers.",
+      "weight": 1
+    },
+    {
+      "id": "docker-medium-1",
+      "prompt": "Write a function addNumbers(a, b) that returns the sum of two numbers.",
+      "topic": "Docker",
+      "difficulty": "medium",
+      "type": "coding",
+      "tags": ["javascript", "coding", "functions"],
+      "correctAnswer": null,
+      "explanation": "The solution should return a + b for any numeric input.",
+      "weight": 2,
+      "coding": {
+        "language": "javascript",
+        "functionName": "addNumbers",
+        "starterCode": "function addNumbers(a, b) {\n  // TODO\n}",
+        "testCases": [
+          {
+            "description": "adds positive numbers",
+            "input": [2, 3],
+            "expectedOutput": 5
+          },
+          {
+            "description": "adds negative and positive",
+            "input": [-4, 10],
+            "expectedOutput": 6
+          }
+        ]
+      }
+    }
+  ]
+}
