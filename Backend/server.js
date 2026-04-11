@@ -204,6 +204,16 @@ try {
   console.warn("⚠️  Practice lab routes not found:", err.message);
 }
 
+
+// Practical lab routes (CTF-style ephemeral Docker/Kubernetes environments)
+try {
+  const practicalLabRoutes = require('./routes/practical-lab');
+  app.use('/api/practical-labs', practicalLabRoutes);
+  console.log('✅ Practical lab routes mounted at /api/practical-labs');
+} catch (err) {
+  console.warn('⚠️  Practical lab routes not found:', err.message);
+}
+
 // Blog listing page
 app.get("/blogs", (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, "blogs.html"));

@@ -1,0 +1,41 @@
+{
+  "id": "docker-misconfig-001",
+  "title": "Docker Misconfiguration Lab",
+  "category": "docker",
+  "difficulty": "medium",
+  "timeoutMinutes": 45,
+  "maxAttempts": 5,
+  "problemStatement": "A customer support container is running with insecure permissions. Investigate the container, identify the risk, and recover the flag from exposed host data.",
+  "objective": "Find and submit the flag located on an exposed host mount.",
+  "hints": [
+    "Run docker inspect and look for privileged=true or dangerous bind mounts.",
+    "Check mounted host paths from inside the container.",
+    "Look for /host/opt/flags or similar directories."
+  ],
+  "guide": [
+    "Step 1: Enumerate running containers and inspect security options.",
+    "Step 2: Enter the vulnerable container shell.",
+    "Step 3: Explore mounted host directories and recover the flag.",
+    "Step 4: Submit the exact flag text."
+  ],
+  "flag": "PTL{docker_bind_mount_exposure}",
+  "runtime": {
+    "provider": "docker",
+    "image": "ghcr.io/acadly/labs/docker-misconfig:latest",
+    "ports": [
+      {
+        "container": 22,
+        "host": 2222
+      }
+    ],
+    "env": {
+      "LAB_MODE": "ctf"
+    },
+    "shell": {
+      "type": "exec",
+      "command": [
+        "/bin/sh"
+      ]
+    }
+  }
+}
