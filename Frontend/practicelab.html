@@ -80,6 +80,68 @@
       topicSelect.innerHTML = topics.map((topic) => `<option>${topic}</option>`).join("");
     }
 
+    const SUBJECT_TOPIC_PATHS = {
+      Physics: ["Gravity", "Thermodynamics", "Electricity"],
+      Chemistry: ["Organic Chemistry", "Inorganic Chemistry"],
+      Mathematics: ["Algebra"],
+      "Computer Science": ["Data Structures"],
+    };
+
+    function normalizeQuestions(raw, meta = {}) {
+      const source = Array.isArray(raw) ? raw : Array.isArray(raw?.questions) ? raw.questions : [];
+      return source
+        .filter((item) => item && (item.question || item.prompt))
+        .map((item) => ({
+          question: item.question || item.prompt,
+          options: Array.isArray(item.options) ? item.options : [],
+          answer: item.answer || item.correctAnswer || "",
+          subject: meta.subject || item.subject || "",
+          topic: meta.topic || item.topic || "",
+          difficulty: meta.difficulty || item.difficulty || "",
+        }));
+    }
+
+    async function loadTopicQuestions(subject, topic, difficulty) {
+      const topicPath = encodeURIComponent(topic);
+      const filePath = `../Questions/Subject/${encodeURIComponent(subject)}/${topicPath}/${difficulty}.json`;
+      const response = await fetch(filePath);
+
+      if (!response.ok) {
+        throw new Error(`Question file missing: ${subject}/${topic}/${difficulty}.json`);
+      }
+
+      const payload = await response.json();
+      return normalizeQuestions(payload, { subject, topic, difficulty });
+    }
+
+    async function generateTestFromQuestionFolder(config) {
+      const isAllTopics = config.topic === "All Topics";
+      const topics = isAllTopics
+        ? SUBJECT_TOPIC_PATHS[config.subject] || []
+        : [config.topic];
+
+      const topicLoads = await Promise.allSettled(
+        topics.map((topic) => loadTopicQuestions(config.subject, topic, config.difficulty))
+      );
+
+      const loadedQuestions = topicLoads
+        .filter((entry) => entry.status === "fulfilled")
+        .flatMap((entry) => entry.value);
+
+      if (!loadedQuestions.length) {
+        throw new Error(`No ${config.difficulty} questions found in Questions/Subject for your selection.`);
+      }
+
+      const randomized = shuffle(loadedQuestions);
+      const generatedQuestions = randomized.slice(0, Number.parseInt(config.questions, 10) || 10);
+
+      return {
+        totalAvailable: loadedQuestions.length,
+        generatedCount: generatedQuestions.length,
+        questions: generatedQuestions,
+      };
+    }
+
     function renderTest(data) {
       const testArea = document.getElementById("testArea");
       const testMeta = document.getElementById("testMeta");
@@ -121,15 +183,22 @@
       startButton.textContent = "Generating...";
 
       try {
-        const response = await fetch("/api/start-lab", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(config),
-        });
+        let testPayload;
+        try {
+          const response = await fetch("/api/start-lab", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(config),
+          });
 
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || "Could not start lab.");
-        renderTest(payload);
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error || "Could not start lab.");
+          testPayload = payload;
+        } catch (apiError) {
+          testPayload = await generateTestFromQuestionFolder(config);
+        }
+
+        renderTest(testPayload);
       } catch (error) {
         alert(error.message);
       } finally {
@@ -144,6 +213,15 @@
     qSlider.addEventListener("input", () => {
       qValue.textContent = qSlider.value;
     });
+
+    function shuffle(array) {
+      const cloned = [...array];
+      for (let i = cloned.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+      }
+      return cloned;
+    }
 
     difficultyButtons.forEach((button) => {
       button.addEventListener("click", () => {
