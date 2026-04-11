@@ -111,3 +111,24 @@ Backend/
 - Adaptive testing: `adaptive-engine.js` computes next difficulty based on score.
 - Timed tests: `generate-test` can set `expiresAt`; expired submissions are rejected.
 - Analytics dashboard support: `/analytics/:userId` endpoint returns aggregates.
+
+
+## Frontend wiring (`Frontend/practicallab.html`)
+
+1. On load, frontend calls `GET /api/practice-lab/questions` and builds topic checkboxes dynamically.
+2. Clicking **Generate Test** sends `POST /api/practice-lab/generate-test` with:
+   - `questionCount`
+   - selected `topics`
+   - `difficultyDistribution` ratios
+   - `timed` + `durationMinutes`
+   - `userId`
+3. Backend returns `testId`, randomized questions, and optional `expiresAt`.
+4. Frontend renders question UI by type:
+   - `mcq` => radio options
+   - `coding` => starter-code textarea
+   - `descriptive` => plain textarea
+5. Clicking **Submit Answers** sends `POST /api/practice-lab/evaluate` with `{ testId, userId, answers[] }`.
+6. Result panel shows weighted summary, per-question feedback, explanations, and adaptive recommendation.
+7. **Load History** and **Load Analytics** call:
+   - `GET /api/practice-lab/history/:userId`
+   - `GET /api/practice-lab/analytics/:userId`
