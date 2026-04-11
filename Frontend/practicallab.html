@@ -3,306 +3,308 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Practice Lab</title>
+  <title>Practical Lab | CTF Machine</title>
   <link rel="stylesheet" href="CSS/practicallab.css" />
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <h1>Practice Lab</h1>
-      <p class="muted">Generate dynamic tests from the question bank, submit answers, and review explanations + analytics.</p>
+  <main class="ctf-layout">
+    <header class="hero card">
+      <div>
+        <p class="badge">Practical Lab • Cyber Range</p>
+        <h1>CTF Machine: <span id="machineName">Ares-01</span></h1>
+        <p class="muted">Boot the target, enumerate services, chain exploits, and capture user/root flags.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="bootBtn">Boot Machine</button>
+        <button id="resetBtn" class="ghost">Reset Lab</button>
+      </div>
+    </header>
 
-      <div class="grid two">
-        <label>
-          User ID
-          <input id="userId" type="text" value="demo-user" />
-        </label>
-        <label>
-          Number of Questions
-          <input id="questionCount" type="number" min="1" max="100" value="5" />
-        </label>
+    <section class="card status-panel">
+      <h2>Machine Status</h2>
+      <div class="status-grid">
+        <article>
+          <p class="label">State</p>
+          <p id="machineState" class="status waiting">Offline</p>
+        </article>
+        <article>
+          <p class="label">Target IP</p>
+          <p id="machineIp">-</p>
+        </article>
+        <article>
+          <p class="label">Difficulty</p>
+          <p>Medium</p>
+        </article>
+        <article>
+          <p class="label">Time Elapsed</p>
+          <p id="elapsedTime">00:00</p>
+        </article>
+      </div>
+      <div class="progress-wrap">
+        <p class="label">Compromise Progress</p>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+    </section>
+
+    <section class="card objectives">
+      <h2>Objectives</h2>
+      <ul id="objectiveList" class="objective-list">
+        <li data-step="0"><span class="dot"></span> Discover open TCP services</li>
+        <li data-step="1"><span class="dot"></span> Obtain low-privilege shell</li>
+        <li data-step="2"><span class="dot"></span> Escalate to root access</li>
+        <li data-step="3"><span class="dot"></span> Capture both flags</li>
+      </ul>
+    </section>
+
+    <section class="card workspace">
+      <div class="tabs" role="tablist" aria-label="Machine workspace tabs">
+        <button class="tab active" data-tab="console" type="button">Attack Console</button>
+        <button class="tab" data-tab="intel" type="button">Intel</button>
+        <button class="tab" data-tab="flags" type="button">Flags</button>
       </div>
 
-      <fieldset>
-        <legend>Topics</legend>
-        <div id="topicFilters" class="chips"></div>
-      </fieldset>
+      <div id="console" class="tab-panel active">
+        <div id="terminal" class="terminal" aria-live="polite"></div>
+        <form id="commandForm" class="command-form">
+          <label for="commandInput" class="sr-only">Command</label>
+          <span class="prompt">operator@kali:~$</span>
+          <input id="commandInput" type="text" autocomplete="off" placeholder="Try nmap -sV 10.10.88.23" />
+          <button type="submit">Run</button>
+        </form>
+      </div>
 
-      <fieldset>
-        <legend>Difficulty Distribution</legend>
-        <div class="grid three">
-          <label>Easy <input id="easyRatio" type="number" min="0" step="0.1" value="0.3" /></label>
-          <label>Medium <input id="mediumRatio" type="number" min="0" step="0.1" value="0.4" /></label>
-          <label>Hard <input id="hardRatio" type="number" min="0" step="0.1" value="0.3" /></label>
+      <div id="intel" class="tab-panel">
+        <div class="intel-grid">
+          <article class="intel-card">
+            <h3>Service Map</h3>
+            <ul>
+              <li>22/tcp • OpenSSH 8.2p1</li>
+              <li>80/tcp • Apache 2.4.41</li>
+              <li>3306/tcp • MariaDB (localhost)</li>
+            </ul>
+          </article>
+          <article class="intel-card">
+            <h3>Potential Weaknesses</h3>
+            <ul>
+              <li>Legacy upload endpoint in /dev/portal</li>
+              <li>SUID binary: /usr/local/bin/backup</li>
+              <li>Misconfigured sudo for web user</li>
+            </ul>
+          </article>
+          <article class="intel-card">
+            <h3>Suggested Path</h3>
+            <ol>
+              <li>Enumeration with nmap + dirb</li>
+              <li>Web foothold via file upload bypass</li>
+              <li>Privilege escalation through SUID abuse</li>
+            </ol>
+          </article>
         </div>
-      </fieldset>
-
-      <div class="grid two">
-        <label>
-          <input id="timed" type="checkbox" />
-          Timed Test
-        </label>
-        <label>
-          Duration (minutes)
-          <input id="durationMinutes" type="number" min="5" max="180" value="30" />
-        </label>
       </div>
 
-      <div class="actions">
-        <button id="generateBtn" type="button">Generate Test</button>
-        <button id="historyBtn" type="button" class="ghost">Load History</button>
-        <button id="analyticsBtn" type="button" class="ghost">Load Analytics</button>
+      <div id="flags" class="tab-panel">
+        <div class="flag-grid">
+          <article class="flag-card">
+            <h3>User Flag</h3>
+            <p id="userFlag" class="flag-value">Not captured</p>
+          </article>
+          <article class="flag-card">
+            <h3>Root Flag</h3>
+            <p id="rootFlag" class="flag-value">Not captured</p>
+          </article>
+          <article class="flag-card score">
+            <h3>Score</h3>
+            <p><span id="scoreValue">0</span> / 100</p>
+          </article>
+        </div>
       </div>
-    </section>
-
-    <section id="testSection" class="card" hidden>
-      <h2>Generated Test</h2>
-      <p id="testMeta" class="muted"></p>
-      <div id="timerText" class="timer"></div>
-      <form id="testForm"></form>
-      <button id="submitBtn" type="button">Submit Answers</button>
-    </section>
-
-    <section id="resultSection" class="card" hidden>
-      <h2>Result</h2>
-      <pre id="resultSummary"></pre>
-      <div id="breakdown"></div>
-    </section>
-
-    <section class="card">
-      <h2>History</h2>
-      <pre id="historyOutput">No history loaded.</pre>
-    </section>
-
-    <section class="card">
-      <h2>Analytics</h2>
-      <pre id="analyticsOutput">No analytics loaded.</pre>
     </section>
   </main>
 
   <script>
-    const topicFilters = document.getElementById("topicFilters");
-    const generateBtn = document.getElementById("generateBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const testSection = document.getElementById("testSection");
-    const resultSection = document.getElementById("resultSection");
-    const testMeta = document.getElementById("testMeta");
-    const timerText = document.getElementById("timerText");
-    const testForm = document.getElementById("testForm");
-    const resultSummary = document.getElementById("resultSummary");
-    const breakdown = document.getElementById("breakdown");
-    const historyBtn = document.getElementById("historyBtn");
-    const analyticsBtn = document.getElementById("analyticsBtn");
-    const historyOutput = document.getElementById("historyOutput");
-    const analyticsOutput = document.getElementById("analyticsOutput");
+    const bootBtn = document.getElementById("bootBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const commandForm = document.getElementById("commandForm");
+    const commandInput = document.getElementById("commandInput");
+    const terminal = document.getElementById("terminal");
+    const machineState = document.getElementById("machineState");
+    const machineIp = document.getElementById("machineIp");
+    const elapsedTime = document.getElementById("elapsedTime");
+    const progressBar = document.getElementById("progressBar");
+    const objectiveItems = [...document.querySelectorAll("#objectiveList li")];
+    const scoreValue = document.getElementById("scoreValue");
+    const userFlag = document.getElementById("userFlag");
+    const rootFlag = document.getElementById("rootFlag");
+    const tabs = [...document.querySelectorAll(".tab")];
+    const panels = [...document.querySelectorAll(".tab-panel")];
 
-    let activeTestId = null;
-    let activeQuestions = [];
-    let intervalId = null;
+    const state = {
+      online: false,
+      step: 0,
+      score: 0,
+      startedAt: null,
+      timerId: null,
+      ip: "10.10.88.23",
+      flags: { user: false, root: false }
+    };
 
-    async function loadTopics() {
-      const response = await fetch("/api/practice-lab/questions");
-      const payload = await response.json();
-      const topics = [...new Set((payload.questions || []).map((q) => q.topic))].sort();
+    const commandResponses = {
+      "nmap -sv 10.10.88.23": [
+        "Starting Nmap 7.93 scan on 10.10.88.23",
+        "22/tcp open ssh OpenSSH 8.2p1 Ubuntu",
+        "80/tcp open http Apache 2.4.41",
+        "Service detection complete."
+      ],
+      "dirb http://10.10.88.23": [
+        "---- Scanning URL: http://10.10.88.23/ ----",
+        "+ /dev (CODE:301)",
+        "+ /dev/portal (CODE:200)",
+        "Potential upload endpoint discovered."
+      ],
+      "exploit upload-bypass": [
+        "Uploading shell.php.jpg ...",
+        "Bypass successful.",
+        "Reverse shell received as www-data."
+      ],
+      "linpeas": [
+        "[+] Interesting SUID file: /usr/local/bin/backup",
+        "[+] sudo -l => www-data can run /usr/local/bin/backup as root",
+        "Likely privilege escalation vector identified."
+      ],
+      "exploit suid-backup": [
+        "Crafting malicious tar checkpoint action...",
+        "Executing backup with elevated context...",
+        "Root shell spawned!"
+      ],
+      "cat /home/ares/user.txt": ["THM{us3r_fl4g_9f2a2}"],
+      "cat /root/root.txt": ["THM{r00t_fl4g_31bc1}"]
+    };
 
-      topicFilters.innerHTML = topics.map((topic) => `
-        <label class="chip"><input type="checkbox" value="${topic}" checked /> ${topic}</label>
-      `).join("");
+    function writeLine(text, type = "") {
+      const line = document.createElement("p");
+      line.className = `term-line ${type}`;
+      line.textContent = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
     }
 
-    function selectedTopics() {
-      return [...topicFilters.querySelectorAll('input[type="checkbox"]:checked')].map((el) => el.value);
+    function updateProgress() {
+      const progress = Math.min(100, state.step * 25);
+      progressBar.style.width = `${progress}%`;
+      objectiveItems.forEach((item, index) => {
+        item.classList.toggle("done", index < state.step);
+      });
+      scoreValue.textContent = String(state.score);
     }
 
-    function clearTimer() {
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
-      timerText.textContent = "";
-    }
-
-    function startCountdown(expiresAt) {
-      if (!expiresAt) return;
-      clearTimer();
-
-      intervalId = setInterval(() => {
-        const remainingMs = expiresAt - Date.now();
-        if (remainingMs <= 0) {
-          timerText.textContent = "Time is up. Submit may fail if session expired.";
-          clearTimer();
-          return;
-        }
-
-        const mins = Math.floor(remainingMs / 60000);
-        const secs = Math.floor((remainingMs % 60000) / 1000);
-        timerText.textContent = `Time left: ${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    function startTimer() {
+      if (state.timerId) clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        if (!state.startedAt) return;
+        const elapsed = Math.floor((Date.now() - state.startedAt) / 1000);
+        const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const secs = String(elapsed % 60).padStart(2, "0");
+        elapsedTime.textContent = `${mins}:${secs}`;
       }, 1000);
     }
 
-    function renderQuestions(questions) {
-      activeQuestions = questions;
-      testForm.innerHTML = questions.map((q, i) => {
-        if (q.type === "mcq") {
-          const options = (q.options || []).map((option, idx) => `
-            <label class="option">
-              <input type="radio" name="q_${q.id}" value="${option}" ${idx === 0 ? "" : ""} />
-              ${option}
-            </label>
-          `).join("");
-
-          return `
-            <article class="question">
-              <h3>Q${i + 1}. ${q.prompt}</h3>
-              <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
-              ${options}
-            </article>
-          `;
-        }
-
-        if (q.type === "coding") {
-          return `
-            <article class="question">
-              <h3>Q${i + 1}. ${q.prompt}</h3>
-              <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
-              <p class="muted">Function: ${q.coding?.functionName || "N/A"}</p>
-              <textarea name="q_${q.id}" rows="8">${q.coding?.starterCode || ""}</textarea>
-            </article>
-          `;
-        }
-
-        return `
-          <article class="question">
-            <h3>Q${i + 1}. ${q.prompt}</h3>
-            <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
-            <textarea name="q_${q.id}" rows="4" placeholder="Write your answer"></textarea>
-          </article>
-        `;
-      }).join("");
+    function bootMachine() {
+      state.online = true;
+      state.startedAt = Date.now();
+      state.step = 0;
+      state.score = 0;
+      state.flags = { user: false, root: false };
+      machineState.textContent = "Online";
+      machineState.className = "status online";
+      machineIp.textContent = state.ip;
+      userFlag.textContent = "Not captured";
+      rootFlag.textContent = "Not captured";
+      terminal.innerHTML = "";
+      writeLine("[SYSTEM] Spinning up Ares-01 target machine...", "info");
+      writeLine(`[SYSTEM] VPN route established. Target available at ${state.ip}`, "info");
+      writeLine("[TIP] Start with nmap -sV 10.10.88.23", "tip");
+      updateProgress();
+      startTimer();
     }
 
-    async function generateTest() {
-      const payload = {
-        userId: document.getElementById("userId").value.trim() || "anonymous",
-        questionCount: Number(document.getElementById("questionCount").value),
-        topics: selectedTopics(),
-        timed: document.getElementById("timed").checked,
-        durationMinutes: Number(document.getElementById("durationMinutes").value),
-        difficultyDistribution: {
-          easy: Number(document.getElementById("easyRatio").value),
-          medium: Number(document.getElementById("mediumRatio").value),
-          hard: Number(document.getElementById("hardRatio").value),
-        },
-      };
+    function resetLab() {
+      state.online = false;
+      state.step = 0;
+      state.score = 0;
+      state.startedAt = null;
+      state.flags = { user: false, root: false };
+      machineState.textContent = "Offline";
+      machineState.className = "status waiting";
+      machineIp.textContent = "-";
+      elapsedTime.textContent = "00:00";
+      userFlag.textContent = "Not captured";
+      rootFlag.textContent = "Not captured";
+      if (state.timerId) clearInterval(state.timerId);
+      terminal.innerHTML = "";
+      updateProgress();
+    }
 
-      const response = await fetch("/api/practice-lab/generate-test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    function handleCommand(rawCommand) {
+      const command = rawCommand.trim().toLowerCase();
+      if (!command) return;
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate test.");
+      writeLine(`operator@kali:~$ ${rawCommand}`, "command");
+
+      if (!state.online) {
+        writeLine("Machine is offline. Boot it first.", "error");
+        return;
       }
 
-      activeTestId = data.testId;
-      testMeta.textContent = `Test ${data.testId} • ${data.generatedCount}/${data.requestedCount} questions`;
-      renderQuestions(data.questions || []);
-      testSection.hidden = false;
-      resultSection.hidden = true;
-      startCountdown(data.expiresAt);
-    }
-
-    function collectAnswers() {
-      return activeQuestions.map((q) => {
-        const inputName = `q_${q.id}`;
-        if (q.type === "mcq") {
-          const checked = document.querySelector(`input[name="${inputName}"]:checked`);
-          return { questionId: q.id, answer: checked ? checked.value : "" };
-        }
-
-        const field = testForm.querySelector(`[name="${inputName}"]`);
-        return { questionId: q.id, answer: field ? field.value : "" };
-      });
-    }
-
-    async function submitTest() {
-      if (!activeTestId) return alert("Generate a test first.");
-
-      const payload = {
-        testId: activeTestId,
-        userId: document.getElementById("userId").value.trim() || "anonymous",
-        answers: collectAnswers(),
-      };
-
-      const response = await fetch("/api/practice-lab/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Evaluation failed.");
+      const responses = commandResponses[command];
+      if (!responses) {
+        writeLine("Command not recognized in this simulated lab.", "error");
+        return;
       }
 
-      clearTimer();
-      activeTestId = null;
-      resultSection.hidden = false;
-      resultSummary.textContent = JSON.stringify(data.summary, null, 2) + `\nAdaptive next level: ${data.adaptiveRecommendation}`;
-      breakdown.innerHTML = (data.breakdown || []).map((item) => `
-        <article class="result-item">
-          <h4>${item.questionId}</h4>
-          <p><strong>Score:</strong> ${item.score}/${item.maxScore} • ${item.correct ? "Correct" : "Incorrect"}</p>
-          <p><strong>Feedback:</strong> ${Array.isArray(item.feedback) ? item.feedback.join(" | ") : item.feedback}</p>
-          <p><strong>Explanation:</strong> ${item.explanation}</p>
-        </article>
-      `).join("");
-    }
+      responses.forEach((line) => writeLine(line));
 
-    async function loadHistory() {
-      const userId = document.getElementById("userId").value.trim() || "anonymous";
-      const response = await fetch(`/api/practice-lab/history/${encodeURIComponent(userId)}`);
-      const data = await response.json();
-      historyOutput.textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function loadAnalytics() {
-      const userId = document.getElementById("userId").value.trim() || "anonymous";
-      const response = await fetch(`/api/practice-lab/analytics/${encodeURIComponent(userId)}`);
-      const data = await response.json();
-      analyticsOutput.textContent = JSON.stringify(data, null, 2);
-    }
-
-    generateBtn.addEventListener("click", async () => {
-      generateBtn.disabled = true;
-      try {
-        await generateTest();
-      } catch (error) {
-        alert(error.message);
-      } finally {
-        generateBtn.disabled = false;
+      if (command === "nmap -sv 10.10.88.23" && state.step < 1) {
+        state.step = 1;
+        state.score = 25;
+      } else if (command === "exploit upload-bypass" && state.step < 2) {
+        state.step = 2;
+        state.score = 50;
+      } else if (command === "exploit suid-backup" && state.step < 3) {
+        state.step = 3;
+        state.score = 75;
+      } else if (command === "cat /home/ares/user.txt" && !state.flags.user) {
+        state.flags.user = true;
+        state.score += 10;
+        userFlag.textContent = "THM{us3r_fl4g_9f2a2}";
+      } else if (command === "cat /root/root.txt" && !state.flags.root) {
+        state.flags.root = true;
+        state.step = 4;
+        state.score = 100;
+        rootFlag.textContent = "THM{r00t_fl4g_31bc1}";
       }
+
+      updateProgress();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active"));
+        panels.forEach((panel) => panel.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
     });
 
-    submitBtn.addEventListener("click", async () => {
-      submitBtn.disabled = true;
-      try {
-        await submitTest();
-      } catch (error) {
-        alert(error.message);
-      } finally {
-        submitBtn.disabled = false;
-      }
+    commandForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleCommand(commandInput.value);
+      commandInput.value = "";
     });
 
-    historyBtn.addEventListener("click", loadHistory);
-    analyticsBtn.addEventListener("click", loadAnalytics);
+    bootBtn.addEventListener("click", bootMachine);
+    resetBtn.addEventListener("click", resetLab);
 
-    loadTopics().catch((error) => {
-      topicFilters.innerHTML = `<p class="muted">Failed to load topics: ${error.message}</p>`;
-    });
+    resetLab();
   </script>
 </body>
 </html>
