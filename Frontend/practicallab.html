@@ -3,168 +3,306 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Practical Lab (CTF Style)</title>
+  <title>Practice Lab</title>
   <link rel="stylesheet" href="CSS/practicallab.css" />
 </head>
 <body>
-  <main class="wrap">
-    <section class="hero">
-      <h1>Practical Lab (CTF Style)</h1>
-      <p>
-        Docker and Kubernetes hands-on CTF labs. Start a machine, solve objectives,
-        and submit the captured flag in <strong>PTL{...}</strong> format.
-      </p>
+  <main class="container">
+    <section class="card">
+      <h1>Practice Lab</h1>
+      <p class="muted">Generate dynamic tests from the question bank, submit answers, and review explanations + analytics.</p>
+
+      <div class="grid two">
+        <label>
+          User ID
+          <input id="userId" type="text" value="demo-user" />
+        </label>
+        <label>
+          Number of Questions
+          <input id="questionCount" type="number" min="1" max="100" value="5" />
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>Topics</legend>
+        <div id="topicFilters" class="chips"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Difficulty Distribution</legend>
+        <div class="grid three">
+          <label>Easy <input id="easyRatio" type="number" min="0" step="0.1" value="0.3" /></label>
+          <label>Medium <input id="mediumRatio" type="number" min="0" step="0.1" value="0.4" /></label>
+          <label>Hard <input id="hardRatio" type="number" min="0" step="0.1" value="0.3" /></label>
+        </div>
+      </fieldset>
+
+      <div class="grid two">
+        <label>
+          <input id="timed" type="checkbox" />
+          Timed Test
+        </label>
+        <label>
+          Duration (minutes)
+          <input id="durationMinutes" type="number" min="5" max="180" value="30" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="generateBtn" type="button">Generate Test</button>
+        <button id="historyBtn" type="button" class="ghost">Load History</button>
+        <button id="analyticsBtn" type="button" class="ghost">Load Analytics</button>
+      </div>
     </section>
 
-    <section class="toolbar">
-      <input id="search" placeholder="Search by machine, tag, or keyword" />
-      <select id="track">
-        <option value="all">All Tracks</option>
-        <option value="docker">Docker</option>
-        <option value="kubernetes">Kubernetes</option>
-      </select>
-      <select id="difficulty">
-        <option value="all">All Difficulties</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-      <button class="primary" id="refresh" type="button">Refresh Machines</button>
+    <section id="testSection" class="card" hidden>
+      <h2>Generated Test</h2>
+      <p id="testMeta" class="muted"></p>
+      <div id="timerText" class="timer"></div>
+      <form id="testForm"></form>
+      <button id="submitBtn" type="button">Submit Answers</button>
     </section>
 
-    <section class="grid" id="machineGrid"></section>
+    <section id="resultSection" class="card" hidden>
+      <h2>Result</h2>
+      <pre id="resultSummary"></pre>
+      <div id="breakdown"></div>
+    </section>
 
-    <section class="panel-wrap" id="panelWrap" hidden>
-      <article class="lab-panel" id="labPanel"></article>
+    <section class="card">
+      <h2>History</h2>
+      <pre id="historyOutput">No history loaded.</pre>
+    </section>
+
+    <section class="card">
+      <h2>Analytics</h2>
+      <pre id="analyticsOutput">No analytics loaded.</pre>
     </section>
   </main>
 
   <script>
-    const grid = document.getElementById("machineGrid");
-    const panelWrap = document.getElementById("panelWrap");
-    const labPanel = document.getElementById("labPanel");
+    const topicFilters = document.getElementById("topicFilters");
+    const generateBtn = document.getElementById("generateBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const testSection = document.getElementById("testSection");
+    const resultSection = document.getElementById("resultSection");
+    const testMeta = document.getElementById("testMeta");
+    const timerText = document.getElementById("timerText");
+    const testForm = document.getElementById("testForm");
+    const resultSummary = document.getElementById("resultSummary");
+    const breakdown = document.getElementById("breakdown");
+    const historyBtn = document.getElementById("historyBtn");
+    const analyticsBtn = document.getElementById("analyticsBtn");
+    const historyOutput = document.getElementById("historyOutput");
+    const analyticsOutput = document.getElementById("analyticsOutput");
 
-    const searchInput = document.getElementById("search");
-    const trackSelect = document.getElementById("track");
-    const difficultySelect = document.getElementById("difficulty");
-    const refreshButton = document.getElementById("refresh");
+    let activeTestId = null;
+    let activeQuestions = [];
+    let intervalId = null;
 
-    let currentSession = null;
+    async function loadTopics() {
+      const response = await fetch("/api/practice-lab/questions");
+      const payload = await response.json();
+      const topics = [...new Set((payload.questions || []).map((q) => q.topic))].sort();
 
-    async function fetchMachines() {
-      const params = new URLSearchParams({
-        search: searchInput.value.trim(),
-        track: trackSelect.value,
-        difficulty: difficultySelect.value,
-      });
-
-      const response = await fetch(`/api/ptl/machines?${params.toString()}`);
-      if (!response.ok) throw new Error("Could not load machines right now.");
-      return response.json();
+      topicFilters.innerHTML = topics.map((topic) => `
+        <label class="chip"><input type="checkbox" value="${topic}" checked /> ${topic}</label>
+      `).join("");
     }
 
-    function renderMachines(payload) {
-      if (!payload.machines.length) {
-        grid.innerHTML = '<p class="muted">No machine matched this filter.</p>';
-        return;
+    function selectedTopics() {
+      return [...topicFilters.querySelectorAll('input[type="checkbox"]:checked')].map((el) => el.value);
+    }
+
+    function clearTimer() {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      timerText.textContent = "";
+    }
+
+    function startCountdown(expiresAt) {
+      if (!expiresAt) return;
+      clearTimer();
+
+      intervalId = setInterval(() => {
+        const remainingMs = expiresAt - Date.now();
+        if (remainingMs <= 0) {
+          timerText.textContent = "Time is up. Submit may fail if session expired.";
+          clearTimer();
+          return;
+        }
+
+        const mins = Math.floor(remainingMs / 60000);
+        const secs = Math.floor((remainingMs % 60000) / 1000);
+        timerText.textContent = `Time left: ${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }, 1000);
+    }
+
+    function renderQuestions(questions) {
+      activeQuestions = questions;
+      testForm.innerHTML = questions.map((q, i) => {
+        if (q.type === "mcq") {
+          const options = (q.options || []).map((option, idx) => `
+            <label class="option">
+              <input type="radio" name="q_${q.id}" value="${option}" ${idx === 0 ? "" : ""} />
+              ${option}
+            </label>
+          `).join("");
+
+          return `
+            <article class="question">
+              <h3>Q${i + 1}. ${q.prompt}</h3>
+              <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
+              ${options}
+            </article>
+          `;
+        }
+
+        if (q.type === "coding") {
+          return `
+            <article class="question">
+              <h3>Q${i + 1}. ${q.prompt}</h3>
+              <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
+              <p class="muted">Function: ${q.coding?.functionName || "N/A"}</p>
+              <textarea name="q_${q.id}" rows="8">${q.coding?.starterCode || ""}</textarea>
+            </article>
+          `;
+        }
+
+        return `
+          <article class="question">
+            <h3>Q${i + 1}. ${q.prompt}</h3>
+            <p class="muted">${q.topic} • ${q.difficulty} • weight ${q.weight}</p>
+            <textarea name="q_${q.id}" rows="4" placeholder="Write your answer"></textarea>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function generateTest() {
+      const payload = {
+        userId: document.getElementById("userId").value.trim() || "anonymous",
+        questionCount: Number(document.getElementById("questionCount").value),
+        topics: selectedTopics(),
+        timed: document.getElementById("timed").checked,
+        durationMinutes: Number(document.getElementById("durationMinutes").value),
+        difficultyDistribution: {
+          easy: Number(document.getElementById("easyRatio").value),
+          medium: Number(document.getElementById("mediumRatio").value),
+          hard: Number(document.getElementById("hardRatio").value),
+        },
+      };
+
+      const response = await fetch("/api/practice-lab/generate-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate test.");
       }
 
-      grid.innerHTML = payload.machines.map((machine) => `
-        <article class="machine">
-          <span class="pill">${machine.track}</span>
-          <h3>${machine.name}</h3>
-          <p>${machine.description}</p>
-          <div class="meta">
-            <span class="pill">${machine.difficulty}</span>
-            <span class="pill">${machine.points} pts</span>
-            <span class="pill">Solve rate: ${machine.solveRate}</span>
-            <span class="pill">${machine.duration}</span>
-          </div>
-          <div class="meta">
-            ${machine.tags.map((tag) => `<span class="pill">#${tag}</span>`).join("")}
-          </div>
-          <button class="primary" type="button" onclick="startMachine('${machine.id}')">Start Machine</button>
+      activeTestId = data.testId;
+      testMeta.textContent = `Test ${data.testId} • ${data.generatedCount}/${data.requestedCount} questions`;
+      renderQuestions(data.questions || []);
+      testSection.hidden = false;
+      resultSection.hidden = true;
+      startCountdown(data.expiresAt);
+    }
+
+    function collectAnswers() {
+      return activeQuestions.map((q) => {
+        const inputName = `q_${q.id}`;
+        if (q.type === "mcq") {
+          const checked = document.querySelector(`input[name="${inputName}"]:checked`);
+          return { questionId: q.id, answer: checked ? checked.value : "" };
+        }
+
+        const field = testForm.querySelector(`[name="${inputName}"]`);
+        return { questionId: q.id, answer: field ? field.value : "" };
+      });
+    }
+
+    async function submitTest() {
+      if (!activeTestId) return alert("Generate a test first.");
+
+      const payload = {
+        testId: activeTestId,
+        userId: document.getElementById("userId").value.trim() || "anonymous",
+        answers: collectAnswers(),
+      };
+
+      const response = await fetch("/api/practice-lab/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Evaluation failed.");
+      }
+
+      clearTimer();
+      activeTestId = null;
+      resultSection.hidden = false;
+      resultSummary.textContent = JSON.stringify(data.summary, null, 2) + `\nAdaptive next level: ${data.adaptiveRecommendation}`;
+      breakdown.innerHTML = (data.breakdown || []).map((item) => `
+        <article class="result-item">
+          <h4>${item.questionId}</h4>
+          <p><strong>Score:</strong> ${item.score}/${item.maxScore} • ${item.correct ? "Correct" : "Incorrect"}</p>
+          <p><strong>Feedback:</strong> ${Array.isArray(item.feedback) ? item.feedback.join(" | ") : item.feedback}</p>
+          <p><strong>Explanation:</strong> ${item.explanation}</p>
         </article>
       `).join("");
     }
 
-    async function loadMachines() {
-      try {
-        const payload = await fetchMachines();
-        renderMachines(payload);
-      } catch (error) {
-        grid.innerHTML = `<p>${error.message}</p>`;
-      }
+    async function loadHistory() {
+      const userId = document.getElementById("userId").value.trim() || "anonymous";
+      const response = await fetch(`/api/practice-lab/history/${encodeURIComponent(userId)}`);
+      const data = await response.json();
+      historyOutput.textContent = JSON.stringify(data, null, 2);
     }
 
-    async function startMachine(machineId) {
+    async function loadAnalytics() {
+      const userId = document.getElementById("userId").value.trim() || "anonymous";
+      const response = await fetch(`/api/practice-lab/analytics/${encodeURIComponent(userId)}`);
+      const data = await response.json();
+      analyticsOutput.textContent = JSON.stringify(data, null, 2);
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      generateBtn.disabled = true;
       try {
-        const response = await fetch("/api/ptl/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ machineId }),
-        });
-
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || "Unable to start machine.");
-
-        currentSession = payload.instanceId;
-        panelWrap.hidden = false;
-        labPanel.innerHTML = `
-          <h2>Active Session: ${payload.machine.name}</h2>
-          <p class="muted">Instance <strong>${payload.instanceId}</strong> • Expires in ${payload.expiresIn}</p>
-          <ul>${payload.machine.objectives.map((item) => `<li>${item}</li>`).join("")}</ul>
-          <div class="connection">
-            <strong>Connection:</strong> ${payload.connection.protocol}<br />
-            <strong>Endpoint:</strong> ${payload.connection.endpoint}<br />
-            <strong>User:</strong> ${payload.connection.username}<br />
-            <strong>Password:</strong> ${payload.connection.password}<br />
-            <span class="muted">Flag format: PTL{...}</span>
-          </div>
-          <div class="flag-box">
-            <input id="flagInput" placeholder="Submit captured flag" />
-            <button type="button" onclick="submitFlag()">Submit Flag</button>
-          </div>
-          <div id="status" class="muted"></div>
-        `;
+        await generateTest();
       } catch (error) {
         alert(error.message);
+      } finally {
+        generateBtn.disabled = false;
       }
-    }
+    });
 
-    async function submitFlag() {
-      const flagInput = document.getElementById("flagInput");
-      const status = document.getElementById("status");
-      if (!flagInput || !currentSession) return;
-
+    submitBtn.addEventListener("click", async () => {
+      submitBtn.disabled = true;
       try {
-        const response = await fetch("/api/ptl/submit-flag", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instanceId: currentSession, flag: flagInput.value }),
-        });
-
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.message || payload.error || "Submission failed.");
-
-        status.textContent = `${payload.message} +${payload.reward} XP`;
-        status.className = "ok";
-        currentSession = null;
-        flagInput.value = "";
+        await submitTest();
       } catch (error) {
-        status.textContent = error.message;
-        status.className = "muted";
+        alert(error.message);
+      } finally {
+        submitBtn.disabled = false;
       }
-    }
+    });
 
-    refreshButton.addEventListener("click", loadMachines);
-    searchInput.addEventListener("input", loadMachines);
-    trackSelect.addEventListener("change", loadMachines);
-    difficultySelect.addEventListener("change", loadMachines);
+    historyBtn.addEventListener("click", loadHistory);
+    analyticsBtn.addEventListener("click", loadAnalytics);
 
-    loadMachines();
-    window.startMachine = startMachine;
-    window.submitFlag = submitFlag;
+    loadTopics().catch((error) => {
+      topicFilters.innerHTML = `<p class="muted">Failed to load topics: ${error.message}</p>`;
+    });
   </script>
 </body>
 </html>

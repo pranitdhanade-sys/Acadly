@@ -1,16 +1,106 @@
-﻿/* Practical Lab CSS */
 :root {
-  --bg: 2 6 23;
-  --text: 226 232 240;
-  --border: 30 41 59;
-  --blue: 34 211 238;
+  --bg: #0b1220;
+  --panel: #111a2e;
+  --border: #25324a;
+  --text: #e7eefc;
+  --muted: #9fb0d4;
+  --brand: #4f8cff;
+  --ok: #1ab66f;
 }
-body { background: rgb(var(--bg)); color: rgb(var(--text)); font-family: system-ui; }
-.container { max-width: 800px; margin: 0 auto; padding: 2rem; }
-h2 { margin-bottom: 1.5rem; }
-label { display: block; margin: 1rem 0 0.5rem; font-weight: 600; }
-select, input { width: 100%; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; color: rgb(var(--text)); }
-.toggle { display: flex; gap: 1rem; margin: 1rem 0; }
-.toggle button { flex: 1; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgb(var(--border)); border-radius: 0.5rem; color: rgb(var(--text)); cursor: pointer; transition: all 200ms; }
-.toggle button.active { background: rgb(var(--blue)); border-color: rgb(var(--blue)); color: white; }
 
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.container {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+h1, h2, h3, h4 { margin: 0 0 10px; }
+.muted { color: var(--muted); }
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+label { display: block; font-size: 14px; }
+input[type="text"], input[type="number"], textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f1730;
+  color: var(--text);
+}
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 12px 0;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--brand);
+  color: white;
+  cursor: pointer;
+}
+button.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.question {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.option { display: block; margin-bottom: 6px; }
+.timer { color: var(--ok); margin-bottom: 8px; }
+
+pre {
+  white-space: pre-wrap;
+  background: #0f1730;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.result-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 8px;
+}

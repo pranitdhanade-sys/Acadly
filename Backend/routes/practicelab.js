@@ -1,9 +1,17 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
+
+const { loadQuestionBank } = require("../modules/practice-lab/question-loader");
+const { generateTest } = require("../modules/practice-lab/test-generator");
+const { evaluateTestSubmission } = require("../modules/practice-lab/evaluator");
+const { recordAttempt, getHistory, getAnalytics } = require("../modules/practice-lab/history-store");
+const { nextDifficultyFromPerformance } = require("../modules/practice-lab/adaptive-engine");
 
 const router = express.Router();
 const FRONTEND_PATH = path.join(__dirname, "../../Frontend");
+const QUESTION_LIBRARY_PATH = path.join(__dirname, "../questions");
 
 const QUESTION_BASE_CANDIDATES = [
   path.join(__dirname, "../../Questions/Subject"),
@@ -82,6 +90,7 @@ const MACHINE_CATALOG = [
 ];
 
 const activeInstances = new Map();
+const activeTests = new Map();
 
 const normalize = (value = "") => value.toString().trim();
 const normalizeText = (value = "") => normalize(value).toLowerCase();
@@ -172,6 +181,132 @@ router.post("/api/start-lab", (req, res) => {
     generatedCount: generatedQuestions.length,
     questions: generatedQuestions,
   });
+});
+
+router.get("/api/practice-lab/questions", (req, res) => {
+  const topic = normalizeText(req.query.topic || "");
+  const difficulty = normalizeText(req.query.difficulty || "");
+  const type = normalizeText(req.query.type || "");
+  const tags = normalize(req.query.tags || "")
+    .split(",")
+    .map((tag) => normalizeText(tag))
+    .filter(Boolean);
+
+  const questions = loadQuestionBank(QUESTION_LIBRARY_PATH).filter((question) => {
+    const matchesTopic = !topic || normalizeText(question.topic) === topic;
+    const matchesDifficulty = !difficulty || normalizeText(question.difficulty) === difficulty;
+    const matchesType = !type || normalizeText(question.type) === type;
+    const matchesTags = !tags.length || tags.every((tag) => question.tags.map(normalizeText).includes(tag));
+    return matchesTopic && matchesDifficulty && matchesType && matchesTags;
+  });
+
+  return res.json({
+    count: questions.length,
+    questions: questions.map((question) => ({
+      id: question.id,
+      topic: question.topic,
+      difficulty: question.difficulty,
+      type: question.type,
+      tags: question.tags,
+      prompt: question.prompt,
+      weight: question.weight,
+    })),
+  });
+});
+
+router.post("/api/practice-lab/generate-test", (req, res) => {
+  const questionBank = loadQuestionBank(QUESTION_LIBRARY_PATH);
+  const questionCount = Math.max(1, Math.min(100, Number.parseInt(req.body?.questionCount, 10) || 10));
+  const topics = Array.isArray(req.body?.topics) ? req.body.topics : [];
+  const difficultyDistribution = req.body?.difficultyDistribution || {};
+  const timed = Boolean(req.body?.timed);
+  const durationMinutes = Math.max(5, Math.min(180, Number.parseInt(req.body?.durationMinutes, 10) || 30));
+  const userId = normalize(req.body?.userId || "anonymous");
+
+  const generated = generateTest({
+    questionBank,
+    count: questionCount,
+    topics,
+    difficultyDistribution,
+    timed,
+    durationMinutes,
+  });
+
+  if (!generated.questions.length) {
+    return res.status(404).json({
+      error: "No questions matched the requested filters.",
+      availableQuestions: questionBank.length,
+    });
+  }
+
+  const testId = crypto.randomUUID();
+  const startedAt = Date.now();
+  const expiresAt = timed ? startedAt + durationMinutes * 60_000 : null;
+
+  activeTests.set(testId, {
+    answerKey: generated.answerKey,
+    testMeta: generated.testMeta,
+    userId,
+    startedAt,
+    expiresAt,
+  });
+
+  return res.status(201).json({
+    testId,
+    ...generated.testMeta,
+    startedAt,
+    expiresAt,
+    questions: generated.questions,
+  });
+});
+
+router.post("/api/practice-lab/evaluate", (req, res) => {
+  const testId = normalize(req.body?.testId);
+  const userAnswers = Array.isArray(req.body?.answers) ? req.body.answers : [];
+  const userId = normalize(req.body?.userId || "anonymous");
+
+  if (!activeTests.has(testId)) {
+    return res.status(404).json({ error: "Test session not found." });
+  }
+
+  const testSession = activeTests.get(testId);
+  if (testSession.expiresAt && Date.now() > testSession.expiresAt) {
+    activeTests.delete(testId);
+    return res.status(408).json({ error: "Timed test expired before submission." });
+  }
+
+  const result = evaluateTestSubmission({
+    answerKey: testSession.answerKey,
+    userAnswers,
+  });
+
+  const adaptiveRecommendation = nextDifficultyFromPerformance(result.summary.percentage);
+
+  recordAttempt({
+    userId,
+    testId,
+    testMeta: testSession.testMeta,
+    result,
+  });
+
+  activeTests.delete(testId);
+
+  return res.json({
+    testId,
+    ...result,
+    adaptiveRecommendation,
+  });
+});
+
+router.get("/api/practice-lab/history/:userId", (req, res) => {
+  const userId = normalize(req.params.userId || "anonymous");
+  const history = getHistory(userId);
+  return res.json({ count: history.length, history });
+});
+
+router.get("/api/practice-lab/analytics/:userId", (req, res) => {
+  const userId = normalize(req.params.userId || "anonymous");
+  return res.json(getAnalytics(userId));
 });
 
 router.get("/api/ptl/machines", (req, res) => {

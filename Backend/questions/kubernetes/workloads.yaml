@@ -1,0 +1,16 @@
+{
+  "questions": [
+    {
+      "id": "k8s-hard-1",
+      "prompt": "Which Kubernetes object ensures a specified number of pod replicas are running?",
+      "topic": "Kubernetes",
+      "difficulty": "hard",
+      "type": "mcq",
+      "tags": ["kubernetes", "deployment", "replicas"],
+      "options": ["Deployment", "ConfigMap", "Service", "Ingress"],
+      "correctAnswer": "Deployment",
+      "explanation": "Deployment manages ReplicaSets and maintains desired pod count.",
+      "weight": 3
+    }
+  ]
+}
