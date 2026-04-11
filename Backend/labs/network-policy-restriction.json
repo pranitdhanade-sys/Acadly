@@ -1,0 +1,34 @@
+{
+  "id": "k8s-netpol-001",
+  "title": "Network Policy Restriction Lab",
+  "category": "kubernetes",
+  "difficulty": "hard",
+  "timeoutMinutes": 75,
+  "maxAttempts": 8,
+  "problemStatement": "Internal payment and reporting services cannot communicate after a network policy hardening attempt. Determine what is blocked and implement a safe fix.",
+  "objective": "Update policies to restore approved traffic and retrieve the flag from reporting service.",
+  "hints": [
+    "List all NetworkPolicy objects and compare allowed selectors.",
+    "Validate DNS and namespace labels used by policies.",
+    "Use a temporary debug pod to test connectivity before/after changes."
+  ],
+  "guide": [
+    "Step 1: Enumerate current ingress/egress rules.",
+    "Step 2: Identify traffic flows required by payment -> reporting.",
+    "Step 3: Patch/create least-privilege network policy rules.",
+    "Step 4: Confirm connectivity and recover completion flag."
+  ],
+  "flag": "PTL{network_policy_restored}",
+  "runtime": {
+    "provider": "kubernetes",
+    "namespace": "lab-netpol",
+    "manifestRef": "manifests/network-policy-restriction.yaml",
+    "shell": {
+      "type": "kubectl-exec",
+      "target": "pod/netshoot",
+      "command": [
+        "/bin/sh"
+      ]
+    }
+  }
+}
