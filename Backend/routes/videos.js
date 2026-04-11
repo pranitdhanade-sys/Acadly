@@ -14,7 +14,7 @@ const { VideoMetadata } = require("../../DataBase/schema-mongo");
 
 const router = express.Router();
 const GRIDFS_BUCKET = "videos";
-const LOCAL_VIDEOS_DIR = path.join(__dirname, "../../Videos");
+const LOCAL_VIDEOS_DIR = path.resolve(__dirname, "../../Videos");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -61,6 +61,99 @@ function inferFormat(filename) {
   const ext = path.extname(filename || "").toLowerCase().replace(".", "");
   if (["mp4", "webm", "mkv", "avi"].includes(ext)) return ext;
   return "mp4";
+}
+
+function parseRangeHeader(rangeHeader, fileSize) {
+  if (!rangeHeader || typeof rangeHeader !== "string") return null;
+  if (!rangeHeader.startsWith("bytes=")) return { invalid: true };
+
+  const [rangePart] = rangeHeader.slice(6).split(",");
+  if (!rangePart) return { invalid: true };
+  const [rawStart, rawEnd] = rangePart.split("-");
+  const hasStart = rawStart !== "";
+  const hasEnd = rawEnd !== "";
+
+  if (!hasStart && !hasEnd) return { invalid: true };
+
+  let start;
+  let end;
+
+  if (!hasStart) {
+    const suffixLength = Number.parseInt(rawEnd, 10);
+    if (!Number.isFinite(suffixLength) || suffixLength <= 0) return { invalid: true };
+    const clamped = Math.min(suffixLength, fileSize);
+    start = Math.max(fileSize - clamped, 0);
+    end = fileSize - 1;
+  } else {
+    start = Number.parseInt(rawStart, 10);
+    if (!Number.isFinite(start) || start < 0) return { invalid: true };
+
+    if (hasEnd) {
+      end = Number.parseInt(rawEnd, 10);
+      if (!Number.isFinite(end)) return { invalid: true };
+    } else {
+      end = fileSize - 1;
+    }
+  }
+
+  if (start >= fileSize) return { invalid: true };
+  if (end >= fileSize) end = fileSize - 1;
+  if (end < start) return { invalid: true };
+  return { start, end };
+}
+
+function resolveVideoPath(localFilePath) {
+  if (!localFilePath || typeof localFilePath !== "string") return null;
+  if (path.isAbsolute(localFilePath)) {
+    return path.normalize(localFilePath);
+  }
+  return path.resolve(LOCAL_VIDEOS_DIR, localFilePath);
+}
+
+async function streamFromLocalFile(req, res, localFilePath, fallbackContentType) {
+  const absolutePath = resolveVideoPath(localFilePath);
+  if (!absolutePath) return false;
+
+  let stat;
+  try {
+    stat = await fs.promises.stat(absolutePath);
+  } catch (_) {
+    return false;
+  }
+
+  if (!stat.isFile()) return false;
+
+  const fileSize = stat.size;
+  const contentType = fallbackContentType || "video/mp4";
+  const parsed = parseRangeHeader(req.headers.range, fileSize);
+
+  if (parsed && parsed.invalid) {
+    res.status(416);
+    res.setHeader("Content-Range", `bytes */${fileSize}`);
+    return res.end();
+  }
+
+  const start = parsed ? parsed.start : 0;
+  const end = parsed ? parsed.end : fileSize - 1;
+  const contentLength = end - start + 1;
+
+  res.status(parsed ? 206 : 200);
+  res.setHeader("Accept-Ranges", "bytes");
+  res.setHeader("Content-Type", contentType);
+  res.setHeader("Content-Length", String(contentLength));
+  if (parsed) {
+    res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+  }
+
+  const stream = fs.createReadStream(absolutePath, { start, end });
+  req.on("close", () => stream.destroy());
+  stream.on("error", (err) => {
+    console.error("Local video stream error:", err.message);
+    if (!res.headersSent) res.status(500).json({ error: "Stream failed" });
+    else res.destroy(err);
+  });
+  stream.pipe(res);
+  return true;
 }
 
 function toPlaylistItem(doc) {
@@ -240,6 +333,8 @@ router.get("/:id/stream", async (req, res) => {
       return res.status(404).json({ error: "Video not found" });
     }
     if (!video.file_id) {
+      const streamed = await streamFromLocalFile(req, res, video.localFilePath, video.mimeType);
+      if (streamed) return;
       return res.status(404).json({ error: "No media file" });
     }
 
@@ -248,58 +343,43 @@ router.get("/:id/stream", async (req, res) => {
     const filesColl = mongoose.connection.db.collection(`${GRIDFS_BUCKET}.files`);
     const fileDoc = await filesColl.findOne({ _id: fileObjectId });
     if (!fileDoc) {
+      const streamed = await streamFromLocalFile(req, res, video.localFilePath, video.mimeType);
+      if (streamed) return;
       return res.status(404).json({ error: "File missing in storage" });
     }
 
     const fileSize = fileDoc.length;
     const contentType = video.mimeType || fileDoc.contentType || "video/mp4";
-    const range = req.headers.range;
-
-    if (range) {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      let end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      if (Number.isNaN(start) || start < 0 || start >= fileSize) {
-        res.status(416);
-        res.setHeader("Content-Range", `bytes */${fileSize}`);
-        return res.end();
-      }
-      if (Number.isNaN(end) || end >= fileSize) end = fileSize - 1;
-      if (end < start) {
-        res.status(416);
-        res.setHeader("Content-Range", `bytes */${fileSize}`);
-        return res.end();
-      }
-
-      const chunkSize = end - start + 1;
-      res.status(206);
-      res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
-      res.setHeader("Accept-Ranges", "bytes");
-      res.setHeader("Content-Length", String(chunkSize));
-      res.setHeader("Content-Type", contentType);
-
-      const downloadStream = bucket.openDownloadStream(fileObjectId, {
-        start,
-        end: end + 1,
-      });
-      downloadStream.on("error", (e) => {
-        console.error("GridFS range stream:", e.message);
-        if (!res.headersSent) res.status(500).end();
-        else res.destroy(e);
-      });
-      downloadStream.pipe(res);
-    } else {
-      res.setHeader("Content-Length", String(fileSize));
-      res.setHeader("Content-Type", contentType);
-      res.setHeader("Accept-Ranges", "bytes");
-      const downloadStream = bucket.openDownloadStream(fileObjectId);
-      downloadStream.on("error", (e) => {
-        console.error("GridFS stream:", e.message);
-        if (!res.headersSent) res.status(500).end();
-        else res.destroy(e);
-      });
-      downloadStream.pipe(res);
+    const parsed = parseRangeHeader(req.headers.range, fileSize);
+    if (parsed && parsed.invalid) {
+      res.status(416);
+      res.setHeader("Content-Range", `bytes */${fileSize}`);
+      return res.end();
     }
+
+    const start = parsed ? parsed.start : 0;
+    const end = parsed ? parsed.end : fileSize - 1;
+    const chunkSize = end - start + 1;
+
+    res.status(parsed ? 206 : 200);
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Content-Length", String(chunkSize));
+    res.setHeader("Content-Type", contentType);
+    if (parsed) {
+      res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+    }
+
+    const downloadStream = bucket.openDownloadStream(fileObjectId, {
+      start,
+      end: end + 1,
+    });
+    req.on("close", () => downloadStream.destroy());
+    downloadStream.on("error", (e) => {
+      console.error("GridFS stream:", e.message);
+      if (!res.headersSent) res.status(500).end();
+      else res.destroy(e);
+    });
+    downloadStream.pipe(res);
   } catch (err) {
     console.error("GET /api/videos/:id/stream:", err.message);
     if (!res.headersSent) res.status(500).json({ error: "Stream failed" });

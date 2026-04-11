@@ -177,29 +177,28 @@
         document.getElementById("dbBadge").classList.remove("hidden");
       });
 
-      function loadPlaylist() {
-        // In real scenario, fetch from /api/videos
-        // For now, use demo data from video-metadata.js if available
-        if (window.ACADLY_VIDEO_ENHANCEMENTS) {
-          playlist = [
-            {
-              id: "video_oops_001",
-              title: "Object-Oriented Programming (OOPs)",
-              duration: 1200,
-              thumbnail: "https://via.placeholder.com/200x112?text=OOPs",
-            },
-            {
-              id: "video_backprop_001",
-              title: "Backpropagation - AI's Learning Engine",
-              duration: 1800,
-              thumbnail: "https://via.placeholder.com/200x112?text=Backprop",
-            },
-          ];
+      async function loadPlaylist() {
+        const badge = document.getElementById("dbBadge");
+        try {
+          const response = await fetch("/api/videos");
+          if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.detail || payload.error || response.statusText);
+          }
+          playlist = await response.json();
+        } catch (error) {
+          console.error("Failed to load playlist:", error);
+          playlist = [];
+          badge.textContent = "API offline";
+          badge.classList.remove("hidden");
+          return;
         }
 
         renderPlaylist();
         if (playlist.length > 0) {
           loadVideo(playlist[0]);
+        } else {
+          document.getElementById("videoTitle").textContent = "No published videos available";
         }
       }
 
@@ -230,8 +229,8 @@
         document.getElementById("videoTitle").textContent = video.title;
         document.getElementById("videoCount").textContent = `(${playlist.length})`;
 
-        // Show demo video or placeholder
-        document.getElementById("player").src = `https://www.w3schools.com/html/mov_bbb.mp4`;
+        const player = document.getElementById("player");
+        player.src = video.src || `/api/videos/${encodeURIComponent(video.id)}/stream`;
 
         // Load saved progress for this video
         const progress = await sync.getVideoProgress(video.id);
