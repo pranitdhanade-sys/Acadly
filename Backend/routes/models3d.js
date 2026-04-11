@@ -89,20 +89,32 @@ const upload = multer({
   },
 });
 
+function normalizePublicModelPath(filePath = "", fileName = "") {
+  const normalized = String(filePath || "").replace(/\\/g, "/").trim();
+
+  if (normalized.startsWith("/3d-models/")) {
+    return normalized;
+  }
+
+  const file = fileName || path.basename(normalized);
+  return `/3d-models/${file}`;
+}
+
 function formatModelResponse(doc) {
   const model = doc && typeof doc.toObject === "function" ? doc.toObject() : { ...doc };
+  const publicPath = normalizePublicModelPath(model.filePath, model.fileName);
 
   return {
     id: String(model._id),
     title: model.title,
     description: model.description || "",
-    path: model.filePath,
+    path: publicPath,
     fileName: model.fileName,
     format: model.format,
     fileSize: model.fileSize || 0,
     tags: model.tags || [],
     uploadedAt: model.uploadedAt,
-    downloadUrl: model.filePath,
+    downloadUrl: publicPath,
   };
 }
 

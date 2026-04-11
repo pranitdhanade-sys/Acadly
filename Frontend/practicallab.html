@@ -1,197 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Practical Learning Labs</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="CSS/practicallab.css">
-
-</head>
-<body>
-<main class="wrap">
-  <section class="hero">
-    <h1>Practical Learning Labs</h1>
-    <p class="muted">Not CTF. These are hands-on command labs (TryHackMe-style tasks) to practice real DevOps/Infra/Robotics commands.</p>
-  </section>
-
-  <section class="toolbar">
-    <input id="search" placeholder="Search lab" />
-    <select id="track"><option value="all">All Tracks</option><option>Docker</option><option>Kubernetes</option><option>Terraform</option><option>ANSYS</option><option>Database</option><option>ROS2</option></select>
-    <select id="level"><option value="all">All Levels</option><option>beginner</option><option>intermediate</option><option>advanced</option></select>
-    <button id="refresh" type="button">Refresh</button>
-  </section>
-
-  <section id="grid" class="grid"></section>
-  <section id="panel" class="panel" hidden></section>
-</main>
-
-<script>
-const grid=document.getElementById('grid');
-const panel=document.getElementById('panel');
-const searchInput=document.getElementById('search');
-const trackSelect=document.getElementById('track');
-const levelSelect=document.getElementById('level');
-const refreshButton=document.getElementById('refresh');
-let activeSession=null;
-
-async function loadLabs(){
-  const params=new URLSearchParams({search:searchInput.value.trim(),track:trackSelect.value,level:levelSelect.value});
-  const res=await fetch(`/api/ptl/labs?${params.toString()}`);
-  const payload=await res.json();
-  if(!res.ok) throw new Error(payload.error||'Unable to load labs.');
-  if(!payload.labs.length){grid.innerHTML='<p class="muted">No labs found.</p>'; return;}
-  grid.innerHTML=payload.labs.map((lab)=>`<article class="card"><span class="pill">${lab.track}</span><h3>${lab.name}</h3><p class="muted">${lab.description}</p><div class="meta"><span class="pill">${lab.level}</span><span class="pill">${lab.duration}</span><span class="pill">${lab.taskCount} tasks</span></div><button onclick="startLab('${lab.id}')">Start Lab</button></article>`).join('');
-}
-
-async function startLab(labId){
-  const res=await fetch('/api/ptl/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({labId})});
-  const payload=await res.json();
-  if(!res.ok){alert(payload.error||'Failed to start lab');return;}
-  activeSession=payload.sessionId;
-  panel.hidden=false;
-  panel.innerHTML=`<h2>${payload.lab.name}</h2><p class="muted">Session: ${payload.sessionId} • ${payload.lab.duration}</p>${payload.lab.tasks.map((t)=>`<div class="task"><strong>${t.title}</strong><p class="muted">${t.instruction}</p><p class="muted">Hint: ${t.hint}</p><input class="command" id="cmd-${t.id}" placeholder="Type command you used" /><button onclick="completeTask('${t.id}')">Submit Command</button><div id="result-${t.id}" class="muted"></div></div>`).join('')}<div id="overall" class="muted">Progress: 0/${payload.lab.tasks.length}</div>`;
-}
-
-async function completeTask(taskId){
-  if(!activeSession) return;
-  const command=document.getElementById(`cmd-${taskId}`).value;
-  const result=document.getElementById(`result-${taskId}`);
-  const overall=document.getElementById('overall');
-  const res=await fetch('/api/ptl/complete-task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:activeSession,taskId,command})});
-  const payload=await res.json();
-  if(!res.ok){result.textContent=payload.error||'Could not validate task.';return;}
-  result.textContent=payload.message;
-  result.className=payload.success?'ok':'muted';
-  overall.textContent=`Progress: ${payload.progress}${payload.labCompleted?' • Lab completed 🎉':''}`;
-}
-
-refreshButton.addEventListener('click',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
-searchInput.addEventListener('input',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
-trackSelect.addEventListener('change',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
-levelSelect.addEventListener('change',()=>loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`));
-loadLabs().catch((e)=>grid.innerHTML=`<p>${e.message}</p>`);
-window.startLab=startLab;window.completeTask=completeTask;
-<title>Practical Lab (CTF Style)</title>
-<style>
-  :root { --bg:#030712; --card:#111827; --line:#1f2937; --text:#e5e7eb; --muted:#9ca3af; --accent:#4f46e5; --success:#22c55e; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:Inter,system-ui,sans-serif; color:var(--text); background:radial-gradient(circle at 10% 0%, #111827, var(--bg) 45%); min-height:100vh; }
-  .wrap { max-width:1160px; margin:0 auto; padding:24px 16px 48px; }
-  .hero { border:1px solid var(--line); background:linear-gradient(130deg, rgba(79,70,229,0.28), rgba(17,24,39,0.8)); border-radius:18px; padding:22px; margin-bottom:20px; }
-  .hero h1 { margin:0 0 8px; }
-  .hero p { margin:0; color:var(--muted); }
-  .toolbar { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-bottom:20px; }
-  .toolbar input,.toolbar select { width:100%; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:10px; padding:10px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
-  .machine { border:1px solid var(--line); border-radius:14px; background:rgba(17,24,39,0.85); padding:14px; display:flex; flex-direction:column; gap:10px; }
-  .pill { display:inline-flex; border:1px solid var(--line); background:#0b1220; border-radius:999px; padding:3px 9px; font-size:.78rem; color:var(--muted); }
-  .meta { display:flex; flex-wrap:wrap; gap:6px; }
-  .machine h3,.machine p { margin:0; }
-  .machine p { color:var(--muted); font-size:.92rem; }
-  button { border:none; border-radius:10px; padding:10px; color:#fff; cursor:pointer; font-weight:600; background:var(--accent); }
-  .panel-wrap { margin-top:22px; }
-  .lab-panel { border:1px solid var(--line); background:var(--card); border-radius:14px; padding:16px; }
-  .lab-panel ul { color:var(--muted); }
-  .connection { border:1px dashed #374151; background:#0b1220; border-radius:10px; padding:10px; margin-top:12px; font-size:.87rem; }
-  .flag-box { margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
-  .flag-box input { flex:1; min-width:230px; border:1px solid var(--line); background:#0b1220; color:var(--text); border-radius:10px; padding:10px; }
-  #status { margin-top:10px; font-size:.9rem; }
-  .ok { color:var(--success); }
-  .muted { color:var(--muted); }
-  :root {
-    --bg: #030712;
-    --card: #111827;
-    --line: #1f2937;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --accent: #4f46e5;
-    --success: #22c55e;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color: var(--text);
-    background: radial-gradient(circle at 10% 0%, #111827, var(--bg) 45%);
-    min-height: 100vh;
-  }
-  .wrap { max-width: 1160px; margin: 0 auto; padding: 24px 16px 48px; }
-  .hero {
-    border: 1px solid var(--line);
-    background: linear-gradient(130deg, rgba(79,70,229,0.28), rgba(17,24,39,0.8));
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 20px;
-  }
-  .hero h1 { margin: 0 0 8px; font-size: clamp(1.4rem, 2.7vw, 2rem); }
-  .hero p { margin: 0; color: var(--muted); max-width: 760px; }
-  .toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 20px; }
-  .toolbar input, .toolbar select {
-    width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--text);
-    border-radius: 10px; padding: 10px;
-  }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
-  .machine {
-    border: 1px solid var(--line); border-radius: 14px; background: rgba(17, 24, 39, 0.85);
-    padding: 14px; display: flex; flex-direction: column; gap: 10px;
-  }
-  .pill {
-    display: inline-flex; border: 1px solid var(--line); background: #0b1220; border-radius: 999px;
-    padding: 3px 9px; font-size: 0.78rem; color: var(--muted);
-  }
-  .meta { display: flex; flex-wrap: wrap; gap: 6px; }
-  .machine h3 { margin: 0; font-size: 1.05rem; }
-  .machine p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
-  .machine button, .lab-panel button {
-    border: none; border-radius: 10px; padding: 10px; color: white; cursor: pointer; font-weight: 600;
-  }
-  .primary { background: var(--accent); }
-  .primary:hover { filter: brightness(1.1); }
-  .panel-wrap { margin-top: 22px; }
-  .lab-panel { border: 1px solid var(--line); background: var(--card); border-radius: 14px; padding: 16px; }
-  .lab-panel h2 { margin-top: 0; font-size: 1.1rem; }
-  .lab-panel ul { color: var(--muted); line-height: 1.5; margin-top: 10px; }
-  .connection {
-    border: 1px dashed #374151; background: #0b1220; border-radius: 10px; padding: 10px;
-    margin-top: 12px; font-size: 0.87rem;
-  }
-  .flag-box { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .flag-box input {
-    flex: 1; min-width: 230px; border: 1px solid var(--line); background: #0b1220;
-    color: var(--text); border-radius: 10px; padding: 10px;
-  }
-  #status { margin-top: 10px; font-size: 0.9rem; }
-  .ok { color: var(--success); }
-  .muted { color: var(--muted); }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practical Lab (CTF Style)</title>
+  <link rel="stylesheet" href="CSS/practicallab.css" />
 </head>
 <body>
   <main class="wrap">
     <section class="hero">
       <h1>Practical Lab (CTF Style)</h1>
-      <p>Functional machine labs for Docker, Kubernetes, Terraform, ANSYS, Database, and ROS2 with live start + flag submission flow.</p>
       <p>
-        Hands-on practical missions for Docker, Kubernetes, Terraform, ANSYS, Database and ROS2.
-        Start a machine, solve objectives, then submit the captured flag.
+        Docker and Kubernetes hands-on CTF labs. Start a machine, solve objectives,
+        and submit the captured flag in <strong>PTL{...}</strong> format.
       </p>
     </section>
 
     <section class="toolbar">
       <input id="search" placeholder="Search by machine, tag, or keyword" />
       <select id="track">
-        <option value="all">All Tracks</option><option value="docker">Docker</option><option value="kubernetes">Kubernetes</option>
-        <option value="terraform">Terraform</option><option value="ansys">ANSYS</option><option value="database">Database</option><option value="ros2">ROS2</option>
-      </select>
-      <select id="difficulty"><option value="all">All Difficulties</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
-      <button id="refresh" type="button">Refresh Machines</button>
         <option value="all">All Tracks</option>
         <option value="docker">Docker</option>
         <option value="kubernetes">Kubernetes</option>
-        <option value="terraform">Terraform</option>
-        <option value="ansys">ANSYS</option>
-        <option value="database">Database</option>
-        <option value="ros2">ROS2</option>
       </select>
       <select id="difficulty">
         <option value="all">All Difficulties</option>
@@ -209,210 +39,132 @@ window.startLab=startLab;window.completeTask=completeTask;
     </section>
   </main>
 
-<script>
-const grid=document.getElementById('machineGrid');
-const panelWrap=document.getElementById('panelWrap');
-const labPanel=document.getElementById('labPanel');
-const searchInput=document.getElementById('search');
-const trackSelect=document.getElementById('track');
-const difficultySelect=document.getElementById('difficulty');
-const refreshButton=document.getElementById('refresh');
-let currentSession=null;
+  <script>
+    const grid = document.getElementById("machineGrid");
+    const panelWrap = document.getElementById("panelWrap");
+    const labPanel = document.getElementById("labPanel");
 
-async function fetchMachines(){
-  const params=new URLSearchParams({search:searchInput.value.trim(),track:trackSelect.value,difficulty:difficultySelect.value});
-  const response=await fetch(`/api/ptl/machines?${params.toString()}`);
-  if(!response.ok) throw new Error('Could not load machines right now.');
-  return response.json();
-}
+    const searchInput = document.getElementById("search");
+    const trackSelect = document.getElementById("track");
+    const difficultySelect = document.getElementById("difficulty");
+    const refreshButton = document.getElementById("refresh");
 
-function renderMachines(payload){
-  if(!payload.machines.length){ grid.innerHTML='<p class="muted">No machine matched this filter.</p>'; return; }
-  grid.innerHTML=payload.machines.map((machine)=>`
-    <article class="machine">
-      <span class="pill">${machine.track}</span>
-      <h3>${machine.name}</h3>
-      <p>${machine.description}</p>
-      <div class="meta"><span class="pill">${machine.difficulty}</span><span class="pill">${machine.points} pts</span><span class="pill">Solve rate: ${machine.solveRate}</span><span class="pill">${machine.duration}</span></div>
-      <div class="meta">${machine.tags.map((tag)=>`<span class="pill">#${tag}</span>`).join('')}</div>
-      <button type="button" onclick="startMachine('${machine.id}')">Start Machine</button>
-    </article>
-  `).join('');
-}
+    let currentSession = null;
 
-async function loadMachines(){
-  try{ renderMachines(await fetchMachines()); }
-  catch(error){ grid.innerHTML=`<p>${error.message}</p>`; }
-}
-
-async function startMachine(machineId){
-  try{
-    const response=await fetch('/api/ptl/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({machineId})});
-    const payload=await response.json();
-    if(!response.ok) throw new Error(payload.error||'Unable to start machine.');
-    currentSession=payload.instanceId; panelWrap.hidden=false;
-    labPanel.innerHTML=`
-      <h2>Active Session: ${payload.machine.name}</h2>
-      <p class="muted">Instance <strong>${payload.instanceId}</strong> • Expires in ${payload.expiresIn}</p>
-      <ul>${payload.machine.objectives.map((item)=>`<li>${item}</li>`).join('')}</ul>
-      <div class="connection"><strong>Connection:</strong> ${payload.connection.protocol}<br /><strong>Endpoint:</strong> ${payload.connection.endpoint}<br /><strong>User:</strong> ${payload.connection.username}<br /><strong>Password:</strong> ${payload.connection.password}<br /><span class="muted">Flag format: PTL{...}</span></div>
-      <div class="flag-box"><input id="flagInput" placeholder="Submit captured flag" /><button type="button" onclick="submitFlag()">Submit Flag</button></div>
-      <div id="status" class="muted"></div>
-    `;
-  }catch(error){ alert(error.message); }
-}
-
-async function submitFlag(){
-  const flagInput=document.getElementById('flagInput');
-  const status=document.getElementById('status');
-  if(!flagInput||!currentSession) return;
-  try{
-    const response=await fetch('/api/ptl/submit-flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instanceId:currentSession,flag:flagInput.value})});
-    const payload=await response.json();
-    if(!response.ok) throw new Error(payload.message||payload.error||'Submission failed.');
-    status.textContent=`${payload.message} +${payload.reward} XP`; status.className='ok'; currentSession=null; flagInput.value='';
-  }catch(error){ status.textContent=error.message; status.className='muted'; }
-}
-
-refreshButton.addEventListener('click',loadMachines);
-searchInput.addEventListener('input',loadMachines);
-trackSelect.addEventListener('change',loadMachines);
-difficultySelect.addEventListener('change',loadMachines);
-loadMachines();
-window.startMachine=startMachine;
-window.submitFlag=submitFlag;
-  const grid = document.getElementById('machineGrid');
-  const panelWrap = document.getElementById('panelWrap');
-  const labPanel = document.getElementById('labPanel');
-
-  const searchInput = document.getElementById('search');
-  const trackSelect = document.getElementById('track');
-  const difficultySelect = document.getElementById('difficulty');
-  const refreshButton = document.getElementById('refresh');
-
-  let currentSession = null;
-
-  async function fetchMachines() {
-    const params = new URLSearchParams({
-      search: searchInput.value.trim(),
-      track: trackSelect.value,
-      difficulty: difficultySelect.value,
-    });
-
-    const response = await fetch(`/api/ptl/machines?${params.toString()}`);
-    if (!response.ok) throw new Error('Could not load machines right now.');
-    return response.json();
-  }
-
-  function renderMachines(payload) {
-    if (!payload.machines.length) {
-      grid.innerHTML = '<p class="muted">No machine matched this filter.</p>';
-      return;
-    }
-
-    grid.innerHTML = payload.machines.map((machine) => `
-      <article class="machine">
-        <span class="pill">${machine.track}</span>
-        <h3>${machine.name}</h3>
-        <p>${machine.description}</p>
-        <div class="meta">
-          <span class="pill">${machine.difficulty}</span>
-          <span class="pill">${machine.points} pts</span>
-          <span class="pill">Solve rate: ${machine.solveRate}</span>
-          <span class="pill">${machine.duration}</span>
-        </div>
-        <div class="meta">
-          ${machine.tags.map((tag) => `<span class="pill">#${tag}</span>`).join('')}
-        </div>
-        <button class="primary" type="button" onclick="startMachine('${machine.id}')">Start Machine</button>
-      </article>
-    `).join('');
-  }
-
-  async function loadMachines() {
-    try {
-      const payload = await fetchMachines();
-      renderMachines(payload);
-    } catch (error) {
-      grid.innerHTML = `<p>${error.message}</p>`;
-    }
-  }
-
-  async function startMachine(machineId) {
-    try {
-      const response = await fetch('/api/ptl/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ machineId }),
+    async function fetchMachines() {
+      const params = new URLSearchParams({
+        search: searchInput.value.trim(),
+        track: trackSelect.value,
+        difficulty: difficultySelect.value,
       });
 
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'Unable to start machine.');
-
-      currentSession = payload.instanceId;
-      panelWrap.hidden = false;
-
-      labPanel.innerHTML = `
-        <h2>Active Session: ${payload.machine.name}</h2>
-        <p class="muted">Instance <strong>${payload.instanceId}</strong> • Expires in ${payload.expiresIn}</p>
-        <ul>
-          ${payload.machine.objectives.map((item) => `<li>${item}</li>`).join('')}
-        </ul>
-        <div class="connection">
-          <strong>Connection:</strong> ${payload.connection.protocol}<br />
-          <strong>Endpoint:</strong> ${payload.connection.endpoint}<br />
-          <strong>User:</strong> ${payload.connection.username}<br />
-          <strong>Password:</strong> ${payload.connection.password}<br />
-          <span class="muted">Flag format: PTL{...}</span>
-        </div>
-        <div class="flag-box">
-          <input id="flagInput" placeholder="Submit captured flag" />
-          <button class="primary" type="button" onclick="submitFlag()">Submit Flag</button>
-        </div>
-        <div id="status" class="muted"></div>
-      `;
-    } catch (error) {
-      alert(error.message);
+      const response = await fetch(`/api/ptl/machines?${params.toString()}`);
+      if (!response.ok) throw new Error("Could not load machines right now.");
+      return response.json();
     }
-  }
 
-  async function submitFlag() {
-    const flagInput = document.getElementById('flagInput');
-    const status = document.getElementById('status');
+    function renderMachines(payload) {
+      if (!payload.machines.length) {
+        grid.innerHTML = '<p class="muted">No machine matched this filter.</p>';
+        return;
+      }
 
-    if (!flagInput || !currentSession) return;
-
-    try {
-      const response = await fetch('/api/ptl/submit-flag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          instanceId: currentSession,
-          flag: flagInput.value,
-        }),
-      });
-
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.message || payload.error || 'Submission failed.');
-
-      status.textContent = `${payload.message} +${payload.reward} XP`;
-      status.className = 'ok';
-      currentSession = null;
-      flagInput.value = '';
-    } catch (error) {
-      status.textContent = error.message;
-      status.className = 'muted';
+      grid.innerHTML = payload.machines.map((machine) => `
+        <article class="machine">
+          <span class="pill">${machine.track}</span>
+          <h3>${machine.name}</h3>
+          <p>${machine.description}</p>
+          <div class="meta">
+            <span class="pill">${machine.difficulty}</span>
+            <span class="pill">${machine.points} pts</span>
+            <span class="pill">Solve rate: ${machine.solveRate}</span>
+            <span class="pill">${machine.duration}</span>
+          </div>
+          <div class="meta">
+            ${machine.tags.map((tag) => `<span class="pill">#${tag}</span>`).join("")}
+          </div>
+          <button class="primary" type="button" onclick="startMachine('${machine.id}')">Start Machine</button>
+        </article>
+      `).join("");
     }
-  }
 
-  refreshButton.addEventListener('click', loadMachines);
-  searchInput.addEventListener('input', loadMachines);
-  trackSelect.addEventListener('change', loadMachines);
-  difficultySelect.addEventListener('change', loadMachines);
+    async function loadMachines() {
+      try {
+        const payload = await fetchMachines();
+        renderMachines(payload);
+      } catch (error) {
+        grid.innerHTML = `<p>${error.message}</p>`;
+      }
+    }
 
-  loadMachines();
-  window.startMachine = startMachine;
-  window.submitFlag = submitFlag;
-</script>
+    async function startMachine(machineId) {
+      try {
+        const response = await fetch("/api/ptl/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ machineId }),
+        });
+
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Unable to start machine.");
+
+        currentSession = payload.instanceId;
+        panelWrap.hidden = false;
+        labPanel.innerHTML = `
+          <h2>Active Session: ${payload.machine.name}</h2>
+          <p class="muted">Instance <strong>${payload.instanceId}</strong> • Expires in ${payload.expiresIn}</p>
+          <ul>${payload.machine.objectives.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <div class="connection">
+            <strong>Connection:</strong> ${payload.connection.protocol}<br />
+            <strong>Endpoint:</strong> ${payload.connection.endpoint}<br />
+            <strong>User:</strong> ${payload.connection.username}<br />
+            <strong>Password:</strong> ${payload.connection.password}<br />
+            <span class="muted">Flag format: PTL{...}</span>
+          </div>
+          <div class="flag-box">
+            <input id="flagInput" placeholder="Submit captured flag" />
+            <button type="button" onclick="submitFlag()">Submit Flag</button>
+          </div>
+          <div id="status" class="muted"></div>
+        `;
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function submitFlag() {
+      const flagInput = document.getElementById("flagInput");
+      const status = document.getElementById("status");
+      if (!flagInput || !currentSession) return;
+
+      try {
+        const response = await fetch("/api/ptl/submit-flag", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instanceId: currentSession, flag: flagInput.value }),
+        });
+
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Submission failed.");
+
+        status.textContent = `${payload.message} +${payload.reward} XP`;
+        status.className = "ok";
+        currentSession = null;
+        flagInput.value = "";
+      } catch (error) {
+        status.textContent = error.message;
+        status.className = "muted";
+      }
+    }
+
+    refreshButton.addEventListener("click", loadMachines);
+    searchInput.addEventListener("input", loadMachines);
+    trackSelect.addEventListener("change", loadMachines);
+    difficultySelect.addEventListener("change", loadMachines);
+
+    loadMachines();
+    window.startMachine = startMachine;
+    window.submitFlag = submitFlag;
+  </script>
 </body>
 </html>
